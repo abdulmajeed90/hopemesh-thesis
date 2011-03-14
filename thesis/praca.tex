@@ -1,0 +1,89 @@
+%% Dokumentenklasse (Koma Script) -----------------------------------------
+\documentclass[%
+   %draft,     % Entwurfsstadium
+   final,      % fertiges Dokument
+	 % --- Paper Settings ---
+   paper=a4,% [Todo: add alternatives]
+   paper=portrait, % landscape
+   pagesize=auto, % driver
+   % --- Base Font Size ---
+   fontsize=11pt,%
+	 % --- Koma Script Version ---
+   version=last, %
+ ]{scrbook} % Classes: scrartcl, scrreprt, scrbook
+
+
+% Encoding der Dateien (sonst funktionieren Umlaute nicht)
+% Fuer Linux -> utf8
+% Fuer Windows, alte Linux Distributionen -> latin1
+
+% Empfohlen latin1, da einige Pakete mit utf8 Zeichen nicht
+% funktionieren, z.B: listings, soul.
+\usepackage[latin1]{inputenc}
+%\usepackage[ansinew]{inputenc}
+%\usepackage[utf8]{inputenc}
+%\usepackage{ucs}
+%\usepackage[utf8x]{inputenc}
+
+%%% Preambel
+\input{preambel/settings}
+\input{preambel/preambel}
+%
+%%%% Neue Befehle
+\input{macros/newcommands}
+\input{macros/TableCommands}
+
+%%% Silbentrennung
+\input{preambel/Hyphenation}
+
+%% Dokument Beginn %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% - Deckblatt,
+% - Inhaltsverzeichnis,
+% - Hauptteil gegliedert z.B. in
+%   Einleitung, Grundlagen, Experimente, Ergebnisse, Zusammenfassung
+% - Literaturverzeichnis,
+% - Abbildungsverzeichnis (ggf.),
+% - Tabellenverzeichnis (ggf.),
+% - Abkürzungsverzeichnis (ggf.),
+% - Formelverzeichnis (ggf.),
+% - Anhang, (nicht mehr Bestandteil der Arbeit! Wird daher nicht bewertet)
+% - Erklärung der Urheberschaft,
+
+\begin{document}
+% Deckblatt
+\input{content/Titel}
+\frontmatter
+
+\cleardoublepage
+% Inhaltsverzeichnis in den PDF-Links eintragen
+% \pdfbookmark[1]{Inhaltsverzeichnis}{toc}
+\tableofcontents
+
+% Hauptteil
+\mainmatter
+% Demonstration der Vorlage
+% \input{content/Vorlage/demo.tex}
+
+\input{content/chapters}
+
+% Anhang (Bibliographie darf im deutschen nicht in den Anhang!)
+\bibliography{bib/BibtexDatabase}
+\clearpage
+% Abbildungs- und Tabellenverzeichnis
+\listoffigures
+\listoftables
+% Anhang
+\appendix
+% 'Anhang' ins Inhaltsverzeichnis
+%\phantomsection
+%\addcontentsline{toc}{part}{Anhang}
+
+\input{content/Z-Anhang}
+
+\IfDefined{printindex}{\printindex}
+\IfDefined{printnomenclature}{\printnomenclature}
+
+%% Dokument ENDE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+
