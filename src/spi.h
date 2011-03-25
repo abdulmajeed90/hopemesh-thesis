@@ -7,13 +7,10 @@
 void
 spi_init (void);
 
-bool
-spi_tx16_async (uint16_t data, uint8_t _ss);
+uint16_t
+spi_tx16 (const uint16_t data, uint8_t _ss);
 
-bool
-spi_tx16 (uint16_t data, uint16_t *result, uint8_t _ss);
-
-bool
-spi_rx (uint8_t *data);
+uint8_t
+spi_tx (const uint8_t data, uint8_t _ss);
 
 #endif

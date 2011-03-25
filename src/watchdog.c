@@ -13,11 +13,11 @@ static uint16_t last_line;
 
 uint8_t mcucsr_mirror __attribute__ ((section (".noinit")));
 
-static void get_mcucsr(void) \
+void get_mcucsr(void) \
   __attribute__((naked)) \
   __attribute__((section(".init3")));
 
-static void
+void
 get_mcucsr(void)
 {
   mcucsr_mirror = MCUCSR;

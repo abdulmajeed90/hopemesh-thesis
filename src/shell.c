@@ -18,200 +18,183 @@
 
 const PROGMEM char pgm_bootmsg[] = "\x1b[31mHopeMesh booted and ready ...\x1b[37m\r\n";
 const PROGMEM char pgm_help[] = "Help:\r\n"
-                    "  ?: Prints this help\r\n"
-                    "  l: List all known nodes\r\n"
-                    "  c [key] [value]: Configures [key] with [value]\r\n"
-                    "  c [key]: Prints the value of [key]\r\n"
-                    "  c: Prints all configured keys and values \r\n"
-                    "  w: Prints watchdog and error info\r\n"
-                    "  s [node] [message]: Send a [message] to [node]\r\n";
+"  ?: Prints this help\r\n"
+"  l: List all known nodes\r\n"
+"  c [key] [value]: Configures [key] with [value]\r\n"
+"  c [key]: Prints the value of [key]\r\n"
+"  c: Prints all configured keys and values \r\n"
+"  w: Prints watchdog and error info\r\n"
+"  s [node] [message]: Send a [message] to [node]\r\n";
+
 const PROGMEM char pgm_list[] = "No nodes available\r\n";
 const PROGMEM char pgm_send[] = "Sending message ...\r\n";
 const PROGMEM char pgm_prompt[] = "\x1b[33m$ \x1b[37m";
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
-                              "source: 0x%x\n\r"
-                              "line: %d\n\r\n\r"
-                              "rfm12 status: 0x%x\n\r";
+"source: 0x%x\n\r"
+"line: %d\n\r\n\r"
+"rfm12 status: 0x%x\n\r"
+"rfm12 debug: 0x%x\n\r";
 
-/**
- * function pointer to a shell command
- */          
-typedef PT_THREAD ((*cmd_fn)) (void);
-
-/**
- * The output buffer containing the complete string to be sent via uart
- */
-static char *out_buf = NULL;
-
-/**
- * The currently executed shell command function
- */
-static cmd_fn cmd_thread;
-
-/**
- * The sh
- */
+typedef PT_THREAD((*cmd_fn))(void);
+static char *out_buf, *rfm_buf, *cmd_buf, *cmd;
+static const char *out_ptr = NULL;
+static cmd_fn cmd_fn_instance;
 static struct pt pt_main, pt_cmd;
 
-/**
- * The command buffer and its length
- */
-static uint8_t cmd_len = 0;
-static char *cmd_buf = NULL;
-
-static void
-cmd_new (void)
+PT_THREAD(shell_watchdog)(void)
 {
-  cmd_len = 0;
+  PT_BEGIN(&pt_cmd);
 
-  cmd_buf = stralloc (MAX_CMD_BUF);
-  if (cmd_buf == NULL) {
-    watchdog_abort (ERR_SHELL, __LINE__);
-  }
+  uint16_t radio_status = rfm12_status();
+  uint16_t rfm12_debug = rfm12_get_debug();
+
+  sprintf_P(out_buf, pgm_wd, 
+      watchdog_mcucsr(),
+      watchdog_get_source(),
+      watchdog_get_line(),
+      radio_status,
+      rfm12_debug);
+
+  out_ptr = out_buf;
+  PT_WAIT_UNTIL(&pt_cmd, 
+      uart_tx_str(&out_ptr));
+
+  PT_END(&pt_cmd);
 }
 
-static bool
-cmd_handle (void)
+PT_THREAD(shell_list)(void)
+{
+  PT_BEGIN(&pt_cmd);
+
+  out_ptr = NULL;
+  PT_WAIT_UNTIL(&pt_cmd,
+      uart_tx_pgmstr(pgm_list, out_buf, &out_ptr));
+
+  PT_END(&pt_cmd);
+}
+
+PT_THREAD(shell_tx)(void)
+{
+  PT_BEGIN(&pt_cmd);
+
+  PT_WAIT_THREAD(&pt_cmd, rfm12_tx(cmd_buf));
+
+  out_ptr = NULL;
+  PT_WAIT_UNTIL(&pt_cmd,
+      uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
+
+  PT_END(&pt_cmd);
+}
+
+PT_THREAD(shell_help)(void)
+{
+  PT_BEGIN(&pt_cmd);
+  out_ptr = NULL;
+  PT_WAIT_UNTIL(&pt_cmd,
+      uart_tx_pgmstr(pgm_help, out_buf, &out_ptr));
+  PT_END(&pt_cmd);
+}
+
+PT_THREAD(shell_rx)(void)
+{
+  PT_BEGIN(&pt_cmd);
+
+  out_ptr = "rx: ";
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
+
+  out_ptr = rfm_buf;
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
+  *rfm_buf = '\0';
+
+  out_ptr = "\n\r";
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
+
+  PT_END(&pt_cmd);
+}
+
+const cmd_fn
+shell_data_parse(void)
 {
   switch (*cmd_buf) {
-    // newline pressed. finalize cmd_buf string
-    case '\r':
-      // put a 0 character at the end
-      *cmd_buf = '\0';
-      // rewind cmd_buf pointer to the start of the string
-      cmd_buf -= cmd_len;
-      // reset the command length
-      cmd_len = 0;
-      return true;
-
-    // backslash pressed
-    case '\b':
-      if (cmd_len > 0) {
-        cmd_buf -= 1;
-        cmd_len -= 1;
-      }
-      return false;
-
-    // any other character pressed
-    default:
-      if (cmd_len < MAX_CMD_BUF-1) {
-        cmd_len++;
-        cmd_buf++;
-      }
-      return false;
-  }
-}
-
-PT_THREAD (shell_watchdog) (void)
-{
-  PT_BEGIN (&pt_cmd);
-
-  uint16_t radio_status = 0x0000;
-  PT_WAIT_UNTIL (&pt_cmd, 
-    rfm12_status (&radio_status)
-  );
-
-  char *wd = stralloc (100);
-  if (wd == NULL) {
-    watchdog_abort (ERR_SHELL, __LINE__);
-  }
-  strcpy_P (wd, pgm_wd);
-  sprintf (out_buf, wd, 
-      watchdog_mcucsr (),
-      watchdog_get_source (),
-      watchdog_get_line (),
-      radio_status
-  );
-  free (wd);
-
-  PT_WAIT_UNTIL (&pt_cmd, 
-      uart_tx_str (out_buf)
-  );
-
-  PT_END (&pt_cmd);
-}
-
-PT_THREAD (shell_list) (void)
-{
-  PT_BEGIN (&pt_cmd);
-  PT_WAIT_UNTIL (&pt_cmd,
-      uart_tx_pgmstr (pgm_list, out_buf)
-  );
-  PT_END (&pt_cmd);
-}
-
-PT_THREAD (shell_send) (void)
-{
-  PT_BEGIN (&pt_cmd);
-  PT_WAIT_UNTIL (&pt_cmd,
-      uart_tx_pgmstr (pgm_send, out_buf)
-  );
-  PT_END (&pt_cmd);
-}
-
-PT_THREAD (shell_help) (void)
-{
-  PT_BEGIN (&pt_cmd);
-  PT_WAIT_UNTIL (&pt_cmd,
-      uart_tx_pgmstr (pgm_help, out_buf)
-  );
-  PT_END (&pt_cmd);
-}
-
-static const cmd_fn
-cmd_parse (void)
-{
-  switch (cmd_buf[0]) {
     case 'l' : return shell_list;
-    case 's' : return shell_send;
+    case 's' : return shell_tx;
     case 'w' : return shell_watchdog;
     default  : return shell_help;
   }
 }
 
 void
-shell_init (void)
+shell_init(void)
 {
-  cmd_new ();
+  cmd_buf = stralloc(MAX_CMD_BUF);
+  out_buf = stralloc(MAX_OUT_BUF);
+  rfm_buf = stralloc(MAX_OUT_BUF);
 
-  out_buf = stralloc (MAX_OUT_BUF);
-  if (out_buf == NULL) {
-    watchdog_abort (ERR_SHELL, __LINE__);
-  }
+  cmd = cmd_buf;
+  *rfm_buf = '\0';
 
-  PT_INIT (&pt_main);
-  PT_INIT (&pt_cmd);
+  PT_INIT(&pt_main);
+  PT_INIT(&pt_cmd);
 }
 
-PT_THREAD(shell (void))
+bool
+shell_data_available(void)
 {
-  PT_BEGIN (&pt_main);
+  bool result = uart_rx(cmd);
 
-  PT_WAIT_UNTIL (&pt_main, 
-      uart_tx_pgmstr (pgm_bootmsg, out_buf)
-  );
-
-  PT_WAIT_UNTIL (&pt_main, 
-      uart_tx_pgmstr (pgm_prompt, out_buf)
-  );
-
-  while (true) {
-    PT_WAIT_UNTIL (&pt_main,
-        uart_rx (cmd_buf)
-    );
-
-    if (cmd_handle ()) {
-      cmd_thread = cmd_parse ();
-
-      PT_SPAWN (&pt_main, &pt_cmd,
-          cmd_thread ()
-      );
-
-      PT_WAIT_UNTIL (&pt_main,
-          uart_tx_pgmstr (pgm_prompt, out_buf)
-      );
+  if (result) {
+    switch (*cmd) {
+      case '\r':
+        // newline pressed. finalize cmd_buf string
+        // put a 0 character at the end
+        *cmd = '\0';
+        cmd = cmd_buf;
+        cmd_fn_instance = shell_data_parse();
+        result = true;
+        break;
+      case '\b':
+        // backslash pressed
+        if (cmd != cmd_buf) {
+          cmd--;
+        }
+        result = false;
+        break;
+      default:
+        // any other character pressed
+        if (cmd != cmd_buf+MAX_CMD_BUF-1) {
+          cmd++;
+        }
+        result = false;
     }
   }
 
-  PT_END (&pt_main);
+  if (!result) {
+    result = rfm12_rx(rfm_buf);
+    if (result) {
+      cmd_fn_instance = shell_rx;
+    }
+  }
+
+  return result;
+}
+
+PT_THREAD(shell(void))
+{
+  PT_BEGIN(&pt_main);
+
+  out_ptr = NULL;
+  PT_WAIT_UNTIL(&pt_main, uart_tx_pgmstr(pgm_bootmsg, out_buf, &out_ptr));
+  PT_WAIT_THREAD(&pt_main, shell_watchdog());
+  out_ptr = NULL;
+  PT_WAIT_UNTIL(&pt_main, uart_tx_pgmstr(pgm_prompt, out_buf, &out_ptr));
+
+  while (true) {
+    PT_WAIT_UNTIL(&pt_main, shell_data_available());
+    PT_WAIT_THREAD(&pt_main, cmd_fn_instance());
+
+    out_ptr = NULL;
+    PT_WAIT_UNTIL(&pt_main, uart_tx_pgmstr(pgm_prompt, out_buf, &out_ptr));
+  }
+
+  PT_END(&pt_main);
 }

@@ -38,7 +38,7 @@ TARGET = hopemesh
 OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c rfm12.c util.c
+SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c rfm12.c util.c timer.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -157,7 +157,8 @@ EXTRALIBDIRS =
 
 # 32 KB of external RAM, starting after internal RAM (ATmega162),
 # used for variables (.data/.bss) and heap (malloc()).
-EXTMEMOPTS = -Wl,--section-start=.data=0x800500,--defsym=__heap_end=0x807fff
+# EXTMEMOPTS = -Wl,--section-start=.data=0x800500,--defsym=__heap_end=0x807fff
+EXTMEMOPTS = -Wl,--section-start=.data=0x800500,--defsym=__heap_end=0x8084ff
 
 #---------------- Linker Options ----------------
 #  -Wl,...:     tell GCC to pass this to linker.

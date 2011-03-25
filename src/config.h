@@ -20,17 +20,16 @@
 #define UCSRB UCSR0B
 #define UDRIE UDRIE0
 #define UDR UDR0
-#define USART_UDRE_vect USART0_UDRE_vect
-#define USART_RXC_vect USART0_RXC_vect
+#define SIG_USART_DATA SIG_USART0_DATA
+#define SIG_USART_RECV SIG_USART0_RECV
 #endif
 
 #define BAUD 38400
 
 #define PORT_SS PORTB
-#define DDRSPI DDRB
-#define DDMOSI DDB5
-#define DDSCK DDB7
-#define DD_SS_RADIO DDB4
 #define _SS_RADIO PB4
+
+#define RFM12_INT_NIRQ INT0
+#define SIG_RFM12_NIRQ SIG_INTERRUPT0
 
 #endif

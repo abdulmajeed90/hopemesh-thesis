@@ -1,4 +1,4 @@
-update=Sun 02 Jan 2011 04:21:09 PM CET
+update=Sun 20 Mar 2011 02:30:03 PM CET
 last_client=pcbnew
 [common]
 NetDir=
@@ -59,10 +59,6 @@ PadDrlX=1259
 PadDimH=2300
 PadDimV=2300
 BoardThickness=630
-RouteTo=15
-RouteBo=0
-Segm45=1
-Racc45=1
 SgPcb45=1
 TxtPcbV=800
 TxtPcbH=600
@@ -74,7 +70,7 @@ DrawLar=150
 EdgeLar=150
 TxtLar=120
 MSegLar=150
-WpenSer=10
+LastNetListRead=
 [pcbnew/libraries]
 LibDir=.
 LibName1=libs/74xx-eu

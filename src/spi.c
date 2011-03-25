@@ -34,9 +34,8 @@ ISR (SPI_STC_vect)
 void
 spi_init (void)
 {
-  DDRSPI |= (1<<DDMOSI) | (1<<DDSCK) | (1<<DD_SS_RADIO);
-  SPCR = (1<<SPE) | (1<<MSTR);
-  SPSR = (1<<SPI2X);
+  SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR0);
+  // SPSR = (1<<SPI2X);
 
   spi_ss_high (_SS_RADIO);
   spi_disable_isr ();
@@ -57,8 +56,11 @@ spi_tx16_async (uint16_t data, uint8_t _ss)
   bool result = false;
 
   if (spi_is_isr_disabled ()) {
-    // add lower byte into ringbuffer which will be sent when isr fires
+    // add lower byte into ringbuffer which will be sent when isr is called
     result = ringbuf_add (spi_out_buf, (uint8_t)data);
+
+    // only if lower byte could be added to the ringbuffer, sent the upper
+    // byte now
     if (result) {
       cur_ss = _ss;
   
@@ -72,28 +74,33 @@ spi_tx16_async (uint16_t data, uint8_t _ss)
   return result;
 }
 
-bool
-spi_tx16 (uint16_t data, uint16_t *result, uint8_t _ss)
+uint8_t
+spi_tx (const uint8_t data, uint8_t _ss)
+{
+  spi_ss_low (_ss);
+  SPDR = data;
+  spi_block_until_sent ();
+  spi_ss_high (_ss);
+
+  return SPDR;
+}
+
+uint16_t
+spi_tx16 (const uint16_t data, uint8_t _ss)
 {
   uint16_t response = 0x0000;
+  spi_ss_low (_ss);
 
-  if (spi_is_isr_disabled ()) {
-    spi_ss_low (_ss);
+  // tx & rx upper bytes
+  SPDR = data >> 8;
+  spi_block_until_sent ();
+  response = SPDR << 8;
 
-    // tx & rx upper bytes
-    SPDR = data >> 8;
-    spi_block_until_sent ();
-    response = SPDR << 8;
+  // tx & rx lower bytes
+  SPDR = data;
+  spi_block_until_sent ();
+  response |= SPDR;
 
-    // tx & rx lower bytes
-    SPDR = data;
-    spi_block_until_sent ();
-    response |= SPDR;
-
-    spi_ss_high (_ss);
-    *result = response;
-    return true;
-  }
-
-  return false;
+  spi_ss_high (_ss);
+  return response;
 }

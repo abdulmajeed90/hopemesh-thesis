@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
 #include "pt.h"
 #include "watchdog.h"
@@ -9,28 +10,62 @@
 #include "shell.h"
 #include "rfm12.h"
 #include "spi.h"
+#include "timer.h"
+#include "rxthread.h"
 
-void init_memory_mapped (void) __attribute__ ((naked)) __attribute__ ((section (".init1")));
+#define DDRSPI DDRB
+#define DDMOSI DDB5
+#define DDSCK DDB7
+#define DD_SS_RADIO DDB4
 
-void init_memory_mapped(void)
+#define DDRNIRQ DDRD
+#define DDNIRQ DDD2
+#define DDRFFIT DDRE
+#define DDFFIT DDE0
+
+void
+ram_init(void) \
+             __attribute__ ((naked)) \
+             __attribute__ ((section (".init1")));
+
+void
+ram_init(void)
 {
-  /* enable external memory mapped interface with one wait state for the entire external address space*/
-  MCUCR = (1<<SRE) | (1<<SRW10);
+    MCUCR = (1<<SRE) | (1<<SRW10);
+}
+
+static void
+port_init(void)
+{
+  DDRSPI |= (1<<DDMOSI) | (1<<DDSCK) | (1<<DD_SS_RADIO);
+  DDRNIRQ &= ~(1<<DDNIRQ);
+  DDRFFIT &= ~(1<<DDFFIT);
+}
+
+static void
+bootstrap_delay (void)
+{
+  for (uint8_t i=0; i<30; i++) {
+    _delay_ms(10);
+  }
 }
 
 int
-main (void)
+main(void)
 {
-  uart_init ();
-  spi_init ();
-  shell_init ();
-  rfm12_init ();
-  watchdog_init ();
-
-  sei ();
+  bootstrap_delay();
+  port_init();
+  uart_init();
+  spi_init();
+  shell_init();
+  rfm12_init();
+  // timer_init();
+  watchdog_init();
+  sei();
 
   while (true) {
-    shell ();
-    watchdog ();
+    shell();
+    // timer_thread();
+    watchdog();
   }
 }
