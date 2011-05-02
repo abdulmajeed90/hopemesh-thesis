@@ -58,7 +58,7 @@ typedef enum {
 
 static struct tx_packet tx_packet;
 static struct rx_packet rx_packet;
-static struct pt pt_nirq, pt_rx;
+static struct pt pt_nirq, pt_rx, pt_tx;
 static struct pt_sem mutex, tx_monitor, rx_monitor;
 static volatile uint16_t bytes, debug;
 static tx_state_t tx_state;
@@ -216,6 +216,7 @@ rfm12_init(void)
 
   PT_INIT(&pt_nirq);
   PT_INIT(&pt_rx);
+  PT_INIT(&pt_tx);
 
   PT_SEM_INIT(&mutex, 1);
   PT_SEM_INIT(&tx_monitor, 0);
@@ -255,10 +256,10 @@ PT_THREAD(rfm12_rx(char *buf))
   PT_END(&pt_rx);
 }
 
-PT_THREAD(rfm12_tx(struct pt *pt, const char *data))
+PT_THREAD(rfm12_tx(const char *data))
 {
-  PT_BEGIN(pt);
-  PT_SEM_WAIT(pt, &mutex);
+  PT_BEGIN(&pt_tx);
+  PT_SEM_WAIT(&pt_tx, &mutex);
 
   rfm12_disable_nirq_isr();
   tx_packet.length = strlen(data);
@@ -266,7 +267,7 @@ PT_THREAD(rfm12_tx(struct pt *pt, const char *data))
   rfm12_enable_tx();
   rfm12_enable_nirq_isr();
 
-  PT_SEM_WAIT(pt, &tx_monitor);
-  PT_SEM_SIGNAL(pt, &mutex);
-  PT_END(pt);
+  PT_SEM_WAIT(&pt_tx, &tx_monitor);
+  PT_SEM_SIGNAL(&pt_tx, &mutex);
+  PT_END(&pt_tx);
 }

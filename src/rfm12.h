@@ -17,7 +17,7 @@ rfm12_status(void);
 uint8_t
 rfm12_status_fast(void);
 
-PT_THREAD(rfm12_tx(struct pt *pt, const char *data));
+PT_THREAD(rfm12_tx(const char *data));
 
 PT_THREAD(rfm12_rx(char *buf));
 
