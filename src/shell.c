@@ -39,7 +39,7 @@ typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *rfm_buf, *cmd_buf, *cmd;
 static const char *out_ptr = NULL;
 static cmd_fn cmd_fn_instance;
-static struct pt pt_main, pt_cmd;
+static struct pt pt_main, pt_cmd, pt_cmd_tx;
 
 PT_THREAD(shell_watchdog)(void)
 {
@@ -77,7 +77,7 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  PT_WAIT_THREAD(&pt_cmd, rfm12_tx(cmd_buf));
+  PT_SPAWN(&pt_cmd, &pt_cmd_tx, rfm12_tx(&pt_cmd_tx, cmd_buf));
 
   out_ptr = NULL;
   PT_WAIT_UNTIL(&pt_cmd,

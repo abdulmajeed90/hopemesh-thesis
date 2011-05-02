@@ -204,6 +204,14 @@ struct pt_sem {
     --(s)->count;				\
   } while(0)
 
+#define PT_SEM_WAIT_NOBLOCK(s)	\
+  if ((s)->count > 0) {			\
+    --(s)->count;			\
+  }
+
+#define PT_SEM_IS_BLOCKED(s)	\
+  ((s)->count == 0)
+
 /**
  * Signal a semaphore
  *

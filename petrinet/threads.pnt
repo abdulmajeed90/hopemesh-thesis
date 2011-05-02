@@ -1,0 +1,116 @@
+petrinet 0
+x 576 565
+SIGNAL(MUTEX)
+x 540 330
+WAITING(tx_monitor)
+x 741 540
+STATE(RX)
+x 995 413
+SIGNAL(nIRQ)
+x 592 690
+SIGNAL(rx_monitor)
+x 450 129
+rfm12_tx()
+x 518 205
+WAITING(mutex)
+x 593 437
+SIGNAL(tx_monitor)
+x 741 330
+STATE(TX)
+x 270 321
+WAITING(rx_monitor)
+x 467 60
+----- Sender Thread ----
+x 264 210
+----- Receiver Thread ----
+x 875 210
+----- Interrupt Service Routine -----
+x 930 464
+k=1
+x 480 240
+k=1
+x 864 510
+rx_packet
+x 865 369
+tx_packet
+x 1102 458
+nIRQ goes low
+x 758 405
+END
+x 948 304
+NEXT
+x 804 690
+END
+x 947 575
+NEXT
+x 270 300
+rfm12rx()
+x 270 191
+XXXXXXXXXXXXXXXXXXXXXXX
+x 270 230
+XXXXXXXXXXXXXXXXXXXXXXX
+x 464 45
+XXXXXXXXXXXXXXXXXXXXXXX
+x 462 77
+XXXXXXXXXXXXXXXXXXXXXXX
+x 870 191
+XXXXXXXXXXXXXXXXXXXXXXX
+x 870 229
+XXXXXXXXXXXXXXXXXXXXXXX
+x 797 459
+imm
+x 948 552
+imm
+x 805 668
+imm
+x 945 325
+imm
+x 798 415
+imm
+s 0 596 539  1
+s 1 594 666  0
+s 2 450 220  0
+s 3 796 324  0
+s 4 595 413  0
+s 5 450 352  0
+s 6 944 438  0
+s 7 796 552  0
+s 8 270 347  1
+t 0 804 667 0
+t 1 270 411 0
+t 2 450 284 0
+t 3 797 414 0
+t 4 450 414 0
+t 5 450 150 0
+t 6 796 458 0
+t 7 945 551 0
+t 8 944 324 0
+t 9 1103 437 0
+e 990 624 s 6 t 0
+e 865 339 t 8 s 3
+e 944 381 s 6 t 8
+e 450 252 s 2 t 2
+e 886 416 s 6 t 3
+e 696 413 t 3 s 4
+e 866 303 s 3 t 8
+e 477 474 t 4 s 0
+e 450 318 t 2 s 5
+e 861 527 s 7 t 7
+e 699 666 t 0 s 1
+e 665 293 t 2 s 3
+e 390 472 s 0 t 2
+e 351 581 s 1 t 1
+e 782 608 s 7 t 0
+e 703 570 t 0 s 0
+e 450 185 t 5 s 2
+e 1023 437 t 9 s 6
+e 864 577 t 7 s 7
+e 796 369 s 3 t 3
+e 685 475 s 0 t 6
+e 279 376 t 1 s 8
+e 261 375 s 8 t 1
+e 878 456 s 6 t 6
+e 796 505 t 6 s 7
+e 944 494 s 6 t 7
+e 450 383 s 5 t 4
+e 522 413 s 4 t 4
