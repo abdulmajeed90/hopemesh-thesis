@@ -44,6 +44,11 @@ struct rx_packet
 };
 
 typedef enum {
+  TX,
+  RX
+} radio_state_t;
+
+typedef enum {
   TXSYNC_LENGTH,
   TXDATA,
   TXSUFFIX,
@@ -63,6 +68,7 @@ static struct pt_sem mutex, tx_monitor, rx_monitor;
 static volatile uint16_t bytes, debug;
 static tx_state_t tx_state;
 static rx_state_t rx_state;
+static radio_state_t radio_state;
 
 uint8_t
 rfm12_status_fast(void)
@@ -167,6 +173,7 @@ rfm12_enable_rx(void)
 {
   bytes = 0;
   rx_state = RXLENGTH;
+  radio_state = RX;
   rfm12_cmd16(CONFIG_TXREG_OFF);
   rfm12_reset_fifo();
   rfm12_cmd16(PM_RX_ON);
@@ -177,6 +184,7 @@ rfm12_enable_tx(void)
 {
   bytes = 0;
   tx_state = TXSYNC_LENGTH;
+  radio_state = TX;
   rfm12_cmd16(CONFIG_TXREG_ON);
   rfm12_cmd16(PM_TX_ON);
   rfm12_cmd16(CMD_TX | 0xaa);
@@ -189,7 +197,7 @@ PT_THREAD(rfm12_nirq_thread) (void)
   PT_BEGIN(&pt_nirq);
   PT_WAIT_UNTIL(&pt_nirq, rfm12_is_fifo_ready());
 
-  if (PT_SEM_IS_BLOCKED(&mutex)) {
+  if (radio_state == TX) {
     PT_WAIT_UNTIL(&pt_nirq, rfm12_tx_packet());
     PT_SEM_SIGNAL(&pt_nirq, &tx_monitor);
   } else {
@@ -230,7 +238,7 @@ rfm12_init(void)
   rfm12_cmd16(CONFIG_TXREG_OFF);
   rfm12_cmd16(0xA640); // 868.3MHz freqiency
   rfm12_cmd16(0xC605); // data rate: 0xC6FF = 300bps | 0xC67F = 2.7kbps | 0xC647 = 4.8kbps | 0xC606 = 57.6kbps
-  rfm12_cmd16(0x94A0); // VDI at pin16, FAST VDI response, 134kHz baseband bandwidth, 0dBm LNA gain, -91dBm DRSSI thershold
+  rfm12_cmd16(0x94A5); // VDI at pin16, FAST VDI response, 134kHz baseband bandwidth, 0dBm LNA gain, -91dBm DRSSI thershold
   rfm12_cmd16(0xC2AC); // (?) data filtering, no idea what that does; auto lock, no fast mode, digital filter, DQD4 dhreshold: 00
   rfm12_cmd16(0xCA81);
   rfm12_cmd16(0xCED4); // sync aka grouping; no sync, sync on at 0x2DD4;
