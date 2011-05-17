@@ -6,10 +6,12 @@
 
 #include <avr/pgmspace.h>
 
+#include "debug.h"
 #include "uart.h"
 #include "watchdog.h"
 #include "error.h"
 #include "util.h"
+#include "mac.h"
 #include "rfm12.h"
 #include "spi.h"
 
@@ -33,7 +35,7 @@ const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 "source: 0x%x\n\r"
 "line: %d\n\r\n\r"
 "rfm12 status: 0x%x\n\r"
-"rfm12 debug: 0x%x\n\r";
+"debug: 0x%x\n\r";
 
 typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *rfm_buf, *cmd_buf, *cmd;
@@ -46,18 +48,23 @@ PT_THREAD(shell_watchdog)(void)
   PT_BEGIN(&pt_cmd);
 
   uint16_t radio_status = rfm12_status();
-  uint16_t rfm12_debug = rfm12_get_debug();
+  uint16_t debug = debug_get_cnt();
 
   sprintf_P(out_buf, pgm_wd, 
       watchdog_mcucsr(),
       watchdog_get_source(),
       watchdog_get_line(),
       radio_status,
-      rfm12_debug);
+      debug);
 
   out_ptr = out_buf;
   PT_WAIT_UNTIL(&pt_cmd, 
       uart_tx_str(&out_ptr));
+
+  out_ptr = debug_getstr();
+  PT_WAIT_UNTIL(&pt_cmd, 
+      uart_tx_str(&out_ptr));
+  debug_strclear();
 
   PT_END(&pt_cmd);
 }
@@ -77,8 +84,7 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  PT_WAIT_THREAD(&pt_cmd, rfm12_tx(cmd_buf));
-
+  PT_WAIT_THREAD(&pt_cmd, mac_tx_start(cmd_buf));
   out_ptr = NULL;
   PT_WAIT_UNTIL(&pt_cmd,
       uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
@@ -165,13 +171,6 @@ shell_data_available(void)
           cmd++;
         }
         result = false;
-    }
-  }
-
-  if (!result) {
-    result = rfm12_rx(rfm_buf);
-    if (result) {
-      cmd_fn_instance = shell_rx;
     }
   }
 

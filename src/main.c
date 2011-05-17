@@ -9,6 +9,7 @@
 #include "uart.h"
 #include "shell.h"
 #include "rfm12.h"
+#include "mac.h"
 #include "spi.h"
 #include "timer.h"
 #include "rxthread.h"
@@ -59,6 +60,7 @@ main(void)
   spi_init();
   shell_init();
   rfm12_init();
+  mac_init();
   // timer_init();
   watchdog_init();
   sei();

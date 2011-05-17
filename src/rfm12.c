@@ -1,17 +1,12 @@
 #include "rfm12.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <avr/interrupt.h>
-
 #include "config.h"
-#include "error.h"
 #include "pt.h"
 #include "pt-sem.h"
-#include "ringbuf.h"
 #include "spi.h"
-#include "util.h"
-#include "watchdog.h"
+#include "mac.h"
+#include "debug.h"
 
 #define rfm12_enable_nirq_isr() GICR |= (1<<RFM12_INT_NIRQ)
 #define rfm12_disable_nirq_isr() GICR &= ~(1<<RFM12_INT_NIRQ)
@@ -30,50 +25,24 @@
 #define CMD_STATUS 0x0000
 #define CMD_STATUS8 0x00
 
-struct tx_packet
-{
-  uint8_t sync[2];
-  uint8_t length;
-  const char *buf;
-};
-
-struct rx_packet
-{
-  uint8_t length;
-  char *buf;
-};
+#define CMD8_RSSI 0x01
+#define CMD8_FFIT 0x80
 
 typedef enum {
   TX,
   RX
 } radio_state_t;
 
-typedef enum {
-  TXSYNC_LENGTH,
-  TXDATA,
-  TXSUFFIX,
-  TXEND
-} tx_state_t;
-
-typedef enum {
-  RXLENGTH,
-  RXDATA,
-  RXEND
-} rx_state_t;
-
-static struct tx_packet tx_packet;
-static struct rx_packet rx_packet;
-static struct pt pt_nirq, pt_rx, pt_tx;
-static struct pt_sem mutex, tx_monitor, rx_monitor;
-static volatile uint16_t bytes, debug;
-static tx_state_t tx_state;
-static rx_state_t rx_state;
+uint8_t last_status_fast;
+static struct pt pt_nirq, pt_tx;
+static struct pt_sem mutex;
 static radio_state_t radio_state;
 
 uint8_t
 rfm12_status_fast(void)
 {
-  return rfm12_cmd(0x00);
+  last_status_fast = rfm12_cmd(0x00);
+  return last_status_fast;
 }
 
 uint16_t
@@ -89,90 +58,36 @@ rfm12_reset_fifo(void)
   rfm12_cmd16(FIFO_FILL_ON);
 }
 
-uint16_t
-rfm12_get_debug(void)
+static bool
+rfm12_tx_cb(void)
 {
-  return debug;
-}
-
-void
-rfm12_tx_state_change(uint16_t threshold, tx_state_t new_state)
-{
-  if (bytes == threshold) {
-    bytes = 0;
-    tx_state = new_state;
-  } else {
-    bytes++;
-  }
-}
-
-void
-rfm12_rx_state_change(uint16_t threshold, rx_state_t new_state)
-{
-  if (bytes == threshold) {
-    bytes = 0;
-    rx_state = new_state;
-  } else {
-    bytes++;
-  }
+  uint8_t data;
+  bool fin = mac_tx_next(&data);
+  rfm12_cmd16(CMD_TX | data);
+  return fin;
 }
 
 static bool
-rfm12_tx_packet(void)
-{
-  switch (tx_state) {
-    case TXSYNC_LENGTH:
-      rfm12_cmd16(CMD_TX | tx_packet.sync[bytes]);
-      rfm12_tx_state_change(2, TXDATA);
-      break;
-    case TXDATA:
-      rfm12_cmd16(CMD_TX | tx_packet.buf[bytes]);
-      rfm12_tx_state_change(tx_packet.length-1, TXSUFFIX);
-      break;
-    case TXSUFFIX:
-      rfm12_cmd16(CMD_TX | 0xaa);
-      rfm12_tx_state_change(3, TXEND);
-      break;
-    case TXEND:
-      return true;
-  }
-
-  return false;
-}
-
-static bool
-rfm12_rx_packet(void)
+rfm12_rx_cb(void)
 {
   uint8_t byte = rfm12_cmd16(CMD_RX);
-
-  switch (rx_state) {
-    case RXLENGTH:
-      rx_packet.length = byte;
-      rfm12_rx_state_change(0, RXDATA);
-      break;
-    case RXDATA:
-      rx_packet.buf[bytes] = byte;
-      rfm12_rx_state_change(rx_packet.length-1, RXEND);
-      break;
-    case RXEND:
-      rx_packet.buf[rx_packet.length] = '\0';
-      return true;
+  if (last_status_fast & CMD8_RSSI) {
+    return mac_rx_next(byte);
+  }  else {
+    // signal lost (rssi is not set) -> abort reception
+    return true;
   }
-
-  return false;
 }
 
-bool
+static bool
 rfm12_is_fifo_ready(void)
 {
-  return (rfm12_status_fast() & 0x80);
+  return (rfm12_status_fast() & CMD8_FFIT);
 }
 
 static void
 rfm12_enable_rx(void)
 {
-  bytes = 0;
-  rx_state = RXLENGTH;
   radio_state = RX;
   rfm12_cmd16(CONFIG_TXREG_OFF);
   rfm12_reset_fifo();
@@ -182,29 +97,27 @@ rfm12_enable_rx(void)
 static void
 rfm12_enable_tx(void)
 {
-  bytes = 0;
-  tx_state = TXSYNC_LENGTH;
   radio_state = TX;
   rfm12_cmd16(CONFIG_TXREG_ON);
   rfm12_cmd16(PM_TX_ON);
-  rfm12_cmd16(CMD_TX | 0xaa);
-  rfm12_cmd16(CMD_TX | 0xaa);
 }
 
 static
-PT_THREAD(rfm12_nirq_thread) (void)
+PT_THREAD(rfm12_nirq_thread(void))
 {
   PT_BEGIN(&pt_nirq);
   PT_WAIT_UNTIL(&pt_nirq, rfm12_is_fifo_ready());
 
-  if (radio_state == TX) {
-    PT_WAIT_UNTIL(&pt_nirq, rfm12_tx_packet());
-    PT_SEM_SIGNAL(&pt_nirq, &tx_monitor);
-  } else {
-    PT_SEM_WAIT(&pt_nirq, &mutex);
-    PT_WAIT_UNTIL(&pt_nirq, rfm12_rx_packet());
-    PT_SEM_SIGNAL(&pt_nirq, &rx_monitor);
-    PT_SEM_SIGNAL(&pt_nirq, &mutex);
+  switch(radio_state) {
+    case TX:
+      PT_WAIT_UNTIL(&pt_nirq, rfm12_tx_cb());
+      PT_SEM_SIGNAL(&pt_nirq, &mutex);
+      break;
+    case RX:
+      PT_SEM_WAIT(&pt_nirq, &mutex);
+      PT_WAIT_UNTIL(&pt_nirq, rfm12_rx_cb());
+      PT_SEM_SIGNAL(&pt_nirq, &mutex);
+      break;
   }
 
   rfm12_enable_rx();
@@ -223,19 +136,9 @@ rfm12_init(void)
   rfm12_disable_nirq_isr();
 
   PT_INIT(&pt_nirq);
-  PT_INIT(&pt_rx);
   PT_INIT(&pt_tx);
-
   PT_SEM_INIT(&mutex, 1);
-  PT_SEM_INIT(&tx_monitor, 0);
-  PT_SEM_INIT(&rx_monitor, 0);
 
-  tx_packet.sync[0] = 0x2d;
-  tx_packet.sync[1] = 0xd4;
-  rx_packet.buf = stralloc(255);
-  debug = 0;
-
-  rfm12_cmd16(CONFIG_TXREG_OFF);
   rfm12_cmd16(0xA640); // 868.3MHz freqiency
   rfm12_cmd16(0xC605); // data rate: 0xC6FF = 300bps | 0xC67F = 2.7kbps | 0xC647 = 4.8kbps | 0xC606 = 57.6kbps
   rfm12_cmd16(0x94A5); // VDI at pin16, FAST VDI response, 134kHz baseband bandwidth, 0dBm LNA gain, -91dBm DRSSI thershold
@@ -253,29 +156,14 @@ rfm12_init(void)
   rfm12_enable_nirq_isr();
 }
 
-PT_THREAD(rfm12_rx(char *buf))
-{
-  PT_BEGIN(&pt_rx);
-  PT_SEM_WAIT(&pt_rx, &rx_monitor);
-
-  memcpy(buf, rx_packet.buf, rx_packet.length);
-  buf[rx_packet.length] = '\0';
-
-  PT_END(&pt_rx);
-}
-
-PT_THREAD(rfm12_tx(const char *data))
+PT_THREAD(rfm12_tx_start(void))
 {
   PT_BEGIN(&pt_tx);
   PT_SEM_WAIT(&pt_tx, &mutex);
 
   rfm12_disable_nirq_isr();
-  tx_packet.length = strlen(data);
-  tx_packet.buf = data;
   rfm12_enable_tx();
   rfm12_enable_nirq_isr();
 
-  PT_SEM_WAIT(&pt_tx, &tx_monitor);
-  PT_SEM_SIGNAL(&pt_tx, &mutex);
   PT_END(&pt_tx);
 }
