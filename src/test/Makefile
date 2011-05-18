@@ -7,12 +7,12 @@ avr-%.o: ../%.c
 %.o: %.c
 	$(CC) -c $< $(CFLAGS)
 
-test-shell: test-shell.o avr-shell.o avr-ringbuf.o mock-watchdog.o
+test-mac: test-mac.o avr-mac.o mock-rfm12.o
 	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -f *.o
-	rm -f test-shell
+	rm -f test-mac
 
 .PHONY : clean
 
