@@ -27,11 +27,17 @@ PT_THREAD(rfm12_tx_start(void))
 {
   PT_BEGIN(&pt);
   uint8_t data;
+  uint8_t cnt = 0;
   bool fin = false;
   while (!fin) {
     fin = mac_tx_next(&data);
-    printf("%x ", data);
+    printf("0x%x ", data);
+    if (cnt > 3) {
+      mac_rx_next(data);
+    }
+    cnt++;
   }
   printf("\n");
+
   PT_END(&pt);
 }

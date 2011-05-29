@@ -3,9 +3,9 @@
 #include "../mac.h"
 #include "../rfm12.h"
 
-const char *text = "lorem ipsum";
+const char *text = "slorem ipsum";
 const char *text2 = "st";
-const char bytes[] = { 0xff, 0xff, 0xff, 0xff, '\0' };
+const char bytes[] = { 0xff, 0x8f, 0xff, 0xff, '\0' };
 
 int
 main(int argc, char **argv)
@@ -14,14 +14,12 @@ main(int argc, char **argv)
   mac_init();
   llc_init();
 
-  printf("%s:\n", text);
+  const uint8_t *pkt = NULL;
+
   llc_tx_start(text);
-  printf("\n");
+  pkt = llc_rx();
 
-  printf("%s:\n", text2);
-  llc_tx_start(text2);
-  printf("\n");
+  printf("%s", pkt);
 
-  printf("byte stream (ff ff ff ff):\n");
-  llc_tx_start(bytes);
+  printf("\n");
 }
