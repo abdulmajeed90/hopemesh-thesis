@@ -6,7 +6,6 @@
 #include "pt-sem.h"
 #include "spi.h"
 #include "mac.h"
-#include "debug.h"
 
 #define rfm12_enable_nirq_isr() GICR |= (1<<RFM12_INT_NIRQ)
 #define rfm12_disable_nirq_isr() GICR &= ~(1<<RFM12_INT_NIRQ)

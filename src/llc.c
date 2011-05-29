@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "llc.h"
 #include "mac.h"
 
@@ -14,7 +16,7 @@ llc_tx_next(uint8_t *data)
 uint8_t
 llc_len(void)
 {
-  return 0x00;
+  return strlen(p);
 }
 
 PT_THREAD(llc_tx_start(const char *data))
