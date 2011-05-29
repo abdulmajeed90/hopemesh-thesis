@@ -11,7 +11,7 @@
 #include "watchdog.h"
 #include "error.h"
 #include "util.h"
-#include "mac.h"
+#include "llc.h"
 #include "rfm12.h"
 #include "spi.h"
 
@@ -35,7 +35,7 @@ const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 "source: 0x%x\n\r"
 "line: %d\n\r\n\r"
 "rfm12 status: 0x%x\n\r"
-"debug: 0x%x\n\r";
+"debug: 0x%x\n\rfff";
 
 typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *rfm_buf, *cmd_buf, *cmd;
@@ -65,6 +65,9 @@ PT_THREAD(shell_watchdog)(void)
   PT_WAIT_UNTIL(&pt_cmd, 
       uart_tx_str(&out_ptr));
   debug_strclear();
+
+  out_ptr = "fff";
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
 
   PT_END(&pt_cmd);
 }

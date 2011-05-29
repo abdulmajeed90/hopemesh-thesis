@@ -9,8 +9,11 @@
 bool
 llc_tx_next(uint8_t *data);
 
-uint8_t
-llc_len(void);
+bool
+llc_rx_next(uint8_t data);
+
+void
+llc_rx_abort(void);
 
 void
 llc_init(void);

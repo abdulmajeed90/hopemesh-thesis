@@ -3,20 +3,20 @@
 #include "llc.h"
 #include "rfm12.h"
 #include "pt-sem.h"
+#include "debug.h"
 
 #define FIN 0xaa
 
 typedef enum {
   PREAMBLE,
-  LEN,
   DATA,
   POSTAMBLE
 } mac_state_t;
 
 static struct pt pt;
 
-static const uint8_t preamble[] = { 0xaa, 0xaa, 0x2d, 0xd4, '\0' };
-static const uint8_t postamble[] = { FIN, '\0' };
+static const uint8_t preamble[] = { FIN, FIN, 0x2d, 0xd4, '\0' };
+static const uint8_t postamble[] = { FIN, FIN, '\0' };
 static const uint8_t *p;
 static mac_state_t state;
 
@@ -28,11 +28,7 @@ mac_tx_next(uint8_t *data)
   switch(state) {
     case(PREAMBLE):
       *data = *p++;
-      if (!*p) state = LEN;
-      break;
-    case(LEN):
-      *data = llc_len();
-      state = DATA;
+      if (!*p) state = DATA;
       break;
     case(DATA):
       if (!llc_tx_next(data)) {
@@ -53,7 +49,7 @@ bool
 mac_rx_next(uint8_t data)
 {
   if (data != FIN) {
-    return false;
+    return llc_rx_next(data);
   }
 
   return true;
@@ -62,6 +58,7 @@ mac_rx_next(uint8_t data)
 void
 mac_rx_abort(void)
 {
+  llc_rx_abort();
 }
 
 PT_THREAD(mac_tx_start(void))

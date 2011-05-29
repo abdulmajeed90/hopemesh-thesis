@@ -6,6 +6,7 @@
 #include "pt-sem.h"
 #include "spi.h"
 #include "mac.h"
+#include "debug.h"
 
 #define rfm12_enable_nirq_isr() GICR |= (1<<RFM12_INT_NIRQ)
 #define rfm12_disable_nirq_isr() GICR &= ~(1<<RFM12_INT_NIRQ)
@@ -70,12 +71,14 @@ static bool
 rfm12_rx_cb(void)
 {
   uint8_t byte = rfm12_cmd16(CMD_RX);
+  debug_char(byte);
   if (last_status_fast & CMD8_RSSI) {
-    return mac_rx_next(byte);
-  }  else {
     // signal lost (rssi is not set) -> abort reception
+    debug_cnt();
     mac_rx_abort();
     return true;
+  }  else {
+    return mac_rx_next(byte);
   }
 }
 
