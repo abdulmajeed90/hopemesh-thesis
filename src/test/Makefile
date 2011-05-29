@@ -7,7 +7,7 @@ avr-%.o: ../%.c
 %.o: %.c
 	$(CC) -c $< $(CFLAGS)
 
-test-mac: test-mac.o avr-mac.o mock-rfm12.o
+test-mac: test-mac.o avr-mac.o avr-llc.o mock-rfm12.o
 	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:

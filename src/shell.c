@@ -84,7 +84,7 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  PT_WAIT_THREAD(&pt_cmd, mac_tx_start(cmd_buf));
+  PT_WAIT_THREAD(&pt_cmd, llc_tx_start(cmd_buf));
   out_ptr = NULL;
   PT_WAIT_UNTIL(&pt_cmd,
       uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));

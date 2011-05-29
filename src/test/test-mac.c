@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "../llc.h"
 #include "../mac.h"
 #include "../rfm12.h"
 
@@ -10,8 +11,10 @@ main(int argc, char **argv)
 {
   rfm12_init();
   mac_init();
+  llc_init();
+
   printf("text:\n");
-  mac_tx_start(text);
+  llc_tx_start(text);
   printf("byte stream:\n");
-  mac_tx_start(bytes);
+  llc_tx_start(bytes);
 }

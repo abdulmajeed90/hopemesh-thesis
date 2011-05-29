@@ -12,9 +12,12 @@ mac_tx_next(uint8_t *data);
 bool
 mac_rx_next(uint8_t data);
 
-PT_THREAD(mac_tx_start(const char *data));
+PT_THREAD(mac_tx_start(void));
 
 void
 mac_init(void);
+
+void
+mac_rx_abort(void);
 
 #endif
