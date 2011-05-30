@@ -64,11 +64,13 @@ main(void)
   mac_init();
   llc_init();
   // timer_init();
+  rx_thread_init();
   watchdog_init();
   sei();
 
   while (true) {
     shell();
+    rx_thread();
     // timer_thread();
     watchdog();
   }

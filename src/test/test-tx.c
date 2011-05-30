@@ -1,11 +1,22 @@
 #include <stdio.h>
+#include "../pt.h"
 #include "../llc.h"
 #include "../mac.h"
 #include "../rfm12.h"
 
-const char *text = "slorem ipsum";
-const char *text2 = "st";
-const char bytes[] = { 0xff, 0x8f, 0xff, 0xff, '\0' };
+static const char *text = "slorem ipsum";
+static const char *text2 = "st";
+static const char bytes[] = { 0xff, 0x8f, 0xff, 0xff, '\0' };
+static struct pt pt;
+
+const char buf[255];
+
+PT_THREAD(rx_thread(char *data))
+{
+  PT_BEGIN(&pt);
+  PT_WAIT_THREAD(&pt, llc_rx(data));
+  PT_END(&pt);
+}
 
 int
 main(int argc, char **argv)
@@ -14,12 +25,10 @@ main(int argc, char **argv)
   mac_init();
   llc_init();
 
-  const uint8_t *pkt = NULL;
-
-  llc_tx_start(text);
-  pkt = llc_rx();
-
-  printf("%s", pkt);
+  PT_INIT(&pt);
+  llc_tx_start(bytes);
+  rx_thread(buf);
+  printf("%s", buf);
 
   printf("\n");
 }

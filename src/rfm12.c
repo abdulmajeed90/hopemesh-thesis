@@ -74,7 +74,6 @@ rfm12_rx_cb(void)
   debug_char(byte);
   if (last_status_fast & CMD8_RSSI) {
     // signal lost (rssi is not set) -> abort reception
-    debug_cnt();
     mac_rx_abort();
     return true;
   }  else {
