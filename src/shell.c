@@ -11,7 +11,7 @@
 #include "watchdog.h"
 #include "error.h"
 #include "util.h"
-#include "llc.h"
+#include "l3.h"
 #include "rfm12.h"
 #include "spi.h"
 
@@ -35,7 +35,7 @@ const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 "source: 0x%x\n\r"
 "line: %d\n\r\n\r"
 "rfm12 status: 0x%x\n\r"
-"debug: 0x%x\n\rfff";
+"debug: 0x%x\n\r";
 
 typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *rfm_buf, *cmd_buf, *cmd;
@@ -60,14 +60,13 @@ PT_THREAD(shell_watchdog)(void)
   out_ptr = out_buf;
   PT_WAIT_UNTIL(&pt_cmd, 
       uart_tx_str(&out_ptr));
+  out_ptr = NULL;
 
   out_ptr = debug_getstr();
+  debug_strclear();
   PT_WAIT_UNTIL(&pt_cmd, 
       uart_tx_str(&out_ptr));
-  debug_strclear();
-
-  out_ptr = "fff";
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
+  out_ptr = NULL;
 
   PT_END(&pt_cmd);
 }
@@ -87,7 +86,7 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  PT_WAIT_THREAD(&pt_cmd, llc_tx_start(cmd_buf));
+  PT_WAIT_THREAD(&pt_cmd, l3_tx_start(cmd_buf));
   out_ptr = NULL;
   PT_WAIT_UNTIL(&pt_cmd,
       uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
@@ -101,23 +100,6 @@ PT_THREAD(shell_help)(void)
   out_ptr = NULL;
   PT_WAIT_UNTIL(&pt_cmd,
       uart_tx_pgmstr(pgm_help, out_buf, &out_ptr));
-  PT_END(&pt_cmd);
-}
-
-PT_THREAD(shell_rx)(void)
-{
-  PT_BEGIN(&pt_cmd);
-
-  out_ptr = "rx: ";
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
-
-  out_ptr = rfm_buf;
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
-  *rfm_buf = '\0';
-
-  out_ptr = "\n\r";
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
-
   PT_END(&pt_cmd);
 }
 

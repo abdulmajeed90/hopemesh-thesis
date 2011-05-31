@@ -3,26 +3,27 @@
 #include "llc.h"
 #include "mac.h"
 #include "hamming.h"
+#include "l3.h"
 #include "debug.h"
 
-static struct pt pt_tx, pt_rx;
-static const char *p;
-static uint8_t cnt_tx, cnt_rx, rx_hamming;
-static char rx[255];
-static bool rx_complete = false;
+static struct pt pt_tx;
+static uint8_t p;
+static uint8_t cnt_tx, cnt_rx, rx_byte;
+static bool l3_tx_hasnext;
 
 bool
 llc_tx_next(uint8_t *data)
 {
   if (cnt_tx & 0x01) {
-    *data = hamming_enc_high(*p);
+    *data = hamming_enc_high(p);
 
-    if (!*p++) {
+    if (!l3_tx_hasnext) {
       cnt_tx = 0;
       return false;
     }
   } else {
-    *data = hamming_enc_low(*p);
+    l3_tx_hasnext = l3_tx_next(&p);
+    *data = hamming_enc_low(p);
   }
 
   cnt_tx++;
@@ -32,47 +33,31 @@ llc_tx_next(uint8_t *data)
 bool
 llc_rx_next(uint8_t data)
 {
-  debug_cnt();
-  if (rx_complete)
-  {
-    return false;
-  }
+  if (cnt_rx & 0x1) {
+    rx_byte |= hamming_dec_high(data);
 
-  if (cnt_rx & 0x01) {
-    rx_hamming |= hamming_dec_high(data);
-    rx[cnt_rx >> 1] = rx_hamming;
-    if (!rx_hamming) {
-      rx_complete = true;
+    if (!l3_rx_next(rx_byte)) {
+      cnt_rx = 0;
       return false;
     }
   } else {
-    rx_hamming = hamming_dec_low(data);
+    rx_byte = hamming_dec_low(data);
   }
 
   cnt_rx++;
   return true;
 }
 
-PT_THREAD(llc_rx(char *dest))
-{
-  PT_BEGIN(&pt_rx);
-  PT_WAIT_UNTIL(&pt_rx, rx_complete);
-  memcpy(dest, rx, strlen(rx));
-  cnt_rx = 0;
-  rx_complete = false;
-  PT_END(&pt_rx);
-}
-
 void
 llc_rx_abort()
 {
   cnt_rx = 0;
+  l3_rx_abort();
 }
 
-PT_THREAD(llc_tx_start(const char *data))
+PT_THREAD(llc_tx_start(void))
 {
   PT_BEGIN(&pt_tx);
-  p = data;
   cnt_tx = 0;
   PT_WAIT_THREAD(&pt_tx, mac_tx_start());
   PT_END(&pt_tx);
@@ -82,5 +67,4 @@ void
 llc_init(void)
 {
   PT_INIT(&pt_tx);
-  PT_INIT(&pt_rx);
 }

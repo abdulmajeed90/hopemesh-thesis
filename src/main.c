@@ -14,6 +14,7 @@
 #include "timer.h"
 #include "rxthread.h"
 #include "llc.h"
+#include "l3.h"
 
 #define DDRSPI DDRB
 #define DDMOSI DDB5
@@ -63,6 +64,7 @@ main(void)
   rfm12_init();
   mac_init();
   llc_init();
+  l3_init();
   // timer_init();
   rx_thread_init();
   watchdog_init();

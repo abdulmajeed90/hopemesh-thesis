@@ -38,7 +38,7 @@ TARGET = hopemesh
 OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c llc.c mac.c rfm12.c util.c debug.c hamming.c rxthread.c
+SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c l3.c llc.c mac.c rfm12.c util.c debug.c hamming.c rxthread.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s

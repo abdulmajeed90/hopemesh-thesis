@@ -15,11 +15,9 @@ llc_rx_next(uint8_t data);
 void
 llc_rx_abort(void);
 
-PT_THREAD(llc_rx(char *dest));
-
 void
 llc_init(void);
 
-PT_THREAD(llc_tx_start(const char *data));
+PT_THREAD(llc_tx_start(void));
 
 #endif

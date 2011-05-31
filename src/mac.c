@@ -48,6 +48,7 @@ mac_tx_next(uint8_t *data)
 bool
 mac_rx_next(uint8_t data)
 {
+  debug_char((char) data);
   if (data != FIN) {
     return llc_rx_next(data);
   }

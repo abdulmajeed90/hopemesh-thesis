@@ -71,7 +71,6 @@ static bool
 rfm12_rx_cb(void)
 {
   uint8_t byte = rfm12_cmd16(CMD_RX);
-  debug_char(byte);
   if (last_status_fast & CMD8_RSSI) {
     // signal lost (rssi is not set) -> abort reception
     mac_rx_abort();
