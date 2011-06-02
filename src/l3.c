@@ -2,6 +2,7 @@
 
 #include "l3.h"
 #include "llc.h"
+#include "debug.h"
 
 static struct pt pt, pt_rx;
 static const uint8_t *p;
@@ -28,6 +29,7 @@ l3_rx_next(uint8_t data)
     return false;
   }
 
+  debug_cnt();
   rx[rx_cnt++] = (char) data;
 
   if (!data) {

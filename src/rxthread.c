@@ -20,11 +20,15 @@ PT_THREAD(rx_thread(void))
   PT_BEGIN(&pt);
   PT_WAIT_THREAD(&pt, l3_rx_get(buf));
 
-  out_ptr = "rx ";
+  out_ptr = "\n\r$ rx: ";
   PT_WAIT_UNTIL(&pt,
       uart_tx_str(&out_ptr));
 
   out_ptr = buf;
+  PT_WAIT_UNTIL(&pt,
+      uart_tx_str(&out_ptr));
+
+  out_ptr = "\n\r$ ";
   PT_WAIT_UNTIL(&pt,
       uart_tx_str(&out_ptr));
 

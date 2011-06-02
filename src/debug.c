@@ -1,8 +1,8 @@
 #include "debug.h"
 
-uint16_t cnt = 0;
-char buf[255];
-uint8_t bufpos;
+static uint16_t cnt = 0;
+static char buf[255];
+static uint8_t bufpos;
 
 const char *
 debug_getstr(void)

@@ -30,7 +30,7 @@ const PROGMEM char pgm_help[] = "Help:\r\n"
 
 const PROGMEM char pgm_list[] = "No nodes available\r\n";
 const PROGMEM char pgm_send[] = "Sending message ...\r\n";
-const PROGMEM char pgm_prompt[] = "\x1b[33m$ \x1b[37m";
+const PROGMEM char pgm_prompt[] = "$ ";
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 "source: 0x%x\n\r"
 "line: %d\n\r\n\r"
@@ -48,9 +48,8 @@ PT_THREAD(shell_watchdog)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  // uint16_t radio_status = rfm12_status();
-  uint16_t radio_status = 0x0000;
-  uint16_t debug = 0x0000;
+  uint16_t radio_status = rfm12_status();
+  uint16_t debug = debug_get_cnt();
 
   sprintf_P(out_buf, pgm_wd, 
       watchdog_mcucsr(),
@@ -82,10 +81,11 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  // PT_WAIT_THREAD(&pt_cmd, l3_tx_start(cmd_buf));
-  // out_ptr = NULL;
-  // PT_WAIT_UNTIL(&pt_cmd,
-  //     uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
+  PT_WAIT_THREAD(&pt_cmd, l3_tx_start(cmd_buf));
+
+  out_ptr = NULL;
+  PT_WAIT_UNTIL(&pt_cmd,
+      uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
 
   PT_END(&pt_cmd);
 }

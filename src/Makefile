@@ -38,7 +38,7 @@ TARGET = hopemesh
 OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c util.c
+SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c util.c rfm12.c mac.c llc.c l3.c hamming.c debug.c rxthread.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -76,7 +76,7 @@ CSTANDARD = -std=gnu99
 
 # Place -D or -U options here for C sources
 CDEFS = -DF_CPU=$(F_CPU)UL
-#CDEFS += -DLC_INCLUDE='"lc-addrlabels.h"'
+CDEFS += -DLC_INCLUDE='"lc-addrlabels.h"'
 
 # Place -D or -U options here for ASM sources
 ADEFS = -DF_CPU=$(F_CPU)

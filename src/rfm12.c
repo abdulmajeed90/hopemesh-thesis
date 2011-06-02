@@ -29,11 +29,11 @@
 #define CMD8_FFIT 0x80
 
 typedef enum {
-  TX,
-  RX
+  STATE_TX,
+  STATE_RX
 } radio_state_t;
 
-uint8_t last_status_fast;
+static uint8_t last_status_fast;
 static struct pt pt_nirq, pt_tx;
 static struct pt_sem mutex;
 static radio_state_t radio_state;
@@ -76,7 +76,7 @@ rfm12_rx_cb(void)
     mac_rx_abort();
     return true;
   }  else {
-    return mac_rx_next(byte);
+    return !mac_rx_next(byte);
   }
 }
 
@@ -89,7 +89,7 @@ rfm12_is_fifo_ready(void)
 static void
 rfm12_enable_rx(void)
 {
-  radio_state = RX;
+  radio_state = STATE_RX;
   rfm12_cmd16(CONFIG_TXREG_OFF);
   rfm12_reset_fifo();
   rfm12_cmd16(PM_RX_ON);
@@ -98,7 +98,7 @@ rfm12_enable_rx(void)
 static void
 rfm12_enable_tx(void)
 {
-  radio_state = TX;
+  radio_state = STATE_TX;
   rfm12_cmd16(CONFIG_TXREG_ON);
   rfm12_cmd16(PM_TX_ON);
 }
@@ -110,11 +110,11 @@ PT_THREAD(rfm12_nirq_thread(void))
   PT_WAIT_UNTIL(&pt_nirq, rfm12_is_fifo_ready());
 
   switch(radio_state) {
-    case TX:
+    case STATE_TX:
       PT_WAIT_UNTIL(&pt_nirq, rfm12_tx_cb());
       PT_SEM_SIGNAL(&pt_nirq, &mutex);
       break;
-    case RX:
+    case STATE_RX:
       PT_SEM_WAIT(&pt_nirq, &mutex);
       PT_WAIT_UNTIL(&pt_nirq, rfm12_rx_cb());
       PT_SEM_SIGNAL(&pt_nirq, &mutex);
@@ -160,7 +160,10 @@ rfm12_init(void)
 PT_THREAD(rfm12_tx_start(void))
 {
   PT_BEGIN(&pt_tx);
+
+  cli();
   PT_SEM_WAIT(&pt_tx, &mutex);
+  sei();
 
   rfm12_disable_nirq_isr();
   rfm12_enable_tx();

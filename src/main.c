@@ -9,6 +9,11 @@
 #include "uart.h"
 #include "shell.h"
 #include "spi.h"
+#include "rfm12.h"
+#include "mac.h"
+#include "llc.h"
+#include "l3.h"
+#include "rxthread.h"
 
 #define DDRSPI DDRB
 #define DDMOSI DDB5
@@ -55,18 +60,18 @@ main(void)
   uart_init();
   spi_init();
   shell_init();
-  // rfm12_init();
-  // mac_init();
-  // llc_init();
-  // l3_init();
+  rfm12_init();
+  mac_init();
+  llc_init();
+  l3_init();
   // timer_init();
-  // rx_thread_init();
+  rx_thread_init();
   watchdog_init();
   sei();
 
   while (true) {
     shell();
-    // rx_thread();
+    rx_thread();
     // timer_thread();
     watchdog();
   }
