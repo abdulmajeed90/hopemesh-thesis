@@ -38,17 +38,19 @@ const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 "debug: 0x%x\n\r";
 
 typedef PT_THREAD((*cmd_fn))(void);
-static char *out_buf, *rfm_buf, *cmd_buf, *cmd;
-static const char *out_ptr = NULL;
-static cmd_fn cmd_fn_instance;
-static struct pt pt_main, pt_cmd;
+static char *out_buf, *cmd_buf;
+static volatile char *cmd;
+static volatile const char *out_ptr = NULL;
+static volatile cmd_fn cmd_fn_instance;
+static volatile struct pt pt_main, pt_cmd;
 
 PT_THREAD(shell_watchdog)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  uint16_t radio_status = rfm12_status();
-  uint16_t debug = debug_get_cnt();
+  // uint16_t radio_status = rfm12_status();
+  uint16_t radio_status = 0x0000;
+  uint16_t debug = 0x0000;
 
   sprintf_P(out_buf, pgm_wd, 
       watchdog_mcucsr(),
@@ -58,12 +60,6 @@ PT_THREAD(shell_watchdog)(void)
       debug);
 
   out_ptr = out_buf;
-  PT_WAIT_UNTIL(&pt_cmd, 
-      uart_tx_str(&out_ptr));
-  out_ptr = NULL;
-
-  out_ptr = debug_getstr();
-  debug_strclear();
   PT_WAIT_UNTIL(&pt_cmd, 
       uart_tx_str(&out_ptr));
   out_ptr = NULL;
@@ -86,10 +82,10 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  PT_WAIT_THREAD(&pt_cmd, l3_tx_start(cmd_buf));
-  out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_cmd,
-      uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
+  // PT_WAIT_THREAD(&pt_cmd, l3_tx_start(cmd_buf));
+  // out_ptr = NULL;
+  // PT_WAIT_UNTIL(&pt_cmd,
+  //     uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
 
   PT_END(&pt_cmd);
 }
@@ -119,10 +115,8 @@ shell_init(void)
 {
   cmd_buf = stralloc(MAX_CMD_BUF);
   out_buf = stralloc(MAX_OUT_BUF);
-  rfm_buf = stralloc(MAX_OUT_BUF);
 
   cmd = cmd_buf;
-  *rfm_buf = '\0';
 
   PT_INIT(&pt_main);
   PT_INIT(&pt_cmd);

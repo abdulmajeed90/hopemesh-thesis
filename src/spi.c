@@ -4,8 +4,8 @@
 #include "config.h"
 #include "ringbuf.h"
 
-#define spi_disable_isr() SPCR &= ~(1<<SPIE)
-#define spi_enable_isr() SPCR |= (1<<SPIE)
+#define spi_disable_isr() (SPCR &= ~(1<<SPIE))
+#define spi_enable_isr() (SPCR |= (1<<SPIE))
 #define spi_is_isr_disabled() !(SPCR & (1<<SPIE))
 
 #define spi_ss_low(ss) (PORT_SS &= ~(1<<ss))
@@ -14,10 +14,11 @@
 
 #define spi_block_until_sent() while (!(SPSR & (1<<SPIF)))
 
-static ringbuf_t *spi_in_buf, *spi_out_buf;
+static volatile ringbuf_t *spi_in_buf;
+static volatile ringbuf_t *spi_out_buf;
 static volatile uint8_t cur_ss;
 
-ISR (SPI_STC_vect)
+ISR(SPI_STC_vect)
 {
   uint8_t data_in, data_out;
   data_in = SPDR;
@@ -32,7 +33,7 @@ ISR (SPI_STC_vect)
 }
 
 void
-spi_init (void)
+spi_init(void)
 {
   SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1);
   // SPSR = (1<<SPI2X);
@@ -45,13 +46,13 @@ spi_init (void)
 }
 
 bool
-spi_rx (uint8_t *data)
+spi_rx(uint8_t *data)
 {
   return ringbuf_remove (spi_in_buf, data);
 }
 
 bool
-spi_tx16_async (uint16_t data, uint8_t _ss)
+spi_tx16_async(uint16_t data, uint8_t _ss)
 {
   bool result = false;
 
@@ -75,7 +76,7 @@ spi_tx16_async (uint16_t data, uint8_t _ss)
 }
 
 uint8_t
-spi_tx (const uint8_t data, uint8_t _ss)
+spi_tx(const uint8_t data, uint8_t _ss)
 {
   spi_ss_low (_ss);
   SPDR = data;
@@ -86,7 +87,7 @@ spi_tx (const uint8_t data, uint8_t _ss)
 }
 
 uint16_t
-spi_tx16 (const uint16_t data, uint8_t _ss)
+spi_tx16(const uint16_t data, uint8_t _ss)
 {
   uint16_t response = 0x0000;
   spi_ss_low (_ss);

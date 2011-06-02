@@ -13,7 +13,8 @@
 #define uart_disable_udrie_isr() UCSRB &= ~(1<<UDRIE)
 #define uart_enable_udrie_isr() UCSRB |= (1<<UDRIE)
 
-static ringbuf_t *uart_out_buf, *uart_in_buf;
+static volatile ringbuf_t *uart_out_buf;
+static volatile ringbuf_t *uart_in_buf;
 
 ISR(SIG_USART_RECV)
 {
@@ -64,7 +65,7 @@ uart_tx(const char what)
 }
 
 bool
-uart_tx_pgmstr(PGM_P src, char *buf, const char **ptr)
+uart_tx_pgmstr(PGM_P src, char *buf, volatile const char **ptr)
 {
   if (*ptr == NULL) {
     strcpy_P(buf, src);
@@ -75,7 +76,7 @@ uart_tx_pgmstr(PGM_P src, char *buf, const char **ptr)
 }
 
 bool
-uart_tx_str(const char **str)
+uart_tx_str(volatile const char **str)
 {
     if (**str) {
         bool char_added = ringbuf_add(uart_out_buf, **str);
@@ -90,7 +91,7 @@ uart_tx_str(const char **str)
 }
 
 bool
-uart_rx(char *where)
+uart_rx(volatile char *where)
 {
   return ringbuf_remove(uart_in_buf, (uint8_t*) where);
 }

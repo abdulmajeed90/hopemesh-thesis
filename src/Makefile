@@ -38,7 +38,7 @@ TARGET = hopemesh
 OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c l3.c llc.c mac.c rfm12.c util.c debug.c hamming.c rxthread.c
+SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c util.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -52,7 +52,7 @@ ASRC =
 # Optimization level, can be [0, 1, 2, 3, s]. 
 #     0 = turn off optimization. s = optimize for size.
 #     (Note: 3 is not always the best optimization level. See avr-libc FAQ.)
-OPT = s
+OPT = 2
 
 
 # Debugging format.
@@ -76,7 +76,7 @@ CSTANDARD = -std=gnu99
 
 # Place -D or -U options here for C sources
 CDEFS = -DF_CPU=$(F_CPU)UL
-CDEFS += -DLC_INCLUDE='"lc-addrlabels.h"'
+#CDEFS += -DLC_INCLUDE='"lc-addrlabels.h"'
 
 # Place -D or -U options here for ASM sources
 ADEFS = -DF_CPU=$(F_CPU)
@@ -210,7 +210,8 @@ AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
 #---------------- Communication Options (minicom) ----------------
 
 # serial communication port
-COM_PORT = /dev/ttyACM0
+COM_PORT0 = /dev/ttyACM0
+COM_PORT1 = /dev/ttyACM1
 COM_BAUDRATE = 38400
 
 #============================================================================
@@ -372,8 +373,11 @@ clean_list :
 	$(REMOVEDIR) .dep
 
 # call minicom
-com:
-	minicom -o -c on -b $(COM_BAUDRATE) -D $(COM_PORT)
+com0:
+	minicom -o -c on -b $(COM_BAUDRATE) -D $(COM_PORT0)
+
+com1:
+	minicom -o -c on -b $(COM_BAUDRATE) -D $(COM_PORT1)
 
 # Create object files directory
 $(shell mkdir $(OBJDIR) 2>/dev/null)

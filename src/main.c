@@ -8,13 +8,7 @@
 #include "config.h"
 #include "uart.h"
 #include "shell.h"
-#include "rfm12.h"
-#include "mac.h"
 #include "spi.h"
-#include "timer.h"
-#include "rxthread.h"
-#include "llc.h"
-#include "l3.h"
 
 #define DDRSPI DDRB
 #define DDMOSI DDB5
@@ -48,7 +42,7 @@ port_init(void)
 static void
 bootstrap_delay (void)
 {
-  for (uint8_t i=0; i<30; i++) {
+  for (uint8_t i=0; i<50; i++) {
     _delay_ms(10);
   }
 }
@@ -61,18 +55,18 @@ main(void)
   uart_init();
   spi_init();
   shell_init();
-  rfm12_init();
-  mac_init();
-  llc_init();
-  l3_init();
+  // rfm12_init();
+  // mac_init();
+  // llc_init();
+  // l3_init();
   // timer_init();
-  rx_thread_init();
+  // rx_thread_init();
   watchdog_init();
   sei();
 
   while (true) {
     shell();
-    rx_thread();
+    // rx_thread();
     // timer_thread();
     watchdog();
   }

@@ -20,4 +20,5 @@ tags
 *.lot
 *.nlo
 *.toc
+*.bbl
 vim.session
