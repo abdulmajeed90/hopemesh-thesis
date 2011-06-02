@@ -10,8 +10,8 @@
 #include "ringbuf.h"
 #include "watchdog.h"
  
-#define uart_disable_udrie_isr() UCSRB &= ~(1<<UDRIE)
-#define uart_enable_udrie_isr() UCSRB |= (1<<UDRIE)
+#define uart_disable_udrie_isr() (UCSRB &= ~(1<<UDRIE))
+#define uart_enable_udrie_isr() (UCSRB |= (1<<UDRIE))
 
 static ringbuf_t *uart_out_buf;
 static ringbuf_t *uart_in_buf;

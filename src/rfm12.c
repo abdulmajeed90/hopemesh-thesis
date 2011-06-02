@@ -8,8 +8,8 @@
 #include "mac.h"
 #include "debug.h"
 
-#define rfm12_enable_nirq_isr() GICR |= (1<<RFM12_INT_NIRQ)
-#define rfm12_disable_nirq_isr() GICR &= ~(1<<RFM12_INT_NIRQ)
+#define rfm12_enable_nirq_isr() (GICR |= (1<<RFM12_INT_NIRQ))
+#define rfm12_disable_nirq_isr() (GICR &= ~(1<<RFM12_INT_NIRQ))
 #define rfm12_cmd16(data) spi_tx16(data, _SS_RADIO)
 #define rfm12_cmd(data) spi_tx(data, _SS_RADIO)
 
