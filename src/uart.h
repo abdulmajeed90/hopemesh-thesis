@@ -23,4 +23,7 @@ uart_tx_str(const char **str);
 bool
 uart_rx(char *where);
 
+void
+uart_tx_thread(void);
+
 #endif

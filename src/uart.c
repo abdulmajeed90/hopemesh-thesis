@@ -40,7 +40,7 @@ uart_init(void)
   UBRRH = UBRRH_VALUE;
   UBRRL = UBRRL_VALUE;
 
-  uart_disable_udrie_isr();
+  uart_enable_udrie_isr();
 
   uart_out_buf = ringbuf_new(10);
   uart_in_buf = ringbuf_new(10);
@@ -56,11 +56,6 @@ bool
 uart_tx(const char what)
 {
   bool result = ringbuf_add(uart_out_buf, what);
-
-  if (result) {
-    uart_enable_udrie_isr();
-  }
-
   return result;
 }
 
@@ -78,20 +73,29 @@ uart_tx_pgmstr(PGM_P src, char *buf, const char **ptr)
 bool
 uart_tx_str(const char **str)
 {
-    if (**str) {
-        bool char_added = ringbuf_add(uart_out_buf, **str);
-        if (char_added) {
-          (*str)++;
-          uart_enable_udrie_isr();
-        }
-        return false;
-    } else {
-        return true;
+  bool result = true;
+
+  if (**str) {
+    bool char_added = ringbuf_add(uart_out_buf, **str);
+    if (char_added) {
+      (*str)++;
     }
+    result = false;
+  }
+
+  return result;
 }
 
 bool
 uart_rx(char *where)
 {
   return ringbuf_remove(uart_in_buf, (uint8_t*) where);
+}
+
+void
+uart_tx_thread(void)
+{
+  if (ringbuf_size(uart_out_buf)) {
+    uart_enable_udrie_isr();
+  }
 }

@@ -72,6 +72,7 @@ main(void)
   while (true) {
     shell();
     rx_thread();
+    uart_tx_thread();
     // timer_thread();
     watchdog();
   }
