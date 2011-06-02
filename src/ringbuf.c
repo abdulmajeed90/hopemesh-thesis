@@ -46,7 +46,7 @@ ringbuf_clear (ringbuf_t *buf)
 }
 
 bool
-ringbuf_add (volatile ringbuf_t *buf, volatile uint8_t what)
+ringbuf_add (ringbuf_t *buf, uint8_t what)
 {
   if (buf->size == buf->max) {
     return false;
@@ -63,7 +63,7 @@ ringbuf_add (volatile ringbuf_t *buf, volatile uint8_t what)
 }
 
 bool
-ringbuf_remove (volatile ringbuf_t *buf, volatile uint8_t *what)
+ringbuf_remove (ringbuf_t *buf, uint8_t *what)
 {
   if (buf->size == 0) {
     return false;

@@ -15,12 +15,12 @@ bool
 uart_tx(const char what);
 
 bool
-uart_tx_pgmstr(PGM_P src, char *buf, volatile const char **ptr);
+uart_tx_pgmstr(PGM_P src, char *buf, const char **ptr);
 
 bool
-uart_tx_str(volatile const char **str);
+uart_tx_str(const char **str);
 
 bool
-uart_rx(volatile char *where);
+uart_rx(char *where);
 
 #endif

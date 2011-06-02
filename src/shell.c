@@ -39,10 +39,10 @@ const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 
 typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *cmd_buf;
-static volatile char *cmd;
-static volatile const char *out_ptr = NULL;
-static volatile cmd_fn cmd_fn_instance;
-static volatile struct pt pt_main, pt_cmd;
+static char *cmd;
+static const char *out_ptr = NULL;
+static cmd_fn cmd_fn_instance;
+static struct pt pt_main, pt_cmd;
 
 PT_THREAD(shell_watchdog)(void)
 {

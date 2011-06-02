@@ -14,9 +14,9 @@
 
 #define spi_block_until_sent() while (!(SPSR & (1<<SPIF)))
 
-static volatile ringbuf_t *spi_in_buf;
-static volatile ringbuf_t *spi_out_buf;
-static volatile uint8_t cur_ss;
+static ringbuf_t *spi_in_buf;
+static ringbuf_t *spi_out_buf;
+static uint8_t cur_ss;
 
 ISR(SPI_STC_vect)
 {
