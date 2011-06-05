@@ -162,7 +162,7 @@ rfm12_init(void)
   rfm12_enable_nirq_isr();
 }
 
-PT_THREAD(rfm12_tx_start(void))
+PT_THREAD(rfm12_tx(void))
 {
   PT_BEGIN(&pt_tx);
 

@@ -48,35 +48,34 @@ mac_tx_next(uint8_t *dest)
 bool
 mac_rx(rfm12_rx_t *rx)
 {
+  bool fin = true;
+
   mac_rx_t mac_rx;
-  bool fin = false;
+  mac_rx.payload = 0;
 
   if (rx->status == RFM12_RX_OK) {
-    mac_rx.status = MAC_RX_OK;
-    mac_rx.payload = rx->payload;
-
     if (rx->payload == FIN) {
-      fin = true;
+      mac_rx.status = MAC_RX_FIN;
     } else {
-      llc_rx_next(&mac_rx);
+      mac_rx.status = MAC_RX_OK;
+      mac_rx.payload = rx->payload;
+      fin = false;
     }
   } else {
     mac_rx.status = MAC_RX_ABORT;
-    mac_rx.payload = 0;
-
-    llc_rx_next(&mac_rx);
-    fin = true;
   }
+
+  llc_rx_next(&mac_rx);
 
   return fin;
 }
 
-PT_THREAD(mac_tx_start(void))
+PT_THREAD(mac_tx(void))
 {
   PT_BEGIN(&pt);
   state = PREAMBLE;
   p = preamble;
-  PT_WAIT_THREAD(&pt, rfm12_tx_start());
+  PT_WAIT_THREAD(&pt, rfm12_tx());
   PT_END(&pt);
 }
 

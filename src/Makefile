@@ -246,7 +246,7 @@ ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS) $(GENDEPFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 # Default target.
-all: begin gccversion sizebefore build sizeafter end
+all: begin gccversion sizebefore build sizeafter test end
 
 # Change the build target to build a HEX file or a library.
 build: elf hex eep lss sym
@@ -353,7 +353,7 @@ $(OBJDIR)/%.o : %.S
 	$(CC) -E -mmcu=$(MCU) -I. $(CFLAGS) $< -o $@
 
 # Target: clean project.
-clean: begin clean_list end
+clean: begin clean_list test-clean end
 
 clean_list :
 	@echo
@@ -379,6 +379,12 @@ com0:
 com1:
 	minicom -o -c on -b $(COM_BAUDRATE) -D $(COM_PORT1)
 
+test:
+	cd test && make
+
+test-clean:
+	cd test && make clean
+
 # Create object files directory
 $(shell mkdir $(OBJDIR) 2>/dev/null)
 
@@ -389,4 +395,4 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 .PHONY : all begin finish end sizebefore sizeafter gccversion \
 build elf hex eep lss sym coff extcoff \
 clean clean_list program debug gdb-config \
-%_test
+test test-clean

@@ -12,7 +12,7 @@ avr-%.o: ../%.c
 %.o: %.c
 	$(CC) -c $< $(CFLAGS)
 
-test-tx: test-tx.o mock-crc16.o avr-l3.o avr-mac.o avr-llc.o avr-debug.o avr-hamming.o mock-rfm12.o mock-uart.o
+test-tx: test-tx.o mock-crc16.o avr-l3.o avr-mac.o avr-llc.o avr-debug.o avr-hamming.o mock-rfm12.o mock-uart.o mock-watchdog.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 clean:

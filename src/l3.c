@@ -4,55 +4,27 @@
 #include "llc.h"
 #include "debug.h"
 
-static struct pt pt, pt_rx;
-static const uint8_t *p;
-static char rx[255];
-static uint8_t rx_cnt;
-static bool rx_complete;
+static struct pt pt_tx, pt_rx;
+static llc_rx_t p_rx;
 
-bool
-l3_tx_next(uint8_t *dest)
-{
-  *dest = *p;
-
-  if (*p++)
-    return true;
-  else
-    return false;
-}
-
-void
-l3_rx(uint8_t data)
-{
-  if (rx_cnt == 254) {
-    data = '\0';
-  } else {
-    rx[rx_cnt++] = (char) data;
-  }
-}
-
-PT_THREAD(l3_rx_get(char *dest))
+PT_THREAD(l3_rx(char *dest))
 {
   PT_BEGIN(&pt_rx);
-  PT_WAIT_UNTIL(&pt_rx, rx_complete);
-  memcpy(dest, rx, strlen(rx)+1);
-  rx_complete = false;
+  p_rx.data = (uint8_t *) dest;
+  PT_WAIT_UNTIL(&pt_rx, llc_rx(&p_rx));
   PT_END(&pt_rx);
+}
+
+PT_THREAD(l3_tx(const char *data))
+{
+  PT_BEGIN(&pt_tx);
+  PT_WAIT_THREAD(&pt_tx, llc_tx((uint8_t *) data, strlen(data)+1));
+  PT_END(&pt_tx);
 }
 
 void
 l3_init(void)
 {
-  PT_INIT(&pt);
+  PT_INIT(&pt_tx);
   PT_INIT(&pt_rx);
-  rx_cnt = 0;
-  rx_complete = false;
-}
-
-PT_THREAD(l3_tx_start(const char *data))
-{
-  PT_BEGIN(&pt);
-  p = (uint8_t *) data;
-  PT_WAIT_THREAD(&pt, llc_tx_start((uint8_t *) data, strlen(data)));
-  PT_END(&pt);
 }

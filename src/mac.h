@@ -15,6 +15,7 @@ mac_rx(rfm12_rx_t *rx);
 
 typedef enum {
   MAC_RX_OK,
+  MAC_RX_FIN,
   MAC_RX_ABORT
 } mac_status_t;
 
@@ -23,7 +24,7 @@ typedef struct {
   uint8_t payload;
 } mac_rx_t;
 
-PT_THREAD(mac_tx_start(void));
+PT_THREAD(mac_tx(void));
 
 void
 mac_init(void);

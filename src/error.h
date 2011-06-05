@@ -7,5 +7,6 @@
 #define ERR_RFM12 0x0004
 #define ERR_TIMER 0x0005
 #define ERR_UTIL 0x0006
+#define ERR_LLC 0x0007
 
 #endif

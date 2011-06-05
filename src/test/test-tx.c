@@ -19,18 +19,18 @@ main(int argc, char **argv)
   llc_init();
   l3_init();
 
-  l3_tx_start(text);
-  l3_rx_get(buf);
+  l3_tx(text);
+  l3_rx(buf);
   printf("%s", buf);
   printf("\n");
 
-  l3_tx_start(text2);
-  l3_rx_get(buf);
+  l3_tx(text2);
+  l3_rx(buf);
   printf("%s", buf);
   printf("\n");
 
-  l3_tx_start((char *) bytes);
-  l3_rx_get(buf);
+  l3_tx((char *) bytes);
+  l3_rx(buf);
   printf("%s", buf);
 
   printf("\n");

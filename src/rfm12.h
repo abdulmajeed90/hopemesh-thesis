@@ -13,7 +13,7 @@ rfm12_status(void);
 uint8_t
 rfm12_status_fast(void);
 
-PT_THREAD(rfm12_tx_start(void));
+PT_THREAD(rfm12_tx(void));
 
 typedef enum {
   RFM12_RX_OK,

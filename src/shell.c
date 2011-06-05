@@ -16,7 +16,7 @@
 #include "spi.h"
 
 #define MAX_CMD_BUF 80
-#define MAX_OUT_BUF 255
+#define MAX_OUT_BUF 256
 
 const PROGMEM char pgm_bootmsg[] = "\x1b[31mHopeMesh booted and ready ...\x1b[37m\r\n";
 const PROGMEM char pgm_help[] = "Help:\r\n"
@@ -81,7 +81,7 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  PT_WAIT_THREAD(&pt_cmd, l3_tx_start(cmd_buf));
+  PT_WAIT_THREAD(&pt_cmd, l3_tx(cmd_buf));
 
   out_ptr = NULL;
   PT_WAIT_UNTIL(&pt_cmd,

@@ -23,7 +23,7 @@ rfm12_status_fast(void)
   return 0x00;
 }
 
-PT_THREAD(rfm12_tx_start(void))
+PT_THREAD(rfm12_tx(void))
 {
   PT_BEGIN(&pt);
   uint8_t data;
@@ -33,8 +33,8 @@ PT_THREAD(rfm12_tx_start(void))
     fin = mac_tx_next(&data);
     printf("0x%x ", data);
     if (cnt > 3) {
-      mac_rx_t rx;
-      rx.status = MAC_RX_OK;
+      rfm12_rx_t rx;
+      rx.status = RFM12_RX_OK;
       rx.payload = data;
       mac_rx(&rx);
     }
