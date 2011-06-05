@@ -11,7 +11,7 @@ bool
 mac_tx_next(uint8_t *dest);
 
 bool
-mac_rx(rfm12_packet_t *packet);
+mac_rx(rfm12_rx_t *packet);
 
 typedef enum {
   MAC_RX_OK,

@@ -23,6 +23,6 @@ typedef enum {
 typedef struct {
   rfm12_status_t status;
   uint8_t payload;
-} rfm12_packet_t;
+} rfm12_rx_t;
 
 #endif

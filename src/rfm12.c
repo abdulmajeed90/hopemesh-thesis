@@ -71,7 +71,7 @@ static bool
 rfm12_rx_cb(void)
 {
   uint8_t byte = rfm12_cmd16(CMD_RX);
-  rfm12_packet_t packet;
+  rfm12_rx_t packet;
   packet.payload = byte;
 
   if (last_status_fast & CMD8_RSSI) {

@@ -46,7 +46,7 @@ mac_tx_next(uint8_t *dest)
 }
 
 bool
-mac_rx(rfm12_packet_t *packet)
+mac_rx(rfm12_rx_t *packet)
 {
   mac_packet_t mac_packet;
   bool fin = false;
