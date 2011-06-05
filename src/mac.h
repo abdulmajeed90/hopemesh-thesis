@@ -11,7 +11,7 @@ bool
 mac_tx_next(uint8_t *dest);
 
 bool
-mac_rx(rfm12_rx_t *packet);
+mac_rx(rfm12_rx_t *rx);
 
 typedef enum {
   MAC_RX_OK,
@@ -21,7 +21,7 @@ typedef enum {
 typedef struct {
   mac_status_t status;
   uint8_t payload;
-} mac_packet_t;
+} mac_rx_t;
 
 PT_THREAD(mac_tx_start(void));
 

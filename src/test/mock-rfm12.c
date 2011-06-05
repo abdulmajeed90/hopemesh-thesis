@@ -33,10 +33,10 @@ PT_THREAD(rfm12_tx_start(void))
     fin = mac_tx_next(&data);
     printf("0x%x ", data);
     if (cnt > 3) {
-      mac_packet_t packet;
-      packet.status = MAC_RX_OK;
-      packet.payload = data;
-      mac_rx(&packet);
+      mac_rx_t rx;
+      rx.status = MAC_RX_OK;
+      rx.payload = data;
+      mac_rx(&rx);
     }
     cnt++;
   }

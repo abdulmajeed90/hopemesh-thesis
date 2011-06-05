@@ -75,7 +75,7 @@ llc_rx_frame(uint8_t data)
 }
 
 void
-llc_rx_next(mac_packet_t *packet)
+llc_rx_next(mac_rx_t *rx)
 {
 }
 

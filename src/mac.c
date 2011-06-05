@@ -46,25 +46,25 @@ mac_tx_next(uint8_t *dest)
 }
 
 bool
-mac_rx(rfm12_rx_t *packet)
+mac_rx(rfm12_rx_t *rx)
 {
-  mac_packet_t mac_packet;
+  mac_rx_t mac_rx;
   bool fin = false;
 
-  if (packet->status == RFM12_RX_OK) {
-    mac_packet.status = MAC_RX_OK;
-    mac_packet.payload = packet->payload;
+  if (rx->status == RFM12_RX_OK) {
+    mac_rx.status = MAC_RX_OK;
+    mac_rx.payload = rx->payload;
 
-    if (packet->payload == FIN) {
+    if (rx->payload == FIN) {
       fin = true;
     } else {
-      llc_rx_next(&mac_packet);
+      llc_rx_next(&mac_rx);
     }
   } else {
-    mac_packet.status = MAC_RX_ABORT;
-    mac_packet.payload = 0;
+    mac_rx.status = MAC_RX_ABORT;
+    mac_rx.payload = 0;
 
-    llc_rx_next(&mac_packet);
+    llc_rx_next(&mac_rx);
     fin = true;
   }
 

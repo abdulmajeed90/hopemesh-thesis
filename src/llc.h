@@ -11,7 +11,7 @@ bool
 llc_tx_next(uint8_t *dest);
 
 void
-llc_rx_next(mac_packet_t *packet);
+llc_rx_next(mac_rx_t *rx);
 
 void
 llc_rx_abort(void);
