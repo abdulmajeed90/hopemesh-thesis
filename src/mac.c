@@ -21,23 +21,23 @@ static const uint8_t *p;
 static mac_state_t state;
 
 bool
-mac_tx_next(uint8_t *data)
+mac_tx_next(uint8_t *dest)
 {
   bool fin = false;
 
   switch(state) {
     case(PREAMBLE):
-      *data = *p++;
+      *dest = *p++;
       if (!*p) state = DATA;
       break;
     case(DATA):
-      if (!llc_tx_next(data)) {
+      if (!llc_tx_next(dest)) {
         state = POSTAMBLE;
         p = postamble;
       }
       break;
     case(POSTAMBLE):
-      *data = *p++;
+      *dest = *p++;
       if (!*p) fin = true;
       break;
   }
@@ -46,13 +46,29 @@ mac_tx_next(uint8_t *data)
 }
 
 bool
-mac_rx_next(uint8_t data)
+mac_rx(rfm12_packet_t *packet)
 {
-  if (data != FIN) {
-    return llc_rx_next(data);
+  mac_packet_t mac_packet;
+  bool fin = false;
+
+  if (packet->status == RFM12_RX_OK) {
+    mac_packet.status = MAC_RX_OK;
+    mac_packet.payload = packet->payload;
+
+    if (packet->payload == FIN) {
+      fin = true;
+    } else {
+      llc_rx_next(&mac_packet);
+    }
+  } else {
+    mac_packet.status = MAC_RX_ABORT;
+    mac_packet.payload = 0;
+
+    llc_rx_next(&mac_packet);
+    fin = true;
   }
 
-  return true;
+  return fin;
 }
 
 void

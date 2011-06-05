@@ -21,24 +21,21 @@ l3_tx_next(uint8_t *data)
     return false;
 }
 
-bool
+void
 l3_rx_next(uint8_t data)
 {
-  if (rx_complete)
-  {
-    return false;
+  if (rx_cnt == 254) {
+    data = '\0';
+  } else {
+    rx[rx_cnt++] = (char) data;
   }
+}
 
-  debug_cnt();
-  rx[rx_cnt++] = (char) data;
-
-  if (!data) {
-    rx_complete = true;
-    rx_cnt = 0;
-    return false;
-  }
-
-  return true;
+void
+l3_rx_complete(void)
+{
+  rx_complete = true;
+  rx_cnt = 0;
 }
 
 void
@@ -70,6 +67,6 @@ PT_THREAD(l3_tx_start(const char *data))
 {
   PT_BEGIN(&pt);
   p = (uint8_t *) data;
-  PT_WAIT_THREAD(&pt, llc_tx_start());
+  PT_WAIT_THREAD(&pt, llc_tx_start((uint8_t *) data, strlen(data)));
   PT_END(&pt);
 }

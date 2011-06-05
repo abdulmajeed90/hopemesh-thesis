@@ -10,8 +10,11 @@
 bool
 l3_tx_next(uint8_t *data);
 
-bool
+void
 l3_rx_next(uint8_t data);
+
+void
+l3_rx_complete(void);
 
 void
 l3_rx_abort(void);

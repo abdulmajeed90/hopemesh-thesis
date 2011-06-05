@@ -1,64 +1,103 @@
 #include <string.h>
+#include <util/crc16.h>
 
 #include "llc.h"
 #include "mac.h"
 #include "hamming.h"
 #include "l3.h"
 #include "debug.h"
+#include "ringbuf.h"
+
+#define MAX_LEN 255
 
 static struct pt pt_tx;
-static uint8_t p;
-static uint8_t cnt_tx, cnt_rx, rx_byte;
-static bool l3_tx_hasnext;
+
+enum state {
+  LLC_STATE_DATA,
+  LLC_STATE_CRC_LOW,
+  LLC_STATE_CRC_HIGH,
+};
+
+typedef struct {
+  uint8_t *data;
+  uint16_t crc;
+  uint16_t len;
+  uint16_t cnt;
+  bool hasnext;
+  uint8_t nextbyte;
+  enum state state;
+} packet_t;
+
+static packet_t tx_packet;
+
+static void
+llc_tx_frame(packet_t *p)
+{
+  p->hasnext = true;
+
+  switch(p->state) {
+    case(LLC_STATE_DATA):
+      p->nextbyte = *p->data++;
+      if ((p->cnt>>1) == p->len) {
+        p->data -= p->len+1;
+        tx_packet.state = LLC_STATE_CRC_LOW;
+      }
+      break;
+    case(LLC_STATE_CRC_LOW):
+      p->nextbyte = (uint8_t) p->crc;
+      p->state = LLC_STATE_CRC_HIGH;
+      break;
+    case(LLC_STATE_CRC_HIGH):
+      p->nextbyte = (uint8_t) (p->crc >> 8);
+      p->hasnext = false;
+      break;
+  }
+}
 
 bool
-llc_tx_next(uint8_t *data)
+llc_tx_next(uint8_t *dest)
 {
-  if (cnt_tx & 0x01) {
-    *data = hamming_enc_high(p);
-
-    if (!l3_tx_hasnext) {
-      cnt_tx = 0;
-      return false;
-    }
+  if (tx_packet.cnt++ & 0x01) {
+    *dest = hamming_enc_high(tx_packet.nextbyte);
+    return tx_packet.hasnext;
   } else {
-    l3_tx_hasnext = l3_tx_next(&p);
-    *data = hamming_enc_low(p);
+    llc_tx_frame(&tx_packet);
+    *dest = hamming_enc_low(tx_packet.nextbyte);
   }
 
-  cnt_tx++;
   return true;
 }
 
 bool
-llc_rx_next(uint8_t data)
+llc_rx_frame(uint8_t data)
 {
-  if (cnt_rx & 0x1) {
-    rx_byte |= hamming_dec_high(data);
+  return false;
+}
 
-    if (!l3_rx_next(rx_byte)) {
-      cnt_rx = 0;
-      return false;
-    }
-  } else {
-    rx_byte = hamming_dec_low(data);
-  }
-
-  cnt_rx++;
-  return true;
+void
+llc_rx_next(mac_packet_t *packet)
+{
 }
 
 void
 llc_rx_abort()
 {
-  cnt_rx = 0;
-  l3_rx_abort();
 }
 
-PT_THREAD(llc_tx_start(void))
+PT_THREAD(llc_tx_start(uint8_t *data, uint16_t len))
 {
   PT_BEGIN(&pt_tx);
-  cnt_tx = 0;
+
+  tx_packet.cnt = 0;
+  tx_packet.data = data;
+  tx_packet.len = len;
+  tx_packet.state = LLC_STATE_DATA;
+
+  tx_packet.crc = 0xffff;
+  for (uint16_t i = 0; i<len; i++) {
+      tx_packet.crc = _crc16_update(tx_packet.crc, *data++);
+  }
+
   PT_WAIT_THREAD(&pt_tx, mac_tx_start());
   PT_END(&pt_tx);
 }

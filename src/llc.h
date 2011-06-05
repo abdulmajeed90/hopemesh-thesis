@@ -5,12 +5,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "pt.h"
+#include "mac.h"
 
 bool
-llc_tx_next(uint8_t *data);
+llc_tx_next(uint8_t *dest);
 
-bool
-llc_rx_next(uint8_t data);
+void
+llc_rx_next(mac_packet_t *packet);
 
 void
 llc_rx_abort(void);
@@ -18,6 +19,6 @@ llc_rx_abort(void);
 void
 llc_init(void);
 
-PT_THREAD(llc_tx_start(void));
+PT_THREAD(llc_tx_start(uint8_t *data, uint16_t len));
 
 #endif

@@ -71,12 +71,17 @@ static bool
 rfm12_rx_cb(void)
 {
   uint8_t byte = rfm12_cmd16(CMD_RX);
+  rfm12_packet_t packet;
+  packet.payload = byte;
+
   if (last_status_fast & CMD8_RSSI) {
     // signal lost (rssi is not set) -> abort reception
-    mac_rx_abort();
+    packet.status = RFM12_RX_LOST_SIGNAL;
+    mac_rx(&packet);
     return true;
-  }  else {
-    return !mac_rx_next(byte);
+  } else {
+    packet.status = RFM12_RX_OK;
+    return mac_rx(&packet);
   }
 }
 

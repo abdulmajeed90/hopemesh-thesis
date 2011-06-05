@@ -15,4 +15,14 @@ rfm12_status_fast(void);
 
 PT_THREAD(rfm12_tx_start(void));
 
+typedef enum {
+  RFM12_RX_OK,
+  RFM12_RX_LOST_SIGNAL
+} rfm12_status_t;
+
+typedef struct {
+  rfm12_status_t status;
+  uint8_t payload;
+} rfm12_packet_t;
+
 #endif

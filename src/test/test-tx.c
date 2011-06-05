@@ -6,9 +6,8 @@
 #include "../l3.h"
 
 static const char *text = "lorem ipsum";
-static const char *text2 = "st";
+static const char *text2 = "test";
 static const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, '\0' };
-static struct pt pt;
 
 static char buf[255];
 
