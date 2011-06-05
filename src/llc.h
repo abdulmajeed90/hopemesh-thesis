@@ -14,9 +14,6 @@ void
 llc_rx_next(mac_rx_t *rx);
 
 void
-llc_rx_abort(void);
-
-void
 llc_init(void);
 
 PT_THREAD(llc_tx_start(uint8_t *data, uint16_t len));

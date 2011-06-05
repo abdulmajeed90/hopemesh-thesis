@@ -71,12 +71,6 @@ mac_rx(rfm12_rx_t *rx)
   return fin;
 }
 
-void
-mac_rx_abort(void)
-{
-  llc_rx_abort();
-}
-
 PT_THREAD(mac_tx_start(void))
 {
   PT_BEGIN(&pt);
