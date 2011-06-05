@@ -11,9 +11,9 @@ static uint8_t rx_cnt;
 static bool rx_complete;
 
 bool
-l3_tx_next(uint8_t *data)
+l3_tx_next(uint8_t *dest)
 {
-  *data = *p;
+  *dest = *p;
 
   if (*p++)
     return true;
@@ -22,27 +22,13 @@ l3_tx_next(uint8_t *data)
 }
 
 void
-l3_rx_next(uint8_t data)
+l3_rx(uint8_t data)
 {
   if (rx_cnt == 254) {
     data = '\0';
   } else {
     rx[rx_cnt++] = (char) data;
   }
-}
-
-void
-l3_rx_complete(void)
-{
-  rx_complete = true;
-  rx_cnt = 0;
-}
-
-void
-l3_rx_abort(void)
-{
-  rx_complete = false;
-  rx_cnt = 0;
 }
 
 PT_THREAD(l3_rx_get(char *dest))

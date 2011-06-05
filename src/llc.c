@@ -52,13 +52,13 @@ llc_tx_frame(packet_t *p)
       p->nextbyte = *p->data++;
       if ((p->cnt >> 1)-2 == p->len) {
         p->data -= p->len+1;
-        tx_p.state = LLC_STATE_CRC_LOW;
+        tx_p.state = LLC_STATE_CRC_HIGH;
       }
       break;
 
     case(LLC_STATE_CRC_HIGH):
       p->nextbyte = (uint8_t) (p->crc >> 8);
-      p->state = LLC_STATE_CRC_HIGH;
+      p->state = LLC_STATE_CRC_LOW;
       break;
 
     case(LLC_STATE_CRC_LOW):
@@ -72,11 +72,11 @@ bool
 llc_tx_next(uint8_t *dest)
 {
   if (tx_p.cnt++ & 0x01) {
-    *dest = hamming_enc_high(tx_p.nextbyte);
+    *dest = hamming_enc_low(tx_p.nextbyte);
     return tx_p.hasnext;
   } else {
     llc_tx_frame(&tx_p);
-    *dest = hamming_enc_low(tx_p.nextbyte);
+    *dest = hamming_enc_high(tx_p.nextbyte);
   }
 
   return true;
