@@ -148,7 +148,7 @@ llc_rx_reset(packet_t *p)
 }
 
 void
-llc_rx_next(mac_rx_t *mac_rx)
+llc_rx_mac(mac_rx_t *mac_rx)
 {
   if (needspoll_rx) {
     // drop packet, because there is a packet not being proceeded

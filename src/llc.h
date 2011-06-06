@@ -16,7 +16,7 @@ bool
 llc_tx_next(uint8_t *dest);
 
 void
-llc_rx_next(mac_rx_t *mac_rx);
+llc_rx_mac(mac_rx_t *mac_rx);
 
 void
 llc_init(void);

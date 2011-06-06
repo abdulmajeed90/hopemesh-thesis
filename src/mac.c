@@ -65,7 +65,7 @@ mac_rx(rfm12_rx_t *rx)
     mac_rx.status = MAC_RX_ABORT;
   }
 
-  llc_rx_next(&mac_rx);
+  llc_rx_mac(&mac_rx);
 
   return fin;
 }
