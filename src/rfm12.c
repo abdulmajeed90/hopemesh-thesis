@@ -62,7 +62,7 @@ static bool
 rfm12_tx_cb(void)
 {
   uint8_t data;
-  bool fin = mac_tx_next(&data);
+  bool fin = mac_tx_rfm12(&data);
   rfm12_cmd16(CMD_TX | data);
   return fin;
 }
@@ -77,11 +77,11 @@ rfm12_rx_cb(void)
   if (last_status_fast & CMD8_RSSI) {
     // signal lost (rssi is not set) -> abort reception
     packet.status = RFM12_RX_LOST_SIGNAL;
-    mac_rx(&packet);
+    mac_rx_rfm12(&packet);
     return true;
   } else {
     packet.status = RFM12_RX_OK;
-    return mac_rx(&packet);
+    return mac_rx_rfm12(&packet);
   }
 }
 

@@ -21,7 +21,7 @@ static const uint8_t *p;
 static mac_state_t state;
 
 bool
-mac_tx_next(uint8_t *dest)
+mac_tx_rfm12(uint8_t *dest)
 {
   bool fin = false;
 
@@ -46,7 +46,7 @@ mac_tx_next(uint8_t *dest)
 }
 
 bool
-mac_rx(rfm12_rx_t *rx)
+mac_rx_rfm12(rfm12_rx_t *rx)
 {
   bool fin = true;
 

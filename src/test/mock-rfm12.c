@@ -30,13 +30,13 @@ PT_THREAD(rfm12_tx(void))
   uint8_t cnt = 0;
   bool fin = false;
   while (!fin) {
-    fin = mac_tx_next(&data);
+    fin = mac_tx_rfm12(&data);
     printf("0x%x ", data);
     if (cnt > 3) {
       rfm12_rx_t rx;
       rx.status = RFM12_RX_OK;
       rx.payload = data;
-      mac_rx(&rx);
+      mac_rx_rfm12(&rx);
     }
     cnt++;
   }
