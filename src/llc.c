@@ -103,7 +103,11 @@ llc_rx_frame(packet_t *p)
 
     case (LLC_STATE_LEN_LOW):
       p->len |= (uint16_t) p->nextbyte;
-      p->state = LLC_STATE_DATA;
+      if (p->len > MAX_BUF_LEN) {
+	p->state = LLC_STATE_ABORTED;
+      } else {
+	p->state = LLC_STATE_DATA;
+      }
       break;
 
     case (LLC_STATE_DATA):

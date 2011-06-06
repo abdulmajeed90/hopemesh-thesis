@@ -1,6 +1,12 @@
 CC=gcc
 
-CFLAGS=-Wall -std=gnu99 -I. -g
+CFLAGS=-Wall -Wno-unused-but-set-variable
+CFLAGS+=-std=gnu99 -I. -g
+CFLAGS+=-DLC_INCLUDE='"../lc-addrlabels.h"'
+
+CFLAGS_L3_WRAP=-Wl,--wrap,l3_tx
+CFLAGS_L3_WRAP+=-Wl,--wrap,l3_init
+
 #CFLAGS+=$(shell pkg-config --cflags glib-2.0)
 
 LIBS=
@@ -12,6 +18,7 @@ avr-%.o: ../%.c
 %.o: %.c
 	$(CC) -c $< $(CFLAGS)
 
+#test-tx: CFLAGS+=$(CFLAGS_L3_WRAP)
 test-tx: test-tx.o mock-crc16.o avr-l3.o avr-mac.o avr-llc.o avr-debug.o avr-hamming.o mock-rfm12.o mock-uart.o mock-watchdog.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
