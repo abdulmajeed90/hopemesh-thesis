@@ -76,7 +76,7 @@ llc_tx_frame(packet_t *p)
 }
 
 bool
-llc_tx_next(uint8_t *dest)
+llc_tx_mac(uint8_t *dest)
 {
   if (p_tx.cnt++ & 0x01) {
     *dest = hamming_enc_low(p_tx.nextbyte);

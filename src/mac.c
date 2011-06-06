@@ -31,7 +31,7 @@ mac_tx_next(uint8_t *dest)
       if (!*p) state = DATA;
       break;
     case(DATA):
-      if (!llc_tx_next(dest)) {
+      if (!llc_tx_mac(dest)) {
         state = POSTAMBLE;
         p = postamble;
       }

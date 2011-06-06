@@ -13,7 +13,7 @@ typedef struct {
 } llc_rx_t;
 
 bool
-llc_tx_next(uint8_t *dest);
+llc_tx_mac(uint8_t *dest);
 
 void
 llc_rx_mac(mac_rx_t *mac_rx);
