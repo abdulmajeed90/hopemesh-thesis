@@ -44,6 +44,12 @@ static const uint8_t long_packet [] = {
 
 static char buf[255];
 
+uint8_t rx_interceptor(uint8_t value)
+{
+  return 0xee;
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -54,21 +60,15 @@ main(int argc, char **argv)
 
   l3_tx(text);
   l3_rx(buf);
-  printf("%s", buf);
-  printf("\n");
 
   l3_tx(text2);
   l3_rx(buf);
-  printf("%s", buf);
-  printf("\n");
 
-  l3_tx((char *) bytes);
-  l3_rx(buf);
-  printf("%s", buf);
-
+  rfm12_mock_set_rx_interceptor(&rx_interceptor);
   l3_tx((char *) long_packet);
   l3_rx(buf);
-  printf("%s", buf);
 
-  printf("\n");
+  rfm12_mock_set_rx_interceptor(NULL);
+  l3_tx((char *) bytes);
+  l3_rx(buf);
 }
