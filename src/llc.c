@@ -109,7 +109,9 @@ llc_rx_frame(packet_t *p)
     case (LLC_STATE_DATA):
       pos -= 2;
 
-      if (pos == MAX_BUF_LEN) {
+      if (pos >= MAX_BUF_LEN) {
+	// received more bytes than possible,
+	// therefore abort reception
         p->hasnext = false;
         p->state = LLC_STATE_ABORTED;
       } else {
@@ -148,8 +150,10 @@ llc_rx_reset(packet_t *p)
 void
 llc_rx_next(mac_rx_t *mac_rx)
 {
-  if (needspoll_rx)
+  if (needspoll_rx) {
+    // drop packet, because there is a packet not being proceeded
     return;
+  }
 
   switch (mac_rx->status) {
     case (MAC_RX_OK):
