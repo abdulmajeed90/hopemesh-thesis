@@ -13,13 +13,12 @@
 #define uart_disable_udrie_isr() (UCSRB &= ~(1<<UDRIE))
 #define uart_enable_udrie_isr() (UCSRB |= (1<<UDRIE))
 
-static ringbuf_t *uart_out_buf;
-static ringbuf_t *uart_in_buf;
+static volatile ringbuf_t *uart_out_buf;
+static volatile ringbuf_t *uart_in_buf;
 
 ISR(SIG_USART_RECV)
 {
-  uint8_t rx_byte = UDR;
-  ringbuf_add_err(uart_in_buf, rx_byte, ERR_UART);
+  ringbuf_add_err(uart_in_buf, UDR, ERR_UART);
 }
 
 ISR(SIG_USART_DATA)

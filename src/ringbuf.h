@@ -16,15 +16,15 @@ ringbuf_t *
 ringbuf_new(uint8_t max);
 
 void
-ringbuf_clear(ringbuf_t *buf);
+ringbuf_clear(volatile ringbuf_t *buf);
 
 bool
-ringbuf_add(ringbuf_t *buf, uint8_t what);
+ringbuf_add(volatile ringbuf_t *buf, uint8_t what);
 
 bool
-ringbuf_remove(ringbuf_t *buf, uint8_t *what);
+ringbuf_remove(volatile ringbuf_t *buf, uint8_t *what);
 
 uint8_t
-ringbuf_size(ringbuf_t *buf);
+ringbuf_size(volatile ringbuf_t *buf);
 
 #endif

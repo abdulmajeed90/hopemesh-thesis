@@ -17,8 +17,8 @@ static struct pt pt;
 
 static const uint8_t preamble[] = { FIN, FIN, 0x2d, 0xd4, '\0' };
 static const uint8_t postamble[] = { FIN, FIN, '\0' };
-static const uint8_t *p;
-static mac_state_t state;
+static volatile const uint8_t *p;
+static volatile mac_state_t state;
 
 bool
 mac_tx_rfm12(uint8_t *dest)

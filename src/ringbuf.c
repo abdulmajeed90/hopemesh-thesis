@@ -13,13 +13,13 @@ struct ringbuf_t {
 };
 
 uint8_t
-ringbuf_size (ringbuf_t *buf)
+ringbuf_size(volatile ringbuf_t *buf)
 {
   return buf->size;
 }
 
 ringbuf_t *
-ringbuf_new (uint8_t max)
+ringbuf_new(uint8_t max)
 {
   ringbuf_t *new_buf = malloc (sizeof (ringbuf_t));
   if (new_buf == NULL) {
@@ -38,7 +38,7 @@ ringbuf_new (uint8_t max)
 }
 
 void
-ringbuf_clear (ringbuf_t *buf)
+ringbuf_clear(volatile ringbuf_t *buf)
 {
   buf->size = 0;
   buf->start = buf->buf;
@@ -46,7 +46,7 @@ ringbuf_clear (ringbuf_t *buf)
 }
 
 bool
-ringbuf_add (ringbuf_t *buf, uint8_t what)
+ringbuf_add(volatile ringbuf_t *buf, uint8_t what)
 {
   if (buf->size == buf->max) {
     return false;
@@ -63,7 +63,7 @@ ringbuf_add (ringbuf_t *buf, uint8_t what)
 }
 
 bool
-ringbuf_remove (ringbuf_t *buf, uint8_t *what)
+ringbuf_remove(volatile ringbuf_t *buf, uint8_t *what)
 {
   if (buf->size == 0) {
     return false;

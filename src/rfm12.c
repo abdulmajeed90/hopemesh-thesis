@@ -33,9 +33,9 @@ typedef enum {
   STATE_RX
 } radio_state_t;
 
-static uint8_t last_status_fast;
+static volatile uint8_t last_status_fast;
 static struct pt pt_nirq, pt_tx;
-static struct pt_sem mutex;
+static volatile struct pt_sem mutex;
 static radio_state_t radio_state;
 
 uint8_t
