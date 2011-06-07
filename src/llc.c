@@ -18,7 +18,8 @@ enum state {
   LLC_STATE_DATA,
   LLC_STATE_CRC_LOW,
   LLC_STATE_CRC_HIGH,
-  LLC_STATE_ABORTED
+  LLC_STATE_ABORTED,
+  LLC_STATE_FIN
 };
 
 typedef struct {
@@ -67,10 +68,12 @@ llc_tx_frame(packet_t *p)
       break;
 
     case (LLC_STATE_CRC_LOW):
+      p->state = LLC_STATE_FIN;
       p->nextbyte = (uint8_t) p->crc;
       p->hasnext = false;
       break;
-    case (LLC_STATE_ABORTED):
+
+    default:
       break;
   }
 }
@@ -133,10 +136,11 @@ llc_rx_frame(packet_t *p)
 
     case (LLC_STATE_CRC_LOW):
       p->crc |= (uint16_t) p->nextbyte;
+      p->state = LLC_STATE_FIN;
       p->hasnext = false;
       break;
 
-    case (LLC_STATE_ABORTED):
+    default:
       break;
   }
 }
@@ -170,10 +174,10 @@ llc_rx_mac(mac_rx_t *mac_rx)
       break;
 
     case (MAC_RX_FIN):
-      if (p_rx.state == LLC_STATE_ABORTED) {
-        llc_rx_reset(&p_rx);
-      } else {
+      if (p_rx.state == LLC_STATE_FIN) {
         needspoll_rx = true;
+      } else {
+        llc_rx_reset(&p_rx);
       }
       break;
 
@@ -185,6 +189,8 @@ llc_rx_mac(mac_rx_t *mac_rx)
 bool
 llc_rx(llc_rx_t *dest)
 {
+  bool packet_arrived = false;
+ 
   if (needspoll_rx) {
     uint16_t crc = 0xffff;
     crc = _crc16_update(crc, (uint8_t) (p_rx.len >> 8));
@@ -195,19 +201,17 @@ llc_rx(llc_rx_t *dest)
       crc = _crc16_update(crc, *data++);
     }
 
-    if (crc != p_rx.crc) {
-      return false;
+    if (crc == p_rx.crc) {
+      memcpy(dest->data, p_rx.data, p_rx.len);
+      dest->len = p_rx.len;
+      packet_arrived = true;
     }
-
-    memcpy(dest->data, p_rx.data, p_rx.len);
-    dest->len = p_rx.len;
 
     llc_rx_reset(&p_rx);
     needspoll_rx = false;
-    return true;
   }
 
-  return false;
+  return packet_arrived;
 }
 
 PT_THREAD(llc_tx(uint8_t *data, uint16_t len))

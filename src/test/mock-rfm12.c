@@ -39,6 +39,7 @@ PT_THREAD(rfm12_tx(void))
   uint8_t data;
   uint8_t cnt = 0;
   bool fin = false;
+
   while (!fin) {
     fin = mac_tx_rfm12(&data);
 

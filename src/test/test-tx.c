@@ -11,7 +11,6 @@
 static const char *text = "lorem ipsum";
 static const char *text2 = "test";
 static const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, '\0' };
-
 static const uint8_t long_packet [] = {
   0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,
   0xb,0xc,0xd,0xe,0xf,0x10,0x11,0x12,0x13,0x14,
@@ -43,12 +42,98 @@ static const uint8_t long_packet [] = {
 };
 
 static char buf[255];
+static bool finished = false;
+static struct pt pt_rx, pt_tx;
 
-uint8_t rx_interceptor(uint8_t value)
+/**
+ * Intercepts the "bytes" array so that the postamble sync pattern 0xaa
+ * is scrambled as 0xee.
+ */
+uint8_t interceptor_bytes1(uint8_t value)
 {
-  return 0xee;
+  static uint16_t cnt = 0;
+
+  switch (cnt++) {
+    case(22):
+    case(23):
+      return 0xee;
+      break;
+    default:
+      return value;
+  }
 }
 
+/**
+ * Intercepts the "text" array so that it swaps a few bits in the stream.
+ * It is supposed to decode correctly (hamming forward correction)
+ */
+uint8_t interceptor_text1(uint8_t value)
+{
+  static uint16_t cnt = 0;
+
+  switch (cnt++) {
+    case(4):
+      return 0x17; // was 0x15
+      break;
+    case(12):
+      return 0x3f; // was 0x2f
+      break;
+    default:
+      return value;
+  }
+}
+
+PT_THREAD(tx(void))
+{
+  PT_BEGIN(&pt_tx);
+  PT_WAIT_THREAD(&pt_tx, l3_tx(text2));
+  PT_YIELD(&pt_tx);
+
+  PT_WAIT_THREAD(&pt_tx, l3_tx(text));
+  PT_YIELD(&pt_tx);
+
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) long_packet));
+  PT_YIELD(&pt_tx);
+
+  PT_WAIT_THREAD(&pt_tx, l3_tx(text));
+  PT_YIELD(&pt_tx);
+
+  rfm12_mock_set_rx_interceptor(interceptor_bytes1);
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
+  PT_YIELD(&pt_tx);
+
+  rfm12_mock_set_rx_interceptor(NULL);
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
+  PT_YIELD(&pt_tx);
+
+  rfm12_mock_set_rx_interceptor(interceptor_text1);
+  PT_WAIT_THREAD(&pt_tx, l3_tx(text));
+  PT_YIELD(&pt_tx);
+
+  rfm12_mock_set_rx_interceptor(NULL);
+  PT_WAIT_THREAD(&pt_tx, l3_tx(text2));
+  PT_YIELD(&pt_tx);
+
+  finished = true;
+  PT_END(&pt_tx);
+}
+
+PT_THREAD(rx(void))
+{
+  PT_BEGIN(&pt_rx);
+  PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
+  printf("%s\n", buf);
+  PT_END(&pt_rx);
+}
+
+void
+mainloop(void)
+{
+  while (!finished) {
+    tx();
+    rx();
+  }
+}
 
 int
 main(int argc, char **argv)
@@ -57,18 +142,9 @@ main(int argc, char **argv)
   mac_init();
   llc_init();
   l3_init();
+  PT_INIT(&pt_rx);
+  PT_INIT(&pt_tx);
+  finished = false;
 
-  l3_tx(text);
-  l3_rx(buf);
-
-  l3_tx(text2);
-  l3_rx(buf);
-
-  rfm12_mock_set_rx_interceptor(&rx_interceptor);
-  l3_tx((char *) long_packet);
-  l3_rx(buf);
-
-  rfm12_mock_set_rx_interceptor(NULL);
-  l3_tx((char *) bytes);
-  l3_rx(buf);
+  mainloop();
 }
