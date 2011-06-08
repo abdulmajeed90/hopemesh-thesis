@@ -8,8 +8,8 @@ struct ringbuf_t {
   uint8_t *buf;
   uint8_t *start;
   uint8_t *end;
-  uint8_t max;
-  uint8_t size;
+  uint16_t max;
+  uint16_t size;
 };
 
 uint8_t
@@ -19,7 +19,7 @@ ringbuf_size(volatile ringbuf_t *buf)
 }
 
 ringbuf_t *
-ringbuf_new(uint8_t max)
+ringbuf_new(uint16_t max)
 {
   ringbuf_t *new_buf = malloc (sizeof (ringbuf_t));
   if (new_buf == NULL) {

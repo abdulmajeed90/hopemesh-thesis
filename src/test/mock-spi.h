@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef uint16_t
-(*spi_tx16_t)(const uint16_t data, uint8_t _ss);
+(*spi_tx16_t)(uint16_t ret, const uint16_t data, uint8_t _ss);
 
 typedef uint8_t
 (*spi_tx_t)(const uint8_t data, uint8_t _ss);

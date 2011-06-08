@@ -26,8 +26,8 @@ ISR(SIG_USART_DATA)
   uint8_t c;
   if (ringbuf_remove(uart_out_buf, &c)) {
     UDR = c;
-//  } else {
-//    uart_disable_udrie_isr();
+  } else {
+    uart_disable_udrie_isr();
   }
 }
 

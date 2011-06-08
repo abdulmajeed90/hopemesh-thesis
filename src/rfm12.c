@@ -70,7 +70,7 @@ rfm12_tx_cb(void)
 static bool
 rfm12_rx_cb(void)
 {
-  uint8_t byte = rfm12_cmd16(CMD_RX);
+  uint8_t byte = (uint8_t) rfm12_cmd16(CMD_RX);
   rfm12_rx_t packet;
   packet.payload = byte;
 

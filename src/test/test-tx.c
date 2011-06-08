@@ -5,6 +5,7 @@
 #include "../mac.h"
 #include "../rfm12.h"
 #include "../l3.h"
+#include "../spi.h"
 #include "avr/io.h"
 
 #include "mock-rfm12.h"
@@ -57,17 +58,18 @@ PT_THREAD(tx(void))
   PT_BEGIN(&pt_tx);
 
   spi_mock_set_tx(spi_tx_cb);
-  PT_WAIT_THREAD(&pt_tx, l3_tx(text2));
-
-  finished = true;
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
   PT_END(&pt_tx);
 }
 
 PT_THREAD(rx(void))
 {
   PT_BEGIN(&pt_rx);
+  spi_mock_set_tx(spi_tx_cb);
   PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
   printf("%s\n", buf);
+
+  finished = true;
   PT_END(&pt_rx);
 }
 
@@ -76,6 +78,7 @@ mainloop(void)
 {
     while (!finished) {
     tx();
+    rx();
     vec_interrupt0();
   }
 }
@@ -83,6 +86,7 @@ mainloop(void)
 int
 main(int argc, char **argv)
 {
+  spi_init();
   rfm12_init();
   mac_init();
   llc_init();

@@ -13,7 +13,7 @@
 typedef struct ringbuf_t ringbuf_t;
 
 ringbuf_t *
-ringbuf_new(uint8_t max);
+ringbuf_new(uint16_t max);
 
 void
 ringbuf_clear(volatile ringbuf_t *buf);
