@@ -18,8 +18,9 @@ avr-%.o: ../%.c
 %.o: %.c
 	$(CC) -c $< $(CFLAGS)
 
-#test-tx: CFLAGS+=$(CFLAGS_L3_WRAP)
-test-tx: test-tx.o mock-crc16.o avr-l3.o avr-mac.o avr-llc.o avr-debug.o avr-hamming.o mock-rfm12.o mock-uart.o mock-watchdog.o
+test-tx: test-tx.o \
+		avr-rfm12.o avr-l3.o avr-mac.o avr-llc.o avr-debug.o avr-hamming.o \
+  		mock-uart.o mock-watchdog.o mock-crc16.o mock-io.o mock-interrupt.o mock-spi.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 clean:

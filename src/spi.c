@@ -16,21 +16,6 @@
 
 static ringbuf_t *spi_in_buf;
 static ringbuf_t *spi_out_buf;
-static uint8_t cur_ss;
-
-ISR(SPI_STC_vect)
-{
-  uint8_t data_in, data_out;
-  data_in = SPDR;
-  ringbuf_add (spi_in_buf, data_in);
-
-  if (ringbuf_remove (spi_out_buf, &data_out)) {
-    SPDR = data_out;
-  } else {
-    spi_disable_isr ();
-    spi_ss_high (cur_ss);
-  }
-}
 
 void
 spi_init(void)
@@ -43,36 +28,6 @@ spi_init(void)
 
   spi_in_buf = ringbuf_new (10);
   spi_out_buf = ringbuf_new (10);
-}
-
-bool
-spi_rx(uint8_t *data)
-{
-  return ringbuf_remove (spi_in_buf, data);
-}
-
-bool
-spi_tx16_async(uint16_t data, uint8_t _ss)
-{
-  bool result = false;
-
-  if (spi_is_isr_disabled ()) {
-    // add lower byte into ringbuffer which will be sent when isr is called
-    result = ringbuf_add (spi_out_buf, (uint8_t)data);
-
-    // only if lower byte could be added to the ringbuffer, sent the upper
-    // byte now
-    if (result) {
-      cur_ss = _ss;
-  
-      spi_ss_low (cur_ss);
-      spi_enable_isr ();
-      // send upper byte now
-      SPDR = (uint8_t)(data >> 8);
-    }
-  }
-
-  return result;
 }
 
 uint8_t

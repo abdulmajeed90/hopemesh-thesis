@@ -5,6 +5,7 @@
 #include "../mac.h"
 #include "../rfm12.h"
 #include "../l3.h"
+#include "avr/io.h"
 
 #include "mock-rfm12.h"
 
@@ -98,19 +99,19 @@ PT_THREAD(tx(void))
   PT_WAIT_THREAD(&pt_tx, l3_tx(text));
   PT_YIELD(&pt_tx);
 
-  rfm12_mock_set_rx_interceptor(interceptor_bytes1);
+  // rfm12_mock_set_rx_interceptor(interceptor_bytes1);
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
   PT_YIELD(&pt_tx);
 
-  rfm12_mock_set_rx_interceptor(NULL);
+  // rfm12_mock_set_rx_interceptor(NULL);
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
   PT_YIELD(&pt_tx);
 
-  rfm12_mock_set_rx_interceptor(interceptor_text1);
+  // rfm12_mock_set_rx_interceptor(interceptor_text1);
   PT_WAIT_THREAD(&pt_tx, l3_tx(text));
   PT_YIELD(&pt_tx);
 
-  rfm12_mock_set_rx_interceptor(NULL);
+  // rfm12_mock_set_rx_interceptor(NULL);
   PT_WAIT_THREAD(&pt_tx, l3_tx(text2));
   PT_YIELD(&pt_tx);
 
@@ -146,5 +147,6 @@ main(int argc, char **argv)
   PT_INIT(&pt_tx);
   finished = false;
 
+  vec_interrupt0();
   mainloop();
 }
