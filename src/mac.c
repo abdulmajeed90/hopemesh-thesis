@@ -5,18 +5,21 @@
 #include "pt-sem.h"
 #include "debug.h"
 
-#define FIN 0xaa
+#define SYNC_AFC 0xaa
+#define EOP 0xaa
+#define DUMMY 0xaa
 
 typedef enum {
   PREAMBLE,
   DATA,
-  POSTAMBLE
+  POSTAMBLE,
+  FIN
 } mac_state_t;
 
 static struct pt pt;
 
-static const uint8_t preamble[] = { FIN, FIN, 0x2d, 0xd4, '\0' };
-static const uint8_t postamble[] = { FIN, FIN, '\0' };
+static const uint8_t preamble[] = { SYNC_AFC, SYNC_AFC, 0x2d, 0xd4, '\0' };
+static const uint8_t postamble[] = { EOP, DUMMY, '\0' };
 static volatile const uint8_t *p;
 static volatile mac_state_t state;
 
@@ -38,7 +41,12 @@ mac_tx_rfm12(uint8_t *dest)
       break;
     case(POSTAMBLE):
       *dest = *p++;
-      if (!*p) fin = true;
+      if (!*p) {
+	fin = true;
+	state = FIN;
+      }
+      break;
+    default:
       break;
   }
 
@@ -54,7 +62,7 @@ mac_rx_rfm12(rfm12_rx_t *rx)
   mac_rx.payload = 0;
 
   if (rx->status == RFM12_RX_OK) {
-    if (rx->payload == FIN) {
+    if (rx->payload == EOP) {
       mac_rx.status = MAC_RX_FIN;
     } else {
       mac_rx.status = MAC_RX_OK;
@@ -76,6 +84,7 @@ PT_THREAD(mac_tx(void))
   state = PREAMBLE;
   p = preamble;
   PT_WAIT_THREAD(&pt, rfm12_tx());
+  PT_WAIT_UNTIL(&pt, state == FIN);
   PT_END(&pt);
 }
 

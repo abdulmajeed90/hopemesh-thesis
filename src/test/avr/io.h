@@ -83,8 +83,12 @@
 
 /* Standard I/O registers */
 
-extern uint8_t io8_reg[0xff];
+extern uint8_t io8_reg[256];
+
 #define _SFR_IO8(a) io8_reg[a]
+
+void
+io8_reg_dump(void);
 
 /* 0x3F SREG */
 /* 0x3D..0x3E SP */

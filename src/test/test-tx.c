@@ -8,6 +8,7 @@
 #include "avr/io.h"
 
 #include "mock-rfm12.h"
+#include "mock-spi.h"
 
 static const char *text = "lorem ipsum";
 static const char *text2 = "test";
@@ -46,74 +47,17 @@ static char buf[255];
 static bool finished = false;
 static struct pt pt_rx, pt_tx;
 
-/**
- * Intercepts the "bytes" array so that the postamble sync pattern 0xaa
- * is scrambled as 0xee.
- */
-uint8_t interceptor_bytes1(uint8_t value)
+uint8_t spi_tx_cb(const uint8_t data, uint8_t _ss)
 {
-  static uint16_t cnt = 0;
-
-  switch (cnt++) {
-    case(22):
-    case(23):
-      return 0xee;
-      break;
-    default:
-      return value;
-  }
-}
-
-/**
- * Intercepts the "text" array so that it swaps a few bits in the stream.
- * It is supposed to decode correctly (hamming forward correction)
- */
-uint8_t interceptor_text1(uint8_t value)
-{
-  static uint16_t cnt = 0;
-
-  switch (cnt++) {
-    case(4):
-      return 0x17; // was 0x15
-      break;
-    case(12):
-      return 0x3f; // was 0x2f
-      break;
-    default:
-      return value;
-  }
+  return 0x80;
 }
 
 PT_THREAD(tx(void))
 {
   PT_BEGIN(&pt_tx);
+
+  spi_mock_set_tx(spi_tx_cb);
   PT_WAIT_THREAD(&pt_tx, l3_tx(text2));
-  PT_YIELD(&pt_tx);
-
-  PT_WAIT_THREAD(&pt_tx, l3_tx(text));
-  PT_YIELD(&pt_tx);
-
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) long_packet));
-  PT_YIELD(&pt_tx);
-
-  PT_WAIT_THREAD(&pt_tx, l3_tx(text));
-  PT_YIELD(&pt_tx);
-
-  // rfm12_mock_set_rx_interceptor(interceptor_bytes1);
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
-  PT_YIELD(&pt_tx);
-
-  // rfm12_mock_set_rx_interceptor(NULL);
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
-  PT_YIELD(&pt_tx);
-
-  // rfm12_mock_set_rx_interceptor(interceptor_text1);
-  PT_WAIT_THREAD(&pt_tx, l3_tx(text));
-  PT_YIELD(&pt_tx);
-
-  // rfm12_mock_set_rx_interceptor(NULL);
-  PT_WAIT_THREAD(&pt_tx, l3_tx(text2));
-  PT_YIELD(&pt_tx);
 
   finished = true;
   PT_END(&pt_tx);
@@ -130,9 +74,9 @@ PT_THREAD(rx(void))
 void
 mainloop(void)
 {
-  while (!finished) {
+    while (!finished) {
     tx();
-    rx();
+    vec_interrupt0();
   }
 }
 
@@ -143,10 +87,6 @@ main(int argc, char **argv)
   mac_init();
   llc_init();
   l3_init();
-  PT_INIT(&pt_rx);
-  PT_INIT(&pt_tx);
-  finished = false;
 
-  vec_interrupt0();
   mainloop();
 }
