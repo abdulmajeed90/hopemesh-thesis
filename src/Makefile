@@ -324,6 +324,10 @@ $(OBJDIR)/%.o : %.c
 %.s : %.c
 	$(CC) -S $(ALL_CFLAGS) $< -o $@
 
+# Compile: create preprocessed files
+%.prep : %.c
+	$(CC) -E $(ALL_CFLAGS) $< -o $@
+
 # Assemble: create object files from assembler source files.
 $(OBJDIR)/%.o : %.S
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@

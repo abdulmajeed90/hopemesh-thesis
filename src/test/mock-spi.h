@@ -15,4 +15,7 @@ spi_mock_set_tx16(spi_tx16_t cb);
 void
 spi_mock_set_tx(spi_tx_t cb);
 
+void
+spi_mock_close(void);
+
 #endif

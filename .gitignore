@@ -21,4 +21,5 @@ tags
 *.nlo
 *.toc
 *.bbl
-vim.session
+*.prep
+session.vim

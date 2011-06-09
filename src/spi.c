@@ -14,29 +14,23 @@
 
 #define spi_block_until_sent() while (!(SPSR & (1<<SPIF)))
 
-static ringbuf_t *spi_in_buf;
-static ringbuf_t *spi_out_buf;
-
 void
 spi_init(void)
 {
-  SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1);
-  // SPSR = (1<<SPI2X);
+  SPCR =(1<<SPE) |(1<<MSTR) |(1<<SPR1);
+  // SPSR =(1<<SPI2X);
 
-  spi_ss_high (_SS_RADIO);
-  spi_disable_isr ();
-
-  spi_in_buf = ringbuf_new (10);
-  spi_out_buf = ringbuf_new (10);
+  spi_ss_high(_SS_RADIO);
+  spi_disable_isr();
 }
 
 uint8_t
 spi_tx(const uint8_t data, uint8_t _ss)
 {
-  spi_ss_low (_ss);
+  spi_ss_low(_ss);
   SPDR = data;
-  spi_block_until_sent ();
-  spi_ss_high (_ss);
+  spi_block_until_sent();
+  spi_ss_high(_ss);
 
   return SPDR;
 }
@@ -45,18 +39,18 @@ uint16_t
 spi_tx16(const uint16_t data, uint8_t _ss)
 {
   uint16_t response = 0x0000;
-  spi_ss_low (_ss);
+  spi_ss_low(_ss);
 
   // tx & rx upper bytes
   SPDR = data >> 8;
-  spi_block_until_sent ();
+  spi_block_until_sent();
   response = SPDR << 8;
 
   // tx & rx lower bytes
   SPDR = data;
-  spi_block_until_sent ();
+  spi_block_until_sent();
   response |= SPDR;
 
-  spi_ss_high (_ss);
+  spi_ss_high(_ss);
   return response;
 }

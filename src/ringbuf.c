@@ -38,6 +38,13 @@ ringbuf_new(uint16_t max)
 }
 
 void
+ringbuf_free(volatile ringbuf_t *buf)
+{
+  free((void *) buf->buf);
+  free((void *) buf);
+}
+
+void
 ringbuf_clear(volatile ringbuf_t *buf)
 {
   buf->size = 0;

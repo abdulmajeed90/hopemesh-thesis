@@ -19,6 +19,12 @@ spi_init(void)
 }
 
 void
+spi_mock_close(void)
+{
+  ringbuf_free(rxbuf);
+}
+
+void
 spi_mock_set_tx16(spi_tx16_t cb)
 {
   tx16_cb = cb;
@@ -79,6 +85,7 @@ spi_tx16(const uint16_t data, uint8_t _ss)
   }
 
   printf("spi_tx16(data=0x%x, _ss=%d) = 0x%x\n", data, _ss, ret);
+  fflush(stdout);
   return ret;
 }
 
@@ -92,5 +99,6 @@ spi_tx(const uint8_t data, uint8_t _ss)
   }
 
   printf("spi_tx(data=0x%x, _ss=%d) = 0x%x\n", data, _ss, ret);
+  fflush(stdout);
   return ret;
 }

@@ -198,10 +198,17 @@ struct pt_sem {
  *
  * \hideinitializer
  */
-#define PT_SEM_WAIT(pt, s)	\
+#define PT_SEM_WAIT(pt, s)			\
   do {						\
     PT_WAIT_UNTIL(pt, (s)->count > 0);		\
     --(s)->count;				\
+  } while(0)
+
+#define PT_SEM_WAIT_ATOMIC(pt, s)		\
+  do {						\
+    PT_WAIT_UNTIL_ATOMIC(pt, (s)->count > 0);	\
+    --(s)->count;				\
+    sei();					\
   } while(0)
 
 /**

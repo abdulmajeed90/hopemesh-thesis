@@ -7,6 +7,7 @@
 #include "../l3.h"
 #include "../spi.h"
 #include "avr/io.h"
+#include "avr/interrupt.h"
 
 #include "mock-rfm12.h"
 #include "mock-spi.h"
@@ -46,25 +47,51 @@ static const uint8_t long_packet [] = {
 
 static char buf[255];
 static bool finished = false;
-static struct pt pt;
+static struct pt pt_tx, pt_rx;
 
 uint8_t spi_tx_cb(const uint8_t data, uint8_t _ss)
 {
   return 0x80;
 }
 
-PT_THREAD(rx_tx(void))
+static uint8_t cnt_rx = 0;
+PT_THREAD(rx(void))
 {
-  PT_BEGIN(&pt);
-  PT_WAIT_THREAD(&pt, l3_tx((char *) text2));
-  PT_WAIT_THREAD(&pt, l3_rx(buf));
+  PT_BEGIN(&pt_rx);
+
+  PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
   printf("--- %s\n", buf);
 
-  PT_WAIT_THREAD(&pt, l3_tx((char *) text));
-  PT_WAIT_THREAD(&pt, l3_rx(buf));
-  printf("--- text: %s\n", buf);
-  finished = true;
-  PT_END(&pt);
+  if (++cnt_rx == 3) {
+    finished = true;
+  }
+
+  PT_END(&pt_rx);
+}
+
+static
+bool tx_ready = true;
+PT_THREAD(tx(void))
+{
+  PT_BEGIN(&pt_tx);
+  PT_WAIT_UNTIL(&pt_tx, tx_ready);
+
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text2));
+  PT_YIELD(&pt_tx);
+
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
+  PT_YIELD(&pt_tx);
+
+  // simulate a packet which is WAY to long (>255 bytes)
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) long_packet));
+  PT_YIELD(&pt_tx);
+
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
+  PT_YIELD(&pt_tx);
+
+  spi_mock_set_tx(NULL);
+  tx_ready = false;
+  PT_END(&pt_tx);
 }
 
 void
@@ -73,8 +100,9 @@ mainloop(void)
   spi_mock_set_tx(spi_tx_cb);
 
   while (!finished) {
-    rx_tx();
-    vec_interrupt0();
+    CALL_ISR(SIG_INTERRUPT0);
+    rx();
+    tx();
   }
 }
 
@@ -86,7 +114,10 @@ main(int argc, char **argv)
   mac_init();
   llc_init();
   l3_init();
-  PT_INIT(&pt);
+  PT_INIT(&pt_tx);
+  PT_INIT(&pt_rx);
 
   mainloop();
+
+  spi_mock_close();
 }

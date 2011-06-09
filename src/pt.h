@@ -153,6 +153,16 @@ struct pt {
     }						\
   } while(0)
 
+#define PT_WAIT_UNTIL_ATOMIC(pt, condition)	\
+  do {						\
+    LC_SET((pt)->lc);				\
+    cli();					\
+    if(!(condition)) {				\
+      sei();					\
+      return PT_WAITING;			\
+    }						\
+  } while(0)
+
 /**
  * Block and wait while condition is true.
  *
