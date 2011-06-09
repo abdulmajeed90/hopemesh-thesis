@@ -108,7 +108,7 @@ rfm12_enable_tx(void)
   rfm12_cmd16(PM_TX_ON);
 }
 
-static
+static inline
 PT_THREAD(rfm12_nirq_thread(void))
 {
   PT_BEGIN(&pt_nirq);
@@ -165,9 +165,11 @@ rfm12_init(void)
 PT_THREAD(rfm12_tx(void))
 {
   PT_BEGIN(&pt_tx);
-  PT_SEM_WAIT_ATOMIC(&pt_tx, &mutex);
 
+  PT_SEM_WAIT_ATOMIC(&pt_tx, &mutex);
   rfm12_disable_nirq_isr();
+  sei();
+
   rfm12_enable_tx();
   rfm12_enable_nirq_isr();
 

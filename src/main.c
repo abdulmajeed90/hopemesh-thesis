@@ -30,13 +30,19 @@ ram_init(void) \
              __attribute__ ((naked)) \
              __attribute__ ((section (".init1")));
 
+/**
+ * Enable RAM and setup wait states
+ */
 void
 ram_init(void)
 {
     MCUCR = (1<<SRE) | (1<<SRW10);
 }
 
-static void
+/**
+ * Initializes data direction registers (DDR*)
+ */
+static inline void
 port_init(void)
 {
   DDRSPI |= (1<<DDMOSI) | (1<<DDSCK) | (1<<DD_SS_RADIO);
@@ -44,7 +50,11 @@ port_init(void)
   DDRFFIT &= ~(1<<DDFFIT);
 }
 
-static void
+/**
+ * Causes a bootstrap delay of 500msec. This is needed in order to wait
+ * for the uart chip to bootstrap.
+ */
+static inline void
 bootstrap_delay (void)
 {
   for (uint8_t i=0; i<50; i++) {
@@ -52,8 +62,8 @@ bootstrap_delay (void)
   }
 }
 
-int
-main(void)
+static inline void
+main_init(void)
 {
   bootstrap_delay();
   port_init();
@@ -64,16 +74,20 @@ main(void)
   mac_init();
   llc_init();
   l3_init();
-  // timer_init();
   rx_thread_init();
   watchdog_init();
   sei();
+}
+
+int
+main(void)
+{
+  main_init();
 
   while (true) {
     shell();
     rx_thread();
     uart_tx_thread();
-    // timer_thread();
     watchdog();
   }
 }

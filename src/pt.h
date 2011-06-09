@@ -153,6 +153,13 @@ struct pt {
     }						\
   } while(0)
 
+/**
+ * Defines an atomic wait operation. It is the caller's responsibility to
+ * reenable interrupts using sei() after the block is released!
+ *
+ * This enables the caller to implement further checks after the block
+ * is released. This implies that theese checks are atomic too.
+ */
 #define PT_WAIT_UNTIL_ATOMIC(pt, condition)	\
   do {						\
     LC_SET((pt)->lc);				\

@@ -46,12 +46,32 @@ static const uint8_t long_packet [] = {
 };
 
 static char buf[255];
-static bool finished = false;
+static bool fin_rx = false, fin_tx = false;
 static struct pt pt_tx, pt_rx;
 
-uint8_t spi_tx_cb(const uint8_t data, uint8_t _ss)
+static uint16_t cnt_cb = 0;
+
+static uint8_t
+spi_cb_tx(const uint8_t data, uint8_t _ss)
 {
+  cnt_cb++;
   return 0x80;
+}
+
+uint16_t
+spi_cb_tx16(uint16_t ret, const uint16_t data, uint8_t _ss)
+{
+  cnt_cb++;
+
+  // swap bits, so hamming can correct
+  if (cnt_cb == 1266) {
+    ret = 0xee;
+  }
+  if (cnt_cb == 1270) {
+    ret = 0x1d;
+  }
+
+  return ret;
 }
 
 static uint8_t cnt_rx = 0;
@@ -63,18 +83,16 @@ PT_THREAD(rx(void))
   printf("--- %s\n", buf);
 
   if (++cnt_rx == 3) {
-    finished = true;
+    fin_rx = true;
   }
 
   PT_END(&pt_rx);
 }
 
-static
-bool tx_ready = true;
 PT_THREAD(tx(void))
 {
   PT_BEGIN(&pt_tx);
-  PT_WAIT_UNTIL(&pt_tx, tx_ready);
+  PT_WAIT_UNTIL(&pt_tx, !fin_tx);
 
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text2));
   PT_YIELD(&pt_tx);
@@ -90,16 +108,17 @@ PT_THREAD(tx(void))
   PT_YIELD(&pt_tx);
 
   spi_mock_set_tx(NULL);
-  tx_ready = false;
+  fin_tx = true;
   PT_END(&pt_tx);
 }
 
 void
 mainloop(void)
 {
-  spi_mock_set_tx(spi_tx_cb);
+  spi_mock_set_tx(spi_cb_tx);
+  spi_mock_set_tx16(spi_cb_tx16);
 
-  while (!finished) {
+  while (!fin_rx) {
     CALL_ISR(SIG_INTERRUPT0);
     rx();
     tx();

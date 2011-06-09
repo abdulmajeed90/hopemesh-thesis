@@ -204,11 +204,21 @@ struct pt_sem {
     --(s)->count;				\
   } while(0)
 
+/**
+ * Waits for a mutex in an atomic way. That means that it is guaranteed
+ * that no other ISR is able to change the mutex in the middle of this
+ * operation.
+ *
+ * Note that it is the callers responsibility to reenable global interrupts
+ * using sei()!
+ *
+ * This ensures that further checks and operations after the mutex release
+ * are atomic too.
+ */
 #define PT_SEM_WAIT_ATOMIC(pt, s)		\
   do {						\
     PT_WAIT_UNTIL_ATOMIC(pt, (s)->count > 0);	\
     --(s)->count;				\
-    sei();					\
   } while(0)
 
 /**
