@@ -46,39 +46,34 @@ static const uint8_t long_packet [] = {
 
 static char buf[255];
 static bool finished = false;
-static struct pt pt_rx, pt_tx;
+static struct pt pt;
 
 uint8_t spi_tx_cb(const uint8_t data, uint8_t _ss)
 {
   return 0x80;
 }
 
-PT_THREAD(tx(void))
+PT_THREAD(rx_tx(void))
 {
-  PT_BEGIN(&pt_tx);
+  PT_BEGIN(&pt);
+  PT_WAIT_THREAD(&pt, l3_tx((char *) text2));
+  PT_WAIT_THREAD(&pt, l3_rx(buf));
+  printf("--- %s\n", buf);
 
-  spi_mock_set_tx(spi_tx_cb);
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
-  PT_END(&pt_tx);
-}
-
-PT_THREAD(rx(void))
-{
-  PT_BEGIN(&pt_rx);
-  spi_mock_set_tx(spi_tx_cb);
-  PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
-  printf("%s\n", buf);
-
+  PT_WAIT_THREAD(&pt, l3_tx((char *) text));
+  PT_WAIT_THREAD(&pt, l3_rx(buf));
+  printf("--- text: %s\n", buf);
   finished = true;
-  PT_END(&pt_rx);
+  PT_END(&pt);
 }
 
 void
 mainloop(void)
 {
-    while (!finished) {
-    tx();
-    rx();
+  spi_mock_set_tx(spi_tx_cb);
+
+  while (!finished) {
+    rx_tx();
     vec_interrupt0();
   }
 }
@@ -91,6 +86,7 @@ main(int argc, char **argv)
   mac_init();
   llc_init();
   l3_init();
+  PT_INIT(&pt);
 
   mainloop();
 }
