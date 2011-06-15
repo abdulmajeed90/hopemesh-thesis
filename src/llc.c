@@ -12,7 +12,7 @@
 
 static struct pt pt_tx;
 
-enum llc_state_e {
+typedef enum {
   LLC_STATE_LEN_LOW,
   LLC_STATE_LEN_HIGH,
   LLC_STATE_DATA,
@@ -20,28 +20,28 @@ enum llc_state_e {
   LLC_STATE_CRC_HIGH,
   LLC_STATE_ABORTED,
   LLC_STATE_FIN
-};
+} llc_state_e;
 
-struct llc_packet {
+typedef struct {
   uint16_t len;
   uint8_t *data;
   uint16_t crc;
-};
+} llc_packet_t;
 
-struct llc_state {
+typedef struct {
   uint16_t cnt;
   bool hasnext;
   uint8_t nextbyte;
-  enum llc_state_e state;
-};
+  llc_state_e state;
+} llc_state_t;
 
-static struct llc_packet p_tx, p_rx;
-static struct llc_state state_tx, state_rx;
+static llc_packet_t p_tx, p_rx;
+static llc_state_t state_tx, state_rx;
 static uint8_t buf_rx[MAX_BUF_LEN];
 static bool needspoll_rx;
 
 static inline void
-llc_tx_frame(struct llc_packet *p, struct llc_state *s)
+llc_tx_frame(llc_packet_t *p, llc_state_t *s)
 {
   s->hasnext = true;
   uint16_t pos = (s->cnt >> 1);
@@ -97,7 +97,7 @@ llc_tx_mac(uint8_t *dest)
 }
 
 static inline void
-llc_rx_frame(struct llc_packet *p, struct llc_state *s)
+llc_rx_frame(llc_packet_t *p, llc_state_t *s)
 {
   uint16_t pos = (s->cnt >> 1)-1;
   s->hasnext = true;
@@ -150,7 +150,7 @@ llc_rx_frame(struct llc_packet *p, struct llc_state *s)
 }
 
 static inline void
-llc_rx_reset(struct llc_packet *p, struct llc_state *s)
+llc_rx_reset(llc_packet_t *p, llc_state_t *s)
 {
   s->state = LLC_STATE_LEN_HIGH;
   s->cnt = 0;
