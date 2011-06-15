@@ -13,19 +13,16 @@
 static struct pt pt_tx;
 
 typedef enum {
-  LLC_STATE_LEN_LOW,
-  LLC_STATE_LEN_HIGH,
+  LLC_STATE_HEADER,
   LLC_STATE_DATA,
-  LLC_STATE_CRC_LOW,
-  LLC_STATE_CRC_HIGH,
   LLC_STATE_ABORTED,
   LLC_STATE_FIN
 } llc_state_e;
 
 typedef struct {
   uint16_t len;
-  uint8_t *data;
   uint16_t crc;
+  uint8_t *data;
 } llc_packet_t;
 
 typedef struct {
@@ -45,36 +42,25 @@ llc_tx_frame(llc_packet_t *p, llc_state_t *s)
 {
   s->hasnext = true;
   uint16_t pos = (s->cnt >> 1);
+  uint8_t *pp = NULL;
 
   switch (s->state) {
-    case (LLC_STATE_LEN_HIGH):
-      s->nextbyte = (uint8_t) (p->len >> 8);
-      s->state = LLC_STATE_LEN_LOW;
-      break;
-
-    case (LLC_STATE_LEN_LOW):
-      s->nextbyte = (uint8_t) p->len;
-      s->state = LLC_STATE_DATA;
-      break;
-
-    case (LLC_STATE_DATA):
-      pos -= 1;
-
-      s->nextbyte = *p->data++;
-      if (pos == p->len) {
-        s->state = LLC_STATE_CRC_HIGH;
+    case (LLC_STATE_HEADER):
+      pp = ((uint8_t *) p) + pos;
+      s->nextbyte = *pp;
+      if (pos == 3) {
+        s->state = LLC_STATE_DATA;
       }
       break;
 
-    case (LLC_STATE_CRC_HIGH):
-      s->nextbyte = (uint8_t) (p->crc >> 8);
-      s->state = LLC_STATE_CRC_LOW;
-      break;
+    case (LLC_STATE_DATA):
+      pos -= 3;
 
-    case (LLC_STATE_CRC_LOW):
-      s->state = LLC_STATE_FIN;
-      s->nextbyte = (uint8_t) p->crc;
-      s->hasnext = false;
+      s->nextbyte = *p->data++;
+      if (pos == p->len) {
+	s->state = LLC_STATE_FIN;
+	s->hasnext = false;
+      }
       break;
 
     default:
@@ -86,11 +72,11 @@ bool
 llc_tx_mac(uint8_t *dest)
 {
   if (state_tx.cnt++ & 0x01) {
-    *dest = hamming_enc_low(state_tx.nextbyte);
+    *dest = hamming_enc_high(state_tx.nextbyte);
     return state_tx.hasnext;
   } else {
     llc_tx_frame(&p_tx, &state_tx);
-    *dest = hamming_enc_high(state_tx.nextbyte);
+    *dest = hamming_enc_low(state_tx.nextbyte);
   }
 
   return true;
@@ -100,25 +86,26 @@ static inline void
 llc_rx_frame(llc_packet_t *p, llc_state_t *s)
 {
   uint16_t pos = (s->cnt >> 1)-1;
+  uint8_t *pp = NULL;
   s->hasnext = true;
 
   switch (s->state) {
-    case (LLC_STATE_LEN_HIGH):
-      p->len = (uint16_t) s->nextbyte << 8;
-      s->state = LLC_STATE_LEN_LOW;
-      break;
+    case (LLC_STATE_HEADER):
+      pp = ((uint8_t *) p) + pos;
 
-    case (LLC_STATE_LEN_LOW):
-      p->len |= (uint16_t) s->nextbyte;
-      if (p->len > MAX_BUF_LEN) {
+      if ((pos == 1) && (p->len > MAX_BUF_LEN)) {
 	s->state = LLC_STATE_ABORTED;
-      } else {
+      }
+
+      if (pos == 3) {
 	s->state = LLC_STATE_DATA;
       }
+
+      *pp = s->nextbyte;
       break;
 
     case (LLC_STATE_DATA):
-      pos -= 2;
+      pos -= 3;
 
       if (pos >= MAX_BUF_LEN) {
 	// received more bytes than possible,
@@ -126,22 +113,12 @@ llc_rx_frame(llc_packet_t *p, llc_state_t *s)
         s->hasnext = false;
         s->state = LLC_STATE_ABORTED;
       } else {
-        p->data[pos] = s->nextbyte;
-        if (pos+1 == p->len) {
-          s->state = LLC_STATE_CRC_HIGH;
+        p->data[pos-1] = s->nextbyte;
+        if (pos == p->len) {
+	  s->state = LLC_STATE_FIN;
+	  s->hasnext = false;
         }
       }
-      break;
-
-    case (LLC_STATE_CRC_HIGH):
-      p->crc = (uint16_t) s->nextbyte << 8;
-      s->state = LLC_STATE_CRC_LOW;
-      break;
-
-    case (LLC_STATE_CRC_LOW):
-      p->crc |= (uint16_t) s->nextbyte;
-      s->state = LLC_STATE_FIN;
-      s->hasnext = false;
       break;
 
     default:
@@ -152,7 +129,7 @@ llc_rx_frame(llc_packet_t *p, llc_state_t *s)
 static inline void
 llc_rx_reset(llc_packet_t *p, llc_state_t *s)
 {
-  s->state = LLC_STATE_LEN_HIGH;
+  s->state = LLC_STATE_HEADER;
   s->cnt = 0;
   s->hasnext = false;
   s->nextbyte = 0;
@@ -173,10 +150,10 @@ llc_rx_mac(mac_rx_t *mac_rx)
   switch (mac_rx->status) {
     case (MAC_RX_OK):
       if (state_rx.cnt++ & 0x01) {
-        state_rx.nextbyte |= hamming_dec_low(mac_rx->payload);
+        state_rx.nextbyte |= hamming_dec_high(mac_rx->payload);
         llc_rx_frame(&p_rx, &state_rx);
       } else {
-        state_rx.nextbyte = hamming_dec_high(mac_rx->payload);
+        state_rx.nextbyte = hamming_dec_low(mac_rx->payload);
       }
       break;
 
@@ -226,7 +203,7 @@ PT_THREAD(llc_tx(uint8_t *data, uint16_t len))
   PT_BEGIN(&pt_tx);
 
   state_tx.cnt = 0;
-  state_tx.state = LLC_STATE_LEN_HIGH;
+  state_tx.state = LLC_STATE_HEADER;
   p_tx.data = data;
   p_tx.len = len;
 

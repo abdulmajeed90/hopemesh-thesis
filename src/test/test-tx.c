@@ -75,7 +75,7 @@ PT_THREAD(rx(void))
   PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
   printf("--- %s\n", buf);
 
-  if (++cnt_rx == 2) {
+  if (++cnt_rx == 3) {
     fin_rx = true;
   }
 
@@ -94,6 +94,9 @@ PT_THREAD(tx(void))
   PT_YIELD(&pt_tx);
 
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
+  PT_YIELD(&pt_tx);
+
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
   PT_YIELD(&pt_tx);
 
   fin_tx = true;
