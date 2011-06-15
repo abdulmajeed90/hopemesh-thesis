@@ -18,7 +18,11 @@ typedef enum {
 
 static struct pt pt;
 
-static const uint8_t preamble[] = { SYNC_AFC, SYNC_AFC, 0x2d, 0xd4, '\0' };
+static const uint8_t preamble[] = {
+  SYNC_AFC, SYNC_AFC, 
+  SYNC_AFC, SYNC_AFC, 
+  0x2d, 0xd4, '\0' };
+
 static const uint8_t postamble[] = { EOP, DUMMY, '\0' };
 static volatile const uint8_t *p;
 static volatile mac_state_t state;

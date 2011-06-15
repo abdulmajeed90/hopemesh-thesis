@@ -38,7 +38,9 @@ TARGET = hopemesh
 OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c util.c rfm12.c mac.c llc.c l3.c hamming.c debug.c rxthread.c
+SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c util.c rfm12.c \
+      mac.c llc.c l3.c hamming.c debug.c rxthread.c timer.c originator.c \
+      config.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
@@ -356,10 +358,10 @@ clean_list :
 
 # call minicom
 com0:
-	minicom -o -c on -b $(COM_BAUDRATE) -D $(COM_PORT0)
+	picocom --echo -l -b $(COM_BAUDRATE) $(COM_PORT0)
 
 com1:
-	minicom -o -c on -b $(COM_BAUDRATE) -D $(COM_PORT1)
+	picocom --echo -l -b $(COM_BAUDRATE) $(COM_PORT1)
 
 test:
 	cd test && make
@@ -377,4 +379,5 @@ $(shell mkdir $(OBJDIR) 2>/dev/null)
 .PHONY : all begin finish end sizebefore sizeafter gccversion \
 build elf hex eep lss sym coff extcoff \
 clean clean_list program debug gdb-config \
-test test-clean
+test test-clean \
+com0 com1

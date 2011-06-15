@@ -61,7 +61,12 @@ PT_THREAD(shell_watchdog)(void)
   out_ptr = out_buf;
   PT_WAIT_UNTIL(&pt_cmd, 
       uart_tx_str(&out_ptr));
+
+  out_ptr = debug_getstr();
+  PT_WAIT_UNTIL(&pt_cmd, 
+      uart_tx_str(&out_ptr));
   out_ptr = NULL;
+  debug_strclear();
 
   PT_END(&pt_cmd);
 }
@@ -137,6 +142,7 @@ shell_data_available(void)
         cmd_fn_instance = shell_data_parse();
         result = true;
         break;
+      case 0x7f:
       case '\b':
         // backslash pressed
         if (cmd != cmd_buf) {
@@ -160,9 +166,6 @@ PT_THREAD(shell(void))
 {
   PT_BEGIN(&pt_main);
 
-  out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_main, uart_tx_pgmstr(pgm_bootmsg, out_buf, &out_ptr));
-  PT_WAIT_THREAD(&pt_main, shell_watchdog());
   out_ptr = NULL;
   PT_WAIT_UNTIL(&pt_main, uart_tx_pgmstr(pgm_prompt, out_buf, &out_ptr));
 

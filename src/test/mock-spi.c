@@ -9,6 +9,7 @@
 static spi_tx16_t tx16_cb;
 static spi_tx_t tx_cb;
 static uint16_t sync = 0;
+static uint16_t spicnt = 0;
 
 static volatile ringbuf_t *rxbuf;
 
@@ -74,9 +75,17 @@ spi_mock_rx(uint16_t data)
   return 0x0000;
 }
 
+static inline void
+spi_cnt(void)
+{
+  printf("%d\n", spicnt);
+  spicnt++;
+}
+
 uint16_t
 spi_tx16(const uint16_t data, uint8_t _ss)
 {
+  spi_cnt();
   uint16_t ret = 0x0000;
   ret = spi_mock_rx(data);
 
@@ -92,6 +101,7 @@ spi_tx16(const uint16_t data, uint8_t _ss)
 uint8_t
 spi_tx(const uint8_t data, uint8_t _ss)
 {
+  spi_cnt();
   uint8_t ret = 0x00;
   
   if (tx_cb != NULL) {

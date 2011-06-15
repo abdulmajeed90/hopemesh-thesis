@@ -32,4 +32,13 @@
 #define RFM12_INT_NIRQ INT0
 #define SIG_RFM12_NIRQ SIG_INTERRUPT0
 
+#define MAX_SETTINGS 1
+#define SETTING_NODE_ADDR 0
+
+uint16_t
+config_get(uint8_t index);
+
+void
+config_init(void);
+
 #endif

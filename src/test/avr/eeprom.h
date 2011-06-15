@@ -382,28 +382,10 @@
 # define _EEPROM_SUFFIX		_UNKNOWN
 #endif
 
-#define _EEPROM_CONCAT1(s1, s2)     s1 ## s2
-#define _EEPROM_CONCAT2(s1, s2)     _EEPROM_CONCAT1 (s1, s2)
-
-#define eeprom_read_byte      _EEPROM_CONCAT2 (__eerd_byte, _EEPROM_SUFFIX)
-#define eeprom_read_word      _EEPROM_CONCAT2 (__eerd_word, _EEPROM_SUFFIX)
-#define eeprom_read_dword     _EEPROM_CONCAT2 (__eerd_dword, _EEPROM_SUFFIX)
-#define eeprom_read_float     _EEPROM_CONCAT2 (__eerd_float, _EEPROM_SUFFIX)
-#define eeprom_read_block     _EEPROM_CONCAT2 (__eerd_block, _EEPROM_SUFFIX)
-
-#define eeprom_write_byte     _EEPROM_CONCAT2 (__eewr_byte, _EEPROM_SUFFIX)
-#define eeprom_write_word     _EEPROM_CONCAT2 (__eewr_word, _EEPROM_SUFFIX)
-#define eeprom_write_dword    _EEPROM_CONCAT2 (__eewr_dword, _EEPROM_SUFFIX)
-#define eeprom_write_float    _EEPROM_CONCAT2 (__eewr_float, _EEPROM_SUFFIX)
-#define eeprom_write_block    _EEPROM_CONCAT2 (__eewr_block, _EEPROM_SUFFIX)
-
-#define eeprom_update_byte    _EEPROM_CONCAT2 (__eeupd_byte, _EEPROM_SUFFIX)
-#define eeprom_update_word    _EEPROM_CONCAT2 (__eeupd_word, _EEPROM_SUFFIX)
-#define eeprom_update_dword   _EEPROM_CONCAT2 (__eeupd_dword, _EEPROM_SUFFIX)
-#define eeprom_update_float   _EEPROM_CONCAT2 (__eeupd_float, _EEPROM_SUFFIX)
-#define eeprom_update_block   _EEPROM_CONCAT2 (__eeupd_block, _EEPROM_SUFFIX)
-
 #endif	/* !__DOXYGEN__ */
+
+#define eeprom_write_word(addr, value)     *(addr) = value
+#define eeprom_read_word(addr)     *(addr)
 
 #ifndef	__ASSEMBLER__
 
@@ -464,7 +446,7 @@ extern "C" {
     \ingroup avr_eeprom
     Attribute expression causing a variable to be allocated within the
     .eeprom section.	*/
-#define EEMEM __attribute__((section(".eeprom")))
+#define EEMEM 
 
 /** \def eeprom_is_ready
     \ingroup avr_eeprom
@@ -499,7 +481,7 @@ uint8_t eeprom_read_byte (const uint8_t *__p) __ATTR_PURE__;
 /** \ingroup avr_eeprom
     Read one 16-bit word (little endian) from EEPROM address \a __p.
  */
-uint16_t eeprom_read_word (const uint16_t *__p) __ATTR_PURE__;
+// uint16_t eeprom_read_word (const uint16_t *__p) __ATTR_PURE__;
 
 /** \ingroup avr_eeprom
     Read one 32-bit double word (little endian) from EEPROM address \a __p.
@@ -526,7 +508,7 @@ void eeprom_write_byte (uint8_t *__p, uint8_t __value);
 /** \ingroup avr_eeprom
     Write a word \a __value to EEPROM address \a __p.
  */
-void eeprom_write_word (uint16_t *__p, uint16_t __value);
+// void eeprom_write_word (uint16_t *__p, uint16_t __value);
 
 /** \ingroup avr_eeprom
     Write a 32-bit double word \a __value to EEPROM address \a __p.

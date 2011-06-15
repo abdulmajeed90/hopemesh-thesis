@@ -4,6 +4,11 @@
 #include "llc.h"
 #include "debug.h"
 
+uint16_t address;
+
+#define TTL 50
+#define VERSION 1
+
 static struct pt pt_tx, pt_rx;
 static llc_rx_t p_rx;
 

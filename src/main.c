@@ -14,6 +14,7 @@
 #include "llc.h"
 #include "l3.h"
 #include "rxthread.h"
+#include "timer.h"
 
 #define DDRSPI DDRB
 #define DDMOSI DDB5
@@ -66,6 +67,7 @@ static inline void
 main_init(void)
 {
   bootstrap_delay();
+  config_init();
   port_init();
   uart_init();
   spi_init();
@@ -76,6 +78,7 @@ main_init(void)
   l3_init();
   rx_thread_init();
   watchdog_init();
+  timer_init();
   sei();
 }
 
@@ -89,5 +92,6 @@ main(void)
     rx_thread();
     uart_tx_thread();
     watchdog();
+    timer_thread();
   }
 }

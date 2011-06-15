@@ -13,7 +13,7 @@
 #include "mock-spi.h"
 
 static const char *text = "lorem ipsum";
-static const char *text2 = "test";
+static const char *text2 = "s1234567890";
 static const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, '\0' };
 static const uint8_t long_packet [] = {
   0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,
@@ -55,21 +55,14 @@ static uint8_t
 spi_cb_tx(const uint8_t data, uint8_t _ss)
 {
   cnt_cb++;
-  return 0x80;
+
+  return 0x81;
 }
 
 uint16_t
 spi_cb_tx16(uint16_t ret, const uint16_t data, uint8_t _ss)
 {
   cnt_cb++;
-
-  // swap bits, so hamming can correct
-  if (cnt_cb == 1266) {
-    ret = 0xee;
-  }
-  if (cnt_cb == 1270) {
-    ret = 0x1d;
-  }
 
   return ret;
 }
@@ -82,7 +75,7 @@ PT_THREAD(rx(void))
   PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
   printf("--- %s\n", buf);
 
-  if (++cnt_rx == 3) {
+  if (++cnt_rx == 2) {
     fin_rx = true;
   }
 
@@ -97,17 +90,12 @@ PT_THREAD(tx(void))
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text2));
   PT_YIELD(&pt_tx);
 
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
-  PT_YIELD(&pt_tx);
-
-  // simulate a packet which is WAY to long (>255 bytes)
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) long_packet));
   PT_YIELD(&pt_tx);
 
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
+  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
   PT_YIELD(&pt_tx);
 
-  spi_mock_set_tx(NULL);
   fin_tx = true;
   PT_END(&pt_tx);
 }

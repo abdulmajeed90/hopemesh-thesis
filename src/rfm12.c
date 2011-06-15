@@ -74,7 +74,8 @@ rfm12_rx_cb(void)
   rfm12_rx_t packet;
   packet.payload = byte;
 
-  if (last_status_fast & CMD8_RSSI) {
+  if (!(last_status_fast & CMD8_RSSI)) {
+    debug_cnt();
     // signal lost (rssi is not set) -> abort reception
     packet.status = RFM12_RX_LOST_SIGNAL;
     mac_rx_rfm12(&packet);
@@ -112,7 +113,6 @@ static inline
 PT_THREAD(rfm12_nirq_thread(void))
 {
   PT_BEGIN(&pt_nirq);
-  PT_WAIT_UNTIL(&pt_nirq, rfm12_is_fifo_ready());
 
   switch(radio_state) {
     case STATE_TX:
@@ -133,7 +133,9 @@ PT_THREAD(rfm12_nirq_thread(void))
 
 ISR(SIG_RFM12_NIRQ)
 {
-  rfm12_nirq_thread();
+  if (rfm12_is_fifo_ready()) {
+    rfm12_nirq_thread();
+  }
 }
 
 void
