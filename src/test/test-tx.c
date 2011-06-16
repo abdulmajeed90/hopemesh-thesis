@@ -6,6 +6,7 @@
 #include "../rfm12.h"
 #include "../l3.h"
 #include "../spi.h"
+#include "../config.h"
 #include "avr/io.h"
 #include "avr/interrupt.h"
 
@@ -56,7 +57,7 @@ spi_cb_tx(const uint8_t data, uint8_t _ss)
 {
   cnt_cb++;
 
-  return 0x81;
+  return 0x80;
 }
 
 uint16_t
@@ -124,6 +125,7 @@ main(int argc, char **argv)
   mac_init();
   llc_init();
   l3_init();
+  config_init();
   PT_INIT(&pt_tx);
   PT_INIT(&pt_rx);
 

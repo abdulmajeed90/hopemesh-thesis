@@ -32,8 +32,11 @@
 #define RFM12_INT_NIRQ INT0
 #define SIG_RFM12_NIRQ SIG_INTERRUPT0
 
-#define MAX_SETTINGS 1
-#define SETTING_NODE_ADDR 0
+#define MAX_CONFIGS 2
+#define CONFIG_NODE_ADDR 0
+#define CONFIG_FLAGS 1
+
+#define CONFIG_FLAG_RSSI_DETECTION 0
 
 uint16_t
 config_get(uint8_t index);

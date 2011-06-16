@@ -9,7 +9,7 @@ struct ogm_packet *
 ogm_create_new(void)
 {
   struct ogm_packet *p = malloc(sizeof(struct ogm_packet));
-  p->addr = config_get(SETTING_NODE_ADDR);
+  p->addr = config_get(CONFIG_NODE_ADDR);
   p->seqno = 0;
   p->ttl = MAX_TTL;
   return p;

@@ -74,8 +74,12 @@ rfm12_rx_cb(void)
   rfm12_rx_t packet;
   packet.payload = byte;
 
-  if (!(last_status_fast & CMD8_RSSI)) {
-    debug_cnt();
+  bool _rssi = config_get(CONFIG_FLAGS) & (1<<CONFIG_FLAG_RSSI_DETECTION);
+  if (_rssi) {
+    _rssi = !(last_status_fast & CMD8_RSSI);
+  }
+
+  if (_rssi) {
     // signal lost (rssi is not set) -> abort reception
     packet.status = RFM12_RX_LOST_SIGNAL;
     mac_rx_rfm12(&packet);
