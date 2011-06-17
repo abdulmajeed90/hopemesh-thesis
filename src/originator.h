@@ -5,17 +5,17 @@
 
 #define OGM_FLAG_DIRECT 0
 
-struct ogm_packet {
+typedef struct {
   uint8_t flags;
   uint8_t ttl;
   uint16_t seqno;
   uint16_t addr;
-};
+} ogm_packet_t;
 
-struct ogm_packet *
+ogm_packet_t *
 ogm_create_new(void);
 
 void
-ogm_free(struct ogm_packet *p);
+ogm_free(ogm_packet_t *p);
 
 #endif

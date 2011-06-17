@@ -5,10 +5,10 @@
 
 #define MAX_TTL 50
 
-struct ogm_packet *
+ogm_packet_t *
 ogm_create_new(void)
 {
-  struct ogm_packet *p = malloc(sizeof(struct ogm_packet));
+  ogm_packet_t *p = malloc(sizeof(ogm_packet_t));
   p->addr = config_get(CONFIG_NODE_ADDR);
   p->seqno = 0;
   p->ttl = MAX_TTL;
@@ -16,7 +16,7 @@ ogm_create_new(void)
 }
 
 void
-ogm_free(struct ogm_packet *p)
+ogm_free(ogm_packet_t *p)
 {
   free(p);
 }
