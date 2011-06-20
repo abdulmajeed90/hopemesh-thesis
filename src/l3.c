@@ -3,6 +3,8 @@
 #include "l3.h"
 #include "llc.h"
 #include "debug.h"
+#include "originator.h"
+#include "timer.h"
 
 uint16_t address;
 
@@ -27,9 +29,17 @@ PT_THREAD(l3_tx(const char *data))
   PT_END(&pt_tx);
 }
 
+
+void
+ogm_timer_cb(void)
+{
+}
+
 void
 l3_init(void)
 {
   PT_INIT(&pt_tx);
   PT_INIT(&pt_rx);
+  ogm_init();
+  timer_register_cb(ogm_timer_cb);
 }

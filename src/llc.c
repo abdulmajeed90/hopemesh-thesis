@@ -24,7 +24,7 @@ typedef struct {
   uint16_t crc;
 } llc_packet_header_t;
 
-#define llc_packet_header_len_size (sizeof(uint16_t))
+#define LLC_PACKET_HEADER_LEN_SIZE (sizeof(uint16_t))
 
 typedef struct {
   llc_packet_header_t header;
@@ -99,7 +99,7 @@ llc_rx_frame(llc_packet_t *p, llc_state_t *s)
     case (LLC_STATE_HEADER):
       pp = ((uint8_t *) p) + pos;
 
-      if ((pos == llc_packet_header_len_size - 1) &&
+      if ((pos == LLC_PACKET_HEADER_LEN_SIZE - 1) &&
 	  (p->header.len > MAX_BUF_LEN)) {
 	s->state = LLC_STATE_ABORTED;
       }

@@ -10,7 +10,6 @@
 #include "avr/io.h"
 #include "avr/interrupt.h"
 
-#include "mock-rfm12.h"
 #include "mock-spi.h"
 
 static const char *text = "lorem ipsum";
@@ -112,6 +111,7 @@ mainloop(void)
 
   while (!fin_rx) {
     CALL_ISR(SIG_INTERRUPT0);
+    CALL_ISR(SIG_OVERFLOW0);
     rx();
     tx();
   }
@@ -120,6 +120,7 @@ mainloop(void)
 int
 main(int argc, char **argv)
 {
+  timer_init();
   spi_init();
   rfm12_init();
   mac_init();

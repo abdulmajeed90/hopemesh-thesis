@@ -17,7 +17,7 @@ static bool second_notify;
 static struct pt pt_timer;
 static timer_cb cb_list[MAX_TIMER_CB];
 
-ISR (SIG_OVERFLOW0)
+ISR(SIG_OVERFLOW0)
 {
   timer_cnt++;
 
@@ -28,7 +28,7 @@ ISR (SIG_OVERFLOW0)
 }
 
 static inline bool
-one_second_elapsed (void)
+one_second_elapsed(void)
 {
   if (second_notify) {
     second_notify = false;
@@ -61,6 +61,12 @@ PT_THREAD(timer_thread(void))
 
   PT_WAIT_UNTIL(&pt_timer,
     one_second_elapsed());
+
+  timer_cb cb = cb_list[0];
+  while (cb != NULL) {
+    cb();
+    cb++;
+  }
 
   PT_END(&pt_timer);
 }

@@ -78,7 +78,7 @@ spi_mock_rx(uint16_t data)
 static inline void
 spi_cnt(void)
 {
-  printf("%d\n", spicnt);
+//  printf("%d\n", spicnt);
   spicnt++;
 }
 

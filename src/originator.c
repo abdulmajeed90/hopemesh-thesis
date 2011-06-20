@@ -20,3 +20,8 @@ ogm_free(ogm_packet_t *p)
 {
   free(p);
 }
+
+void
+ogm_init(void)
+{
+}

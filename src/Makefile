@@ -40,7 +40,7 @@ OBJDIR = .
 # List C source files here. (C dependencies are automatically generated.)
 SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c util.c rfm12.c \
       mac.c llc.c l3.c hamming.c debug.c rxthread.c timer.c originator.c \
-      config.c
+      config.c timer.c
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
