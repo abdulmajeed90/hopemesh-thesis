@@ -7,15 +7,16 @@
 #include "pt.h"
 #include "mac.h"
 
-typedef struct {
-  uint16_t len;
-  uint8_t *data;
-} llc_rx_t;
-
 typedef enum {
   UNICAST,
   BROADCAST
 } llc_packet_type_t;
+
+typedef struct {
+  llc_packet_type_t type;
+  uint16_t len;
+  uint8_t *data;
+} llc_packet_t;
 
 bool
 llc_tx_mac(uint8_t *dest);
@@ -27,8 +28,8 @@ void
 llc_init(void);
 
 bool
-llc_rx(llc_rx_t *dest);
+llc_rx(llc_packet_t *dest);
 
-PT_THREAD(llc_tx(uint8_t *data, uint16_t len));
+PT_THREAD(llc_tx(llc_packet_t packet));
 
 #endif

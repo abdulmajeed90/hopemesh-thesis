@@ -12,7 +12,7 @@ uint16_t address;
 #define VERSION 1
 
 static struct pt pt_tx, pt_rx;
-static llc_rx_t p_rx;
+static llc_packet_t p_rx, p_tx;
 
 PT_THREAD(l3_rx(char *dest))
 {
@@ -25,10 +25,12 @@ PT_THREAD(l3_rx(char *dest))
 PT_THREAD(l3_tx(const char *data))
 {
   PT_BEGIN(&pt_tx);
-  PT_WAIT_THREAD(&pt_tx, llc_tx((uint8_t *) data, strlen(data)+1));
+  p_tx.data = (uint8_t *) data;
+  p_tx.len = strlen(data) + 1;
+  p_tx.type = BROADCAST;
+  PT_WAIT_THREAD(&pt_tx, llc_tx(p_tx));
   PT_END(&pt_tx);
 }
-
 
 void
 ogm_timer_cb(void)

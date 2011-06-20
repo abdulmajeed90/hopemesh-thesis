@@ -175,7 +175,7 @@ llc_rx_mac(mac_rx_t *mac_rx)
 }
 
 bool
-llc_rx(llc_rx_t *dest)
+llc_rx(llc_packet_t *dest)
 {
   bool packet_arrived = false;
  
@@ -192,6 +192,7 @@ llc_rx(llc_rx_t *dest)
     if (crc == state_rx.header.crc) {
       memcpy(dest->data, state_rx.data, state_rx.header.len);
       dest->len = state_rx.header.len;
+      dest->type = state_rx.header.type;
       packet_arrived = true;
     }
 
@@ -202,20 +203,21 @@ llc_rx(llc_rx_t *dest)
   return packet_arrived;
 }
 
-PT_THREAD(llc_tx(uint8_t *data, uint16_t len))
+PT_THREAD(llc_tx(llc_packet_t packet))
 {
   PT_BEGIN(&pt_tx);
 
   state_tx.cnt = 0;
   state_tx.state = LLC_STATE_HEADER;
-  state_tx.data = data;
-  state_tx.header.len = len;
+  state_tx.data = packet.data;
+  state_tx.header.len = packet.len;
+  state_tx.header.type = packet.type;
 
   state_tx.header.crc = 0xffff;
-  state_tx.header.crc = _crc16_update(state_tx.header.crc, (uint8_t) (len >> 8));
-  state_tx.header.crc = _crc16_update(state_tx.header.crc, (uint8_t) len);
-  for (uint16_t i = 0; i<len; i++) {
-      state_tx.header.crc = _crc16_update(state_tx.header.crc, *data++);
+  state_tx.header.crc = _crc16_update(state_tx.header.crc, (uint8_t) (packet.len >> 8));
+  state_tx.header.crc = _crc16_update(state_tx.header.crc, (uint8_t) packet.len);
+  for (uint16_t i = 0; i < packet.len; i++) {
+      state_tx.header.crc = _crc16_update(state_tx.header.crc, *packet.data++);
   }
 
   PT_WAIT_THREAD(&pt_tx, mac_tx());
