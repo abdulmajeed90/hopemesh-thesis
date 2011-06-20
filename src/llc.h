@@ -12,6 +12,11 @@ typedef struct {
   uint8_t *data;
 } llc_rx_t;
 
+typedef enum {
+  UNICAST,
+  BROADCAST
+} llc_packet_type_t;
+
 bool
 llc_tx_mac(uint8_t *dest);
 
