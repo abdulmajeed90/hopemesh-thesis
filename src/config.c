@@ -3,11 +3,16 @@
 
 static uint16_t int_settings[MAX_CONFIGS];
 
+#ifndef NODE_ADDR
+#define NODE_ADDR 0x0000
+#endif
+
 static uint16_t EEMEM int_settings_eemem[MAX_CONFIGS] = {
   // CONFIG_NODE_ADDR
-  1,
+  NODE_ADDR,
   // CONFIG_FLAGS
-  ~(1 << CONFIG_FLAG_RSSI_DETECTION)
+  ~(1 << CONFIG_FLAG_RSSI_DETECTION) |
+   (1 << CONFIG_FLAG_COLLISION_DETECTION)
 };
 
 uint16_t

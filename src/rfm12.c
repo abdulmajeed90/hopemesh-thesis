@@ -76,7 +76,7 @@ rfm12_rx_cb(void)
 
   bool _rssi = config_get(CONFIG_FLAGS) & (1<<CONFIG_FLAG_RSSI_DETECTION);
   if (_rssi) {
-    _rssi = !(last_status_fast & CMD8_RSSI);
+    _rssi = !rfm12_is_carrier_free();
   }
 
   if (_rssi) {
@@ -88,6 +88,12 @@ rfm12_rx_cb(void)
     packet.status = RFM12_RX_OK;
     return mac_rx_rfm12(&packet);
   }
+}
+
+bool
+rfm12_is_carrier_free(void)
+{
+  return (rfm12_status_fast() & CMD8_RSSI);
 }
 
 static bool

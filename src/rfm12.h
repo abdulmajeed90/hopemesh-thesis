@@ -1,6 +1,7 @@
 #ifndef __RFM12_H__
 #define __RFM12_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "pt.h"
 
@@ -12,6 +13,9 @@ rfm12_status(void);
 
 uint8_t
 rfm12_status_fast(void);
+
+bool
+rfm12_is_carrier_free(void);
 
 PT_THREAD(rfm12_tx(void));
 

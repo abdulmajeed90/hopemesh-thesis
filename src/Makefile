@@ -76,9 +76,13 @@ EXTRAINCDIRS =
 #     gnu99 = c99 plus GCC extensions
 CSTANDARD = -std=gnu99
 
+# preconfigured node address
+NODE_ADDR=0x0001
+
 # Place -D or -U options here for C sources
 CDEFS = -DF_CPU=$(F_CPU)UL
 CDEFS += -DLC_INCLUDE='"lc-addrlabels.h"'
+CDEFS += -DNODE_ADDR=$(NODE_ADDR)
 
 # Place -D or -U options here for ASM sources
 ADEFS = -DF_CPU=$(F_CPU)
@@ -327,7 +331,7 @@ $(OBJDIR)/%.o : %.c
 	$(CC) -S $(ALL_CFLAGS) $< -o $@
 
 # Compile: create preprocessed files
-%.prep : %.c
+%-prep.c : %.c
 	$(CC) -E $(ALL_CFLAGS) $< -o $@
 
 # Assemble: create object files from assembler source files.

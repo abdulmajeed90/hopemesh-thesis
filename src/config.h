@@ -37,6 +37,7 @@
 #define CONFIG_FLAGS 1
 
 #define CONFIG_FLAG_RSSI_DETECTION 0
+#define CONFIG_FLAG_COLLISION_DETECTION 1
 
 uint16_t
 config_get(uint8_t index);
