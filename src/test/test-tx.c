@@ -8,6 +8,7 @@
 #include "../spi.h"
 #include "../config.h"
 #include "../timer.h"
+#include "../clock.h"
 #include "avr/io.h"
 #include "avr/interrupt.h"
 
@@ -108,14 +109,24 @@ PT_THREAD(tx(void))
 }
 
 void
+clock(void)
+{
+  printf("time: %d\n", clock_get_time());
+}
+
+void
 mainloop(void)
 {
   spi_mock_set_tx(spi_cb_tx);
   spi_mock_set_tx16(spi_cb_tx16);
 
   while (!fin_rx) {
+    for (uint8_t i=0; i<10; i++) {
+      CALL_ISR(SIG_OVERFLOW0);
+    }
     CALL_ISR(SIG_INTERRUPT0);
-    CALL_ISR(SIG_OVERFLOW0);
+    timer_thread();
+
     rx();
     tx();
   }
@@ -126,6 +137,8 @@ main(int argc, char **argv)
 {
   timer_init();
   spi_init();
+  clock_init();
+
   rfm12_init();
   mac_init();
   llc_init();

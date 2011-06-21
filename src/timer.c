@@ -10,12 +10,12 @@
 #include "error.h"
 #include "watchdog.h"
 
-#define MAX_TIMER_CB 10
+#define MAX_TIMER_CB 5
 
 static uint8_t timer_cnt;
 static bool second_notify;
 static struct pt pt_timer;
-static timer_cb cb_list[MAX_TIMER_CB];
+static timer_cb cb_list[MAX_TIMER_CB+1];
 
 ISR(SIG_OVERFLOW0)
 {
@@ -43,11 +43,9 @@ timer_register_cb(timer_cb cb)
 {
   uint8_t i = 0;
 
-  while (cb_list[i] != NULL) {
-    i++;
-  }
+  while (cb_list[i++] != NULL) { }
 
-  if (i+1 == MAX_TIMER_CB) {
+  if (i == MAX_TIMER_CB) {
     watchdog_abort(ERR_TIMER, __LINE__);
   }
 
@@ -62,10 +60,9 @@ PT_THREAD(timer_thread(void))
   PT_WAIT_UNTIL(&pt_timer,
     one_second_elapsed());
 
-  timer_cb cb = cb_list[0];
-  while (cb != NULL) {
-    cb();
-    cb++;
+  uint8_t i = 0;
+  while (cb_list[i] != NULL) {
+    cb_list[i++]();
   }
 
   PT_END(&pt_timer);

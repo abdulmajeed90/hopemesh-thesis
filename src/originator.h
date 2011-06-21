@@ -2,15 +2,9 @@
 #define __ORIGINATOR_H__
 
 #include <stdint.h>
+#include "net.h"
 
 #define OGM_FLAG_DIRECT 0
-
-typedef struct {
-  uint8_t flags;
-  uint8_t ttl;
-  uint16_t seqno;
-  uint16_t addr;
-} ogm_packet_t;
 
 ogm_packet_t *
 ogm_create_new(void);

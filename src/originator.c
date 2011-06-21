@@ -9,7 +9,8 @@ ogm_packet_t *
 ogm_create_new(void)
 {
   ogm_packet_t *p = malloc(sizeof(ogm_packet_t));
-  p->addr = config_get(CONFIG_NODE_ADDR);
+  p->originator_addr = config_get(CONFIG_NODE_ADDR);
+  p->sender_addr = 0x0000;
   p->seqno = 0;
   p->ttl = MAX_TTL;
   return p;

@@ -4,7 +4,7 @@
 static uint16_t int_settings[MAX_CONFIGS];
 
 #ifndef NODE_ADDR
-#define NODE_ADDR 0xaaaa
+#define NODE_ADDR 0x0000
 #endif
 
 static uint16_t EEMEM int_settings_eemem[MAX_CONFIGS] = {
