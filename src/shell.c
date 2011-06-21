@@ -23,7 +23,6 @@ const PROGMEM char pgm_help[] = "Help:\r\n"
 "  ?: Prints this help\r\n"
 "  l: List all known nodes\r\n"
 "  c [key] [value]: Configures [key] with [value]\r\n"
-"  c [key]: Prints the value of [key]\r\n"
 "  c: Prints all configured keys and values \r\n"
 "  w: Prints watchdog and error info\r\n"
 "  s [node] [message]: Send a [message] to [node]\r\n";

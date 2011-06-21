@@ -17,7 +17,13 @@ rfm12_status_fast(void);
 bool
 rfm12_is_carrier_free(void);
 
-PT_THREAD(rfm12_tx(void));
+void
+rfm12_enable_tx(void);
+
+PT_THREAD(rfm12_lock(void));
+
+void
+rfm12_release(void);
 
 typedef enum {
   RFM12_RX_OK,

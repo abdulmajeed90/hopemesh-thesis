@@ -7,6 +7,7 @@
 #include "../l3.h"
 #include "../spi.h"
 #include "../config.h"
+#include "../timer.h"
 #include "avr/io.h"
 #include "avr/interrupt.h"
 
@@ -56,7 +57,10 @@ spi_cb_tx(const uint8_t data, uint8_t _ss)
 {
   cnt_cb++;
 
-  return 0x80;
+  if (cnt_cb > 100)
+    return 0x80;
+  else
+    return 0x81;
 }
 
 uint16_t

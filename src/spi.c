@@ -17,7 +17,7 @@
 void
 spi_init(void)
 {
-  SPCR =(1<<SPE) |(1<<MSTR) |(1<<SPR1);
+  SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR1);
   // SPSR =(1<<SPI2X);
 
   spi_ss_high(_SS_RADIO);

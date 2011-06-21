@@ -76,7 +76,7 @@ rfm12_rx_cb(void)
 
   bool _rssi = config_get(CONFIG_FLAGS) & (1<<CONFIG_FLAG_RSSI_DETECTION);
   if (_rssi) {
-    _rssi = !rfm12_is_carrier_free();
+    _rssi = rfm12_is_carrier_free();
   }
 
   if (_rssi) {
@@ -93,7 +93,7 @@ rfm12_rx_cb(void)
 bool
 rfm12_is_carrier_free(void)
 {
-  return (rfm12_status_fast() & CMD8_RSSI);
+  return !(rfm12_status_fast() & CMD8_RSSI);
 }
 
 static bool
@@ -107,16 +107,17 @@ rfm12_enable_rx(void)
 {
   radio_state = STATE_RX;
   rfm12_cmd16(CONFIG_TXREG_OFF);
-  rfm12_reset_fifo();
   rfm12_cmd16(PM_RX_ON);
+  rfm12_reset_fifo();
 }
 
-static void
+void
 rfm12_enable_tx(void)
 {
   radio_state = STATE_TX;
   rfm12_cmd16(CONFIG_TXREG_ON);
   rfm12_cmd16(PM_TX_ON);
+  PT_INIT(&pt_nirq);
 }
 
 static inline
@@ -174,16 +175,19 @@ rfm12_init(void)
   rfm12_enable_nirq_isr();
 }
 
-PT_THREAD(rfm12_tx(void))
+void
+rfm12_release(void)
+{
+  rfm12_enable_nirq_isr();
+}
+
+PT_THREAD(rfm12_lock(void))
 {
   PT_BEGIN(&pt_tx);
 
   PT_SEM_WAIT_ATOMIC(&pt_tx, &mutex);
   rfm12_disable_nirq_isr();
   sei();
-
-  rfm12_enable_tx();
-  rfm12_enable_nirq_isr();
 
   PT_END(&pt_tx);
 }
