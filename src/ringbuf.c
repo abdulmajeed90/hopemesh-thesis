@@ -23,12 +23,12 @@ ringbuf_new(uint16_t max)
 {
   ringbuf_t *new_buf = malloc (sizeof (ringbuf_t));
   if (new_buf == NULL) {
-    watchdog_abort (ERR_RINGBUF, __LINE__);
+    watchdog_error(ERR_RINGBUF);
   }
 
   uint8_t *buf = malloc (sizeof (uint8_t) * max);
   if (buf == NULL) {
-    watchdog_abort (ERR_RINGBUF, __LINE__);
+    watchdog_error(ERR_RINGBUF);
   }
   new_buf->buf = buf;
   new_buf->max = max;

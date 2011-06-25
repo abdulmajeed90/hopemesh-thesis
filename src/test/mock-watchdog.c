@@ -10,7 +10,7 @@ watchdog_init(void)
 }
 
 void
-watchdog_abort (uint16_t source, uint16_t line)
+watchdog_error_line(uint16_t source, uint16_t line)
 {
   printf("Aborting program, source: %d, line: %d\n", source, line);
   exit(0);
@@ -22,25 +22,25 @@ watchdog (void)
 }
 
 uint8_t
-watchdog_mcusr (void)
+watchdog_mcusr(void)
 {
   return 0x8;
 }
 
 uint16_t
-watchdog_get_source (void)
+watchdog_get_source(void)
 {
   return 0;
 }
 
 uint16_t
-watchdog_get_line (void)
+watchdog_get_line(void)
 {
   return 0;
 }
 
 bool
-watchdog_happened (void)
+watchdog_happened(void)
 {
   return true;
 }

@@ -26,31 +26,31 @@ get_mcucsr(void)
 }
 
 uint16_t
-watchdog_get_source (void)
+watchdog_get_source(void)
 {
   return last_source;
 }
 
 uint16_t
-watchdog_get_line (void)
+watchdog_get_line(void)
 {
   return last_line;
 }
 
 uint8_t
-watchdog_mcucsr (void)
+watchdog_mcucsr(void)
 {
   return mcucsr_mirror;
 }
 
 bool
-watchdog_happened (void)
+watchdog_happened(void)
 {
   return bit_is_set (mcucsr_mirror, WDRF);
 }
 
 void
-watchdog_abort (uint16_t source, uint16_t line)
+watchdog_error_line(uint16_t source, uint16_t line)
 {
   // write error source and line to eeprom
   eeprom_busy_wait ();
@@ -64,7 +64,7 @@ watchdog_abort (uint16_t source, uint16_t line)
 }
 
 void
-watchdog_init (void)
+watchdog_init(void)
 {
   get_mcucsr ();
   wdt_enable (WDTO_500MS);
@@ -81,7 +81,7 @@ watchdog_init (void)
 }
 
 void
-watchdog (void)
+watchdog(void)
 {
   wdt_reset ();
 }

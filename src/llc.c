@@ -207,6 +207,10 @@ PT_THREAD(llc_tx(llc_packet_t packet))
 {
   PT_BEGIN(&pt_tx);
 
+  if (packet.len > MAX_BUF_LEN) {
+    watchdog_error(ERR_LLC);
+  }
+
   state_tx.cnt = 0;
   state_tx.state = LLC_STATE_HEADER;
   state_tx.data = packet.data;

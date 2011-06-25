@@ -95,9 +95,6 @@ PT_THREAD(tx(void))
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text2));
   PT_YIELD(&pt_tx);
 
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) long_packet));
-  PT_YIELD(&pt_tx);
-
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
   PT_YIELD(&pt_tx);
 

@@ -3,12 +3,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "watchdog.h"
 
 #define ringbuf_add_err(buf, byte, err_source) \
-  if (!ringbuf_add(buf, byte)) watchdog_abort(err_source, __LINE__)
+  if (!ringbuf_add(buf, byte)) watchdog_error(err_source)
 
 #define ringbuf_remove_err(buf, byte, err_source) \
-  if (!ringbuf_remove(buf, byte)) watchdog_abort(err_source, __LINE__)
+  if (!ringbuf_remove(buf, byte)) watchdog_error(err_source)
 
 typedef struct ringbuf_t ringbuf_t;
 

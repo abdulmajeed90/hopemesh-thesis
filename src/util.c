@@ -7,7 +7,7 @@ stralloc (size_t size)
 {
   char *buf = malloc (size * sizeof (char));
   if (buf == NULL) {
-    watchdog_abort(ERR_UTIL, __LINE__);
+    watchdog_error(ERR_UTIL);
   }
   return buf;
 }

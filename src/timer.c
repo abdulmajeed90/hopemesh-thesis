@@ -46,7 +46,7 @@ timer_register_cb(timer_cb cb)
   while (cb_list[i++] != NULL) { }
 
   if (i == MAX_TIMER_CB) {
-    watchdog_abort(ERR_TIMER, __LINE__);
+    watchdog_error(ERR_TIMER);
   }
 
   cb_list[i++] = cb;

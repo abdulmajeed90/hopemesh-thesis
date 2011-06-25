@@ -8,7 +8,6 @@
 
 #include "error.h"
 #include "ringbuf.h"
-#include "watchdog.h"
  
 #define uart_disable_udrie_isr() (UCSRB &= ~(1<<UDRIE))
 #define uart_enable_udrie_isr() (UCSRB |= (1<<UDRIE))
