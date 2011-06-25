@@ -12,12 +12,6 @@ typedef enum {
   BROADCAST
 } llc_packet_type_t;
 
-typedef struct {
-  llc_packet_type_t type;
-  uint16_t len;
-  uint8_t *data;
-} llc_packet_t;
-
 bool
 llc_tx_mac(uint8_t *dest);
 
@@ -28,8 +22,8 @@ void
 llc_init(void);
 
 bool
-llc_rx(llc_packet_t *dest);
+llc_rx(uint8_t *dest, llc_packet_type_t *type);
 
-PT_THREAD(llc_tx(llc_packet_t packet));
+PT_THREAD(llc_tx(llc_packet_type_t type, uint8_t *data, uint16_t len));
 
 #endif
