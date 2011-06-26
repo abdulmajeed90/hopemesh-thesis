@@ -20,17 +20,18 @@ rfm12_is_carrier_free(void);
 void
 rfm12_enable_tx(void);
 
-PT_THREAD(rfm12_lock(void));
+PT_THREAD(
+rfm12_lock(void));
 
-void
-rfm12_release(void);
+void rfm12_release(void);
 
-typedef enum {
-  RFM12_RX_OK,
-  RFM12_RX_LOST_SIGNAL
+typedef enum
+{
+  RFM12_RX_OK, RFM12_RX_LOST_SIGNAL
 } rfm12_status_t;
 
-typedef struct {
+typedef struct
+{
   rfm12_status_t status;
   uint8_t payload;
 } rfm12_rx_t;

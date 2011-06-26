@@ -10,8 +10,13 @@
 void
 l3_init(void);
 
-PT_THREAD(l3_tx(const char *data));
+PT_THREAD(
+l3_tx(const char *data));
 
-PT_THREAD(l3_rx(char *dest));
+PT_THREAD(
+l3_rx(char *dest));
+
+PT_THREAD(
+l3_thread(void));
 
 #endif

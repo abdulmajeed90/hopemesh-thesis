@@ -25,4 +25,3 @@ clean:
 	find . -executable -name 'test*' -exec rm '{}' ';'
 
 .PHONY : clean
-

@@ -6,6 +6,7 @@
 void
 rx_thread_init(void);
 
-PT_THREAD(rx_thread(void));
+PT_THREAD(
+rx_thread(void));
 
 #endif

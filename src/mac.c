@@ -10,21 +10,14 @@
 #define EOP 0xaa
 #define DUMMY 0xaa
 
-typedef enum {
-  PREAMBLE,
-  DATA,
-  POSTAMBLE,
-  FIN
+typedef enum
+{
+  PREAMBLE, DATA, POSTAMBLE, FIN
 } mac_state_t;
 
 static struct pt pt;
 
-static const uint8_t preamble[] = {
-  SYNC_AFC, SYNC_AFC, 
-  SYNC_AFC, SYNC_AFC, 
-  SYNC_AFC, SYNC_AFC, 
-  SYNC_AFC, SYNC_AFC, 
-  0x2d, 0xd4, '\0' };
+static const uint8_t preamble[] = { SYNC_AFC, SYNC_AFC, 0x2d, 0xd4, '\0' };
 
 static const uint8_t postamble[] = { EOP, DUMMY, '\0' };
 static volatile const uint8_t *p;
@@ -35,22 +28,23 @@ mac_tx_rfm12(uint8_t *dest)
 {
   bool fin = false;
 
-  switch(state) {
-    case(PREAMBLE):
+  switch (state) {
+    case (PREAMBLE):
       *dest = *p++;
-      if (!*p) state = DATA;
+      if (!*p)
+        state = DATA;
       break;
-    case(DATA):
+    case (DATA):
       if (!llc_tx_mac(dest)) {
         state = POSTAMBLE;
         p = postamble;
       }
       break;
-    case(POSTAMBLE):
+    case (POSTAMBLE):
       *dest = *p++;
       if (!*p) {
-	fin = true;
-	state = FIN;
+        fin = true;
+        state = FIN;
       }
       break;
     default:
@@ -94,7 +88,7 @@ PT_THREAD(mac_tx(void))
 
   PT_WAIT_THREAD(&pt, rfm12_lock());
 
-  if (config_get(CONFIG_FLAGS) & (1<<CONFIG_FLAG_COLLISION_DETECTION)) {
+  if (config_get(CONFIG_FLAGS) & (1 << CONFIG_FLAG_COLLISION_DETECTION)) {
     PT_WAIT_UNTIL(&pt, rfm12_is_carrier_free());
   }
 

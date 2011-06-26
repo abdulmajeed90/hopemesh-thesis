@@ -15,6 +15,7 @@
 #include "l3.h"
 #include "rxthread.h"
 #include "timer.h"
+#include "clock.h"
 
 #define DDRSPI DDRB
 #define DDMOSI DDB5
@@ -27,9 +28,8 @@
 #define DDFFIT DDE0
 
 void
-ram_init(void) \
-             __attribute__ ((naked)) \
-             __attribute__ ((section (".init1")));
+ram_init(void) __attribute__ ((naked))
+__attribute__ ((section (".init1")));
 
 /**
  * Enable RAM and setup wait states
@@ -37,7 +37,7 @@ ram_init(void) \
 void
 ram_init(void)
 {
-    MCUCR = (1<<SRE) | (1<<SRW10);
+  MCUCR = (1 << SRE) | (1 << SRW10);
 }
 
 /**
@@ -46,9 +46,9 @@ ram_init(void)
 static inline void
 port_init(void)
 {
-  DDRSPI |= (1<<DDMOSI) | (1<<DDSCK) | (1<<DD_SS_RADIO);
-  DDRNIRQ &= ~(1<<DDNIRQ);
-  DDRFFIT &= ~(1<<DDFFIT);
+  DDRSPI |= (1 << DDMOSI) | (1 << DDSCK) | (1 << DD_SS_RADIO);
+  DDRNIRQ &= ~(1 << DDNIRQ);
+  DDRFFIT &= ~(1 << DDFFIT);
 }
 
 /**
@@ -56,9 +56,9 @@ port_init(void)
  * for the uart chip to bootstrap.
  */
 static inline void
-bootstrap_delay (void)
+bootstrap_delay(void)
 {
-  for (uint8_t i=0; i<50; i++) {
+  for (uint8_t i = 0; i < 50; i++) {
     _delay_ms(10);
   }
 }
@@ -69,16 +69,19 @@ main_init(void)
   bootstrap_delay();
   config_init();
   port_init();
-  uart_init();
+  watchdog_init();
+  timer_init();
+
+  clock_init();
   spi_init();
+  uart_init();
   shell_init();
   rfm12_init();
   mac_init();
   llc_init();
   l3_init();
   rx_thread_init();
-  watchdog_init();
-  timer_init();
+
   sei();
 }
 
@@ -89,6 +92,7 @@ main(void)
 
   while (true) {
     shell();
+    l3_thread();
     rx_thread();
     uart_tx_thread();
     watchdog();

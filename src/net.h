@@ -3,7 +3,8 @@
 
 typedef uint16_t addr_t;
 
-typedef struct {
+typedef struct
+{
   uint8_t flags;
   uint8_t ttl;
   uint16_t seqno;

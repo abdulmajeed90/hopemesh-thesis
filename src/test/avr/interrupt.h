@@ -10,7 +10,9 @@
     a();		  \
   }
 
-void cli(void);
-void sei(void);
+void
+cli(void);
+void
+sei(void);
 
 #endif

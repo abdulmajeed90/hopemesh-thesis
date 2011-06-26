@@ -18,23 +18,24 @@
 #define MAX_CMD_BUF 80
 #define MAX_OUT_BUF 256
 
-const PROGMEM char pgm_bootmsg[] = "\x1b[31mHopeMesh booted and ready ...\x1b[37m\r\n";
+const PROGMEM char pgm_bootmsg[] =
+    "\x1b[31mHopeMesh booted and ready ...\x1b[37m\r\n";
 const PROGMEM char pgm_help[] = "Help:\r\n"
-"  ?: Prints this help\r\n"
-"  l: List all known nodes\r\n"
-"  c [key] [value]: Configures [key] with [value]\r\n"
-"  c: Prints all configured keys and values \r\n"
-"  w: Prints watchdog and error info\r\n"
-"  s [node] [message]: Send a [message] to [node]\r\n";
+    "  ?: Prints this help\r\n"
+    "  l: List all known nodes\r\n"
+    "  c [key] [value]: Configures [key] with [value]\r\n"
+    "  c: Prints all configured keys and values \r\n"
+    "  w: Prints watchdog and error info\r\n"
+    "  s [node] [message]: Send a [message] to [node]\r\n";
 
 const PROGMEM char pgm_list[] = "No nodes available\r\n";
 const PROGMEM char pgm_send[] = "Sending message ...\r\n";
 const PROGMEM char pgm_prompt[] = "$ ";
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
-"source: 0x%x\n\r"
-"line: %d\n\r\n\r"
-"rfm12 status: 0x%x\n\r"
-"debug: 0x%x\n\r";
+    "source: 0x%x\n\r"
+    "line: %d\n\r\n\r"
+    "rfm12 status: 0x%x\n\r"
+    "debug: 0x%x\n\r";
 
 typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *cmd_buf;
@@ -50,20 +51,14 @@ PT_THREAD(shell_watchdog)(void)
   uint16_t radio_status = rfm12_status();
   uint16_t debug = debug_get_cnt();
 
-  sprintf_P(out_buf, pgm_wd, 
-      watchdog_mcucsr(),
-      watchdog_get_source(),
-      watchdog_get_line(),
-      radio_status,
-      debug);
+  sprintf_P(out_buf, pgm_wd, watchdog_mcucsr(), watchdog_get_source(),
+      watchdog_get_line(), radio_status, debug);
 
   out_ptr = out_buf;
-  PT_WAIT_UNTIL(&pt_cmd, 
-      uart_tx_str(&out_ptr));
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
 
   out_ptr = debug_getstr();
-  PT_WAIT_UNTIL(&pt_cmd, 
-      uart_tx_str(&out_ptr));
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
   out_ptr = NULL;
   debug_strclear();
 
@@ -75,8 +70,7 @@ PT_THREAD(shell_list)(void)
   PT_BEGIN(&pt_cmd);
 
   out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_cmd,
-      uart_tx_pgmstr(pgm_list, out_buf, &out_ptr));
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_pgmstr(pgm_list, out_buf, &out_ptr));
 
   PT_END(&pt_cmd);
 }
@@ -88,8 +82,7 @@ PT_THREAD(shell_tx)(void)
   PT_WAIT_THREAD(&pt_cmd, l3_tx(cmd_buf));
 
   out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_cmd,
-      uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
 
   PT_END(&pt_cmd);
 }
@@ -98,8 +91,7 @@ PT_THREAD(shell_help)(void)
 {
   PT_BEGIN(&pt_cmd);
   out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_cmd,
-      uart_tx_pgmstr(pgm_help, out_buf, &out_ptr));
+  PT_WAIT_UNTIL(&pt_cmd, uart_tx_pgmstr(pgm_help, out_buf, &out_ptr));
   PT_END(&pt_cmd);
 }
 
@@ -107,10 +99,14 @@ const cmd_fn
 shell_data_parse(void)
 {
   switch (*cmd_buf) {
-    case 'l' : return shell_list;
-    case 's' : return shell_tx;
-    case 'w' : return shell_watchdog;
-    default  : return shell_help;
+    case 'l':
+      return shell_list;
+    case 's':
+      return shell_tx;
+    case 'w':
+      return shell_watchdog;
+    default:
+      return shell_help;
   }
 }
 
@@ -151,7 +147,7 @@ shell_data_available(void)
         break;
       default:
         // any other character pressed
-        if (cmd != cmd_buf+MAX_CMD_BUF-1) {
+        if (cmd != cmd_buf + MAX_CMD_BUF - 1) {
           cmd++;
         }
         result = false;

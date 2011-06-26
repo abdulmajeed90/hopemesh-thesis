@@ -8,7 +8,7 @@ void
 io8_reg_dump(void)
 {
   printf("io register dump:\n");
-  for (int i=0; i<256; i++) {
+  for (int i = 0; i < 256; i++) {
     printf("0x%x = 0x%x\n", i, io8_reg[i]);
   }
 }

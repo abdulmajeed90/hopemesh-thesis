@@ -17,7 +17,7 @@ watchdog_error_line(uint16_t source, uint16_t line)
 }
 
 void
-watchdog (void)
+watchdog(void)
 {
 }
 

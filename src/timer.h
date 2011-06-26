@@ -12,6 +12,7 @@ typedef void
 void
 timer_register_cb(timer_cb cb);
 
-PT_THREAD(timer_thread (void));
+PT_THREAD(
+timer_thread(void));
 
 #endif

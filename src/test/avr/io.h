@@ -1,32 +1,32 @@
 /* Copyright (c) 2002, Nils Kristian Strom <nilsst@omegav.ntnu.no>
-   All rights reserved.
+ All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
 
-   * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
 
-   * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.
 
-   * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+ * Neither the name of the copyright holders nor the names of
+ contributors may be used to endorse or promote products derived
+ from this software without specific prior written permission.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-  POSSIBILITY OF SUCH DAMAGE. */
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE. */
 
 /* $Id: iom162.h,v 1.13.2.6 2008/11/17 16:20:35 arcanum Exp $ */
 
@@ -79,7 +79,6 @@
 
 /* Clock PRescale */
 #define CLKPR	_SFR_MEM8(0x61)
-
 
 /* Standard I/O registers */
 
@@ -161,13 +160,13 @@ io8_reg_dump(void);
 #define UCSR1A	_SFR_IO8(0x02)	/* USART 1 Control and Status Register A */
 #define UCSR1B	_SFR_IO8(0x01)	/* USART 1 Control and Status Register B */
 #define	UBRR1L  _SFR_IO8(0x00)  /* USART 0 Baud Rate Register High Byte */
- 
 
 /* Interrupt vectors (byte addresses) */
 #define _VECTOR(a) isr##a
 
 /* External Interrupt Request 0 */
-void isr0(void);
+void
+isr0(void);
 #define INT0_vect			_VECTOR(0)
 #define SIG_INTERRUPT0			_VECTOR(0)
 
@@ -232,7 +231,8 @@ void isr0(void);
 #define SIG_OUTPUT_COMPARE0		_VECTOR(16)
 
 /* Timer/Counter0 Overflow */
-void isr17(void);
+void
+isr17(void);
 #define TIMER0_OVF_vect			_VECTOR(17)
 #define SIG_OVERFLOW0			_VECTOR(17)
 
@@ -241,7 +241,8 @@ void isr17(void);
 #define SIG_SPI				_VECTOR(18)
 
 /* USART0, Rx Complete */
-void isr19(void);
+void
+isr19(void);
 #define USART0_RXC_vect			_VECTOR(19)
 #define SIG_USART0_RECV			_VECTOR(19)
 
@@ -250,7 +251,8 @@ void isr19(void);
 #define SIG_USART1_RECV			_VECTOR(20)
 
 /* USART0 Data register Empty */
-void isr21(void);
+void
+isr21(void);
 #define USART0_UDRE_vect		_VECTOR(21)
 #define SIG_USART0_DATA			_VECTOR(21)
 
@@ -280,10 +282,6 @@ void isr21(void);
 
 #define _VECTORS_SIZE 112 /* = (num vec+1) * 4 */
 
-
-
-
-
 /* TCCR3B bit definitions, memory mapped I/O */
 
 #define ICNC3	7
@@ -293,8 +291,6 @@ void isr21(void);
 #define CS32	2
 #define CS31	1
 #define CS30	0
-
-
 
 /* TCCR3A bit definitions, memory mapped I/O */
 
@@ -307,8 +303,6 @@ void isr21(void);
 #define WGM31	1
 #define WGM30	0
 
-
-
 /* ETIMSK bit definitions, memory mapped I/O */
 
 #define TICIE3		5
@@ -316,16 +310,12 @@ void isr21(void);
 #define OCIE3B		3
 #define TOIE3		2
 
-
-
 /* ETIFR bit definitions, memory mapped I/O */
 
 #define ICF3		5
 #define OCF3A		4
 #define OCF3B		3
 #define TOV3		2
-
-
 
 /* PCMSK1 bit definitions, memory mapped I/O */
 #define PCINT15	7
@@ -336,8 +326,6 @@ void isr21(void);
 #define PCINT10	2
 #define PCINT9	1
 #define PCINT8	0
-
-
 
 /* PCMSK0 bit definitions, memory mapped I/O */
 
@@ -350,8 +338,6 @@ void isr21(void);
 #define PCINT1	1
 #define PCINT0	0
 
-
-
 /* CLKPR bit definitions, memory mapped I/O */
 
 #define CLKPCE	7
@@ -359,8 +345,6 @@ void isr21(void);
 #define CLKPS2	2
 #define CLKPS1	1
 #define CLKPS0	0
-
-
 
 /* SPH bit definitions */
 
@@ -373,8 +357,6 @@ void isr21(void);
 #define SP9	9
 #define SP8	8
 
-
-
 /* SPL bit definitions */
 
 #define SP7	7
@@ -386,8 +368,6 @@ void isr21(void);
 #define SP1	1
 #define SP0	0
 
-
-
 /* UBRR1H bit definitions */
 
 #define URSEL1	7
@@ -395,8 +375,6 @@ void isr21(void);
 #define UBRR110	2
 #define UBRR19	1
 #define UBRR18	0
-
-
 
 /* UCSR1C bit definitions */
 
@@ -409,8 +387,6 @@ void isr21(void);
 #define UCSZ10	1
 #define UCPOL1	0
 
-
-
 /* GICR bit definitions */
 
 #define INT1	7
@@ -421,8 +397,6 @@ void isr21(void);
 #define IVSEL	1
 #define IVCE	0
 
-
-
 /* GIFR bit definitions */
 
 #define INTF1	7
@@ -430,8 +404,6 @@ void isr21(void);
 #define INTF2	5
 #define PCIF1	4
 #define PCIF0	3
-
-
 
 /* TIMSK bit definitions */
 
@@ -444,8 +416,6 @@ void isr21(void);
 #define TOIE0	1
 #define OCIE0	0
 
-
-
 /* TIFR bit definitions */
 
 #define TOV1	7
@@ -457,9 +427,7 @@ void isr21(void);
 #define TOV0	1
 #define OCF0	0
 
-
-
-/* SPMCR bit definitions */ 
+/* SPMCR bit definitions */
 
 #define SPMIE	7
 #define RWWSB	6
@@ -468,8 +436,6 @@ void isr21(void);
 #define PGWRT	2
 #define PGERS	1
 #define SPMEN	0
-
-
 
 /* EMCUCR bit definitions */
 
@@ -482,8 +448,6 @@ void isr21(void);
 #define SRW11	1
 #define ISC2	0
 
-
-
 /* MCUCR bit definitions */
 
 #define SRE	7
@@ -495,8 +459,6 @@ void isr21(void);
 #define ISC01	1
 #define ISC00	0
 
-
-
 /* MCUCSR bit definitions */
 
 #define JTD	7
@@ -506,8 +468,6 @@ void isr21(void);
 #define BORF	2
 #define EXTRF	1
 #define PORF	0
-
-
 
 /* TCCR0 bit definitions */
 
@@ -520,8 +480,6 @@ void isr21(void);
 #define CS01	1
 #define CS00	0
 
-
-
 /* SFIOR bit definitions */
 
 #define TSM	7
@@ -532,8 +490,6 @@ void isr21(void);
 #define PUD	2
 #define PSR2	1
 #define PSR310	0
-
-
 
 /* TCCR1A bit definitions */
 
@@ -546,9 +502,6 @@ void isr21(void);
 #define WGM11   1
 #define WGM10   0
 
-
-
-
 /* TCCR1B bit definitions */
 
 #define ICNC1	7		/* Input Capture Noise Canceler */
@@ -558,8 +511,6 @@ void isr21(void);
 #define CS12	2		/* Clock Select 2 */
 #define CS11	1		/* Clock Select 1 */
 #define CS10	0		/* Clock Select 0 */
-
-
 
 /* TCCR2 bit definitions */
 
@@ -572,8 +523,6 @@ void isr21(void);
 #define CS21	1
 #define CS20	0
 
-
-
 /* ASSR bit definitions */
 
 #define AS2	3
@@ -581,8 +530,6 @@ void isr21(void);
 #define TCON2UB	2   /* Kept for backwards compatibility. */
 #define OCR2UB	1
 #define TCR2UB	0
-
-
 
 /* WDTCR bit definitions */
 
@@ -592,8 +539,6 @@ void isr21(void);
 #define WDP1	1
 #define WDP0	0
 
-
-
 /* UBRR0H bif definitions */
 
 #define URSEL0	7
@@ -601,8 +546,6 @@ void isr21(void);
 #define UBRR010	2
 #define UBRR09	1
 #define UBRR08	0
-
-
 
 /* UCSR0C bit definitions */
 
@@ -615,13 +558,9 @@ void isr21(void);
 #define UCSZ00	1
 #define UCPOL0	0
 
-
-
 /* EEARH bit definitions */
 
 #define EEAR8	0
-
-
 
 /* EECR bit definitions */
 
@@ -629,8 +568,6 @@ void isr21(void);
 #define EEMWE	2
 #define EEWE	1
 #define EERE	0
-
-
 
 /* PORTA bit definitions */
 
@@ -643,8 +580,6 @@ void isr21(void);
 #define PA1	1
 #define PA0	0
 
-
-
 /* DDRA bit definitions */
 
 #define DDA7	7
@@ -655,8 +590,6 @@ void isr21(void);
 #define DDA2	2
 #define DDA1	1
 #define DDA0	0
-
-
 
 /* PINA bit definitions */
 
@@ -669,7 +602,6 @@ void isr21(void);
 #define PINA1	1
 #define PINA0	0
 
-
 /* PORTB bit definitions */
 
 #define PB7	7
@@ -680,8 +612,6 @@ void isr21(void);
 #define PB2	2
 #define PB1	1
 #define PB0	0
-
-
 
 /* DDRB bit definitions */
 
@@ -694,8 +624,6 @@ void isr21(void);
 #define DDB1	1
 #define DDB0	0
 
-
-
 /* PINB bit definitions */
 
 #define PINB7	7
@@ -706,8 +634,6 @@ void isr21(void);
 #define PINB2	2
 #define PINB1	1
 #define PINB0	0
-
-
 
 /* PORTC bit definitions */
 
@@ -720,8 +646,6 @@ void isr21(void);
 #define PC1	 1
 #define PC0	 0
 
-
-
 /* DDRC bit definitions */
 
 #define DDC7	7
@@ -732,8 +656,6 @@ void isr21(void);
 #define DDC2	2
 #define DDC1	1
 #define DDC0	0
-
-
 
 /* PINC bit definitions */
 
@@ -746,8 +668,6 @@ void isr21(void);
 #define PINC1	1
 #define PINC0	0
 
-
-
 /* PORTD bit definitions */
 
 #define PD7	 7
@@ -758,8 +678,6 @@ void isr21(void);
 #define PD2	 2
 #define PD1	 1
 #define PD0	 0
-
-
 
 /* DDRD bit definitions */
 
@@ -772,8 +690,6 @@ void isr21(void);
 #define DDD1	1
 #define DDD0	0
 
-
-
 /* PIND bit definitions */
 
 #define PIND7	7
@@ -785,15 +701,11 @@ void isr21(void);
 #define PIND1	1
 #define PIND0	0
 
-
-
 /* SPSR bit definitions */
 
 #define SPIF	7
 #define WCOL	6
 #define SPI2X	0
-
-
 
 /* SPCR bit definitions */
 
@@ -806,8 +718,6 @@ void isr21(void);
 #define SPR1	1
 #define SPR0	0
 
-
-
 /* UCSR0A bit definitions */
 
 #define RXC0	7
@@ -818,8 +728,6 @@ void isr21(void);
 #define UPE0	2
 #define U2X0	1
 #define MPCM0	0
-
-
 
 /* UCSR0B bit definitions */
 
@@ -832,8 +740,6 @@ void isr21(void);
 #define RXB80	1
 #define TXB80	0
 
-
-
 /* ACSR bit definitions */
 
 #define ACD	7
@@ -845,15 +751,11 @@ void isr21(void);
 #define ACIS1	1
 #define ACIS0	0
 
-
-
 /* PORTE bit definitions */
 
 #define PE2	2
 #define PE1	1
 #define PE0	0
-
-
 
 /* DDRE bit definitions */
 
@@ -861,15 +763,11 @@ void isr21(void);
 #define DDE1	1
 #define DDE0	0
 
-
-
 /* PINE bit definitions */
 
 #define PINE2	2
 #define PINE1	1
 #define PINE0	0
-
-
 
 /* UCSR1A bit definitions */
 
@@ -882,8 +780,6 @@ void isr21(void);
 #define U2X1	1
 #define MPCM1	0
 
-
-
 /* UCSR1B bit definitions */
 
 #define RXCIE1	7
@@ -895,7 +791,6 @@ void isr21(void);
 #define RXB81	1
 #define TXB81	0
 
-
 /* Constants */
 #define SPM_PAGESIZE 128
 #define RAMEND		0x4FF
@@ -903,7 +798,6 @@ void isr21(void);
 #define E2END		0x1FF
 #define E2PAGESIZE  4
 #define FLASHEND	0x3FFF
-
 
 /* Fuses */
 
@@ -938,17 +832,14 @@ void isr21(void);
 #define FUSE_M161C       (unsigned char)~_BV(4)
 #define EFUSE_DEFAULT (0xFF)
 
-
 /* Lock Bits */
 #define __LOCK_BITS_EXIST
 #define __BOOT_LOCK_BITS_0_EXIST
 #define __BOOT_LOCK_BITS_1_EXIST 
 
-
 /* Signature */
 #define SIGNATURE_0 0x1E
 #define SIGNATURE_1 0x94
 #define SIGNATURE_2 0x04
-
 
 #endif  /* _AVR_IO_H_ */

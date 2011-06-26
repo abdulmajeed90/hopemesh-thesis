@@ -4,8 +4,9 @@
 #include "pt.h"
 
 void
-shell_init (void);
+shell_init(void);
 
-PT_THREAD(shell (void));
+PT_THREAD(
+shell(void));
 
 #endif

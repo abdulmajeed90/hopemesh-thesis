@@ -4,6 +4,6 @@
 #include <stdlib.h>
 
 char*
-stralloc (size_t size);
+stralloc(size_t size);
 
 #endif

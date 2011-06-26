@@ -4,7 +4,8 @@
 #include "watchdog.h"
 #include "error.h"
 
-struct ringbuf_t {
+struct ringbuf_t
+{
   uint8_t *buf;
   uint8_t *start;
   uint8_t *end;
@@ -21,19 +22,19 @@ ringbuf_size(volatile ringbuf_t *buf)
 ringbuf_t *
 ringbuf_new(uint16_t max)
 {
-  ringbuf_t *new_buf = malloc (sizeof (ringbuf_t));
+  ringbuf_t *new_buf = malloc(sizeof(ringbuf_t));
   if (new_buf == NULL) {
     watchdog_error(ERR_RINGBUF);
   }
 
-  uint8_t *buf = malloc (sizeof (uint8_t) * max);
+  uint8_t *buf = malloc(sizeof(uint8_t) * max);
   if (buf == NULL) {
     watchdog_error(ERR_RINGBUF);
   }
   new_buf->buf = buf;
   new_buf->max = max;
 
-  ringbuf_clear (new_buf);
+  ringbuf_clear(new_buf);
   return new_buf;
 }
 

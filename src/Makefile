@@ -77,7 +77,7 @@ EXTRAINCDIRS =
 CSTANDARD = -std=gnu99
 
 # preconfigured node address
-NODE_ADDR=0x0001
+NODE_ADDR=0xfff1
 
 # Place -D or -U options here for C sources
 CDEFS = -DF_CPU=$(F_CPU)UL

@@ -8,7 +8,7 @@
 
 #include "error.h"
 #include "ringbuf.h"
- 
+
 #define uart_disable_udrie_isr() (UCSRB &= ~(1<<UDRIE))
 #define uart_enable_udrie_isr() (UCSRB |= (1<<UDRIE))
 
@@ -33,8 +33,8 @@ ISR(SIG_USART_DATA)
 void
 uart_init(void)
 {
-  UCSRB |= (1<<RXEN) | (1<<TXEN) | (1<<RXCIE);
-  UCSRC |= (1<<URSEL) | (1<<UCSZ1) | (1<<UCSZ0);
+  UCSRB |= (1 << RXEN) | (1 << TXEN) | (1 << RXCIE);
+  UCSRC |= (1 << URSEL) | (1 << UCSZ1) | (1 << UCSZ0);
   UBRRH = UBRRH_VALUE;
   UBRRL = UBRRL_VALUE;
 
@@ -47,7 +47,7 @@ uart_init(void)
 bool
 uart_ready(void)
 {
-  return (UCSRA & (1<<UDRE));
+  return (UCSRA & (1 << UDRE));
 }
 
 bool

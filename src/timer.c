@@ -10,12 +10,12 @@
 #include "error.h"
 #include "watchdog.h"
 
-#define MAX_TIMER_CB 5
+#define MAX_TIMER_CB 2
 
 static uint8_t timer_cnt;
 static bool second_notify;
 static struct pt pt_timer;
-static timer_cb cb_list[MAX_TIMER_CB+1];
+static volatile timer_cb cb_list[MAX_TIMER_CB + 1];
 
 ISR(SIG_OVERFLOW0)
 {
@@ -38,31 +38,32 @@ one_second_elapsed(void)
   }
 }
 
+static volatile timer_cb *cb;
+
 void
-timer_register_cb(timer_cb cb)
+timer_register_cb(timer_cb new_cb)
 {
-  uint8_t i = 0;
-
-  while (cb_list[i++] != NULL) { }
-
-  if (i == MAX_TIMER_CB) {
-    watchdog_error(ERR_TIMER);
+  cb = cb_list;
+  while (*cb != NULL) {
+    if (cb++ == &cb_list[MAX_TIMER_CB - 1]) {
+      watchdog_error(ERR_TIMER);
+    }
   }
 
-  cb_list[i++] = cb;
-  cb_list[i] = NULL;
+  *cb = new_cb;
+  cb++;
+  cb = NULL;
 }
 
 PT_THREAD(timer_thread(void))
 {
   PT_BEGIN(&pt_timer);
 
-  PT_WAIT_UNTIL(&pt_timer,
-    one_second_elapsed());
+  PT_WAIT_UNTIL(&pt_timer, one_second_elapsed());
 
-  uint8_t i = 0;
-  while (cb_list[i] != NULL) {
-    cb_list[i++]();
+  cb = cb_list;
+  while (*cb != NULL) {
+    (*cb++)();
   }
 
   PT_END(&pt_timer);
@@ -76,6 +77,6 @@ timer_init(void)
   second_notify = false;
   cb_list[0] = NULL;
 
-  TCCR0 = (1<<CS02) | (1<<CS00);
-  TIMSK |= (1<<TOIE0);
+  TCCR0 = (1 << CS02) | (1 << CS00);
+  TIMSK |= (1 << TOIE0);
 }
