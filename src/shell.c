@@ -20,6 +20,7 @@
 
 const PROGMEM char pgm_bootmsg[] =
     "\x1b[31mHopeMesh booted and ready ...\x1b[37m\n\r";
+
 const PROGMEM char pgm_help[] = "Help:\n\r"
     "  ?: Help\n\r"
     "  l: List nodes\n\r"
@@ -29,8 +30,11 @@ const PROGMEM char pgm_help[] = "Help:\n\r"
     "  s [node] [message]: Send a [message] to [node]\n\r";
 
 const PROGMEM char pgm_list[] = "No nodes available\n\r";
+
 const PROGMEM char pgm_ok[] = "OK\n\r";
+
 const PROGMEM char pgm_prompt[] = "$ ";
+
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
     "error: src=0x%x, line=%d\n\r"
     "rfm12: 0x%x\n\r"
@@ -91,6 +95,24 @@ PT_THREAD(shell_help)(void)
   PT_END(&pt_cmd);
 }
 
+static uint8_t i;
+
+PT_THREAD(shell_config)(void)
+{
+  PT_BEGIN(&pt_cmd);
+
+  UART_WAIT(&pt_cmd);
+
+  for (i = 0; i < MAX_CONFIGS; i++) {
+    sprintf(out_buf, "0x%04x\n\r", config_get(i));
+    UART_TX_NOSIGNAL(&pt_cmd, out_buf);
+  }
+
+  UART_SIGNAL(&pt_cmd);
+
+  PT_END(&pt_cmd);
+}
+
 const cmd_fn
 shell_data_parse(void)
 {
@@ -99,6 +121,8 @@ shell_data_parse(void)
       return shell_list;
     case 's':
       return shell_tx;
+    case 'c':
+      return shell_config;
     case 'd':
       return shell_debug;
     default:

@@ -109,7 +109,7 @@ spi_tx16(const uint16_t data, uint8_t _ss)
   }
 
   if ((data != 0) || (ret != 0)) {
-    _spi_printf("0x%00004x>0x%00004x|", data, ret);
+    _spi_printf("0x%04x>0x%04x|", data, ret);
   }
 
   return ret;
@@ -126,7 +126,7 @@ spi_tx(const uint8_t data, uint8_t _ss)
   }
 
   if ((data != 0) || (ret != 0)) {
-    _spi_printf("0x%002x  >0x%002x  |", data, ret);
+    _spi_printf("0x%02x  >0x%02x  |", data, ret);
   }
 
   return ret;
