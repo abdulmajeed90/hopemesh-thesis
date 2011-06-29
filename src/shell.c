@@ -21,15 +21,15 @@
 const PROGMEM char pgm_bootmsg[] =
     "\x1b[31mHopeMesh booted and ready ...\x1b[37m\n\r";
 const PROGMEM char pgm_help[] = "Help:\n\r"
-    "  ?: Prints this help\n\r"
-    "  l: List all known nodes\n\r"
-    "  c [key] [value]: Configures [key] with [value]\n\r"
-    "  c: Prints all configured keys and values \n\r"
-    "  w: Prints watchdog and error info\n\r"
+    "  ?: Help\n\r"
+    "  l: List nodes\n\r"
+    "  c [key] [value]: Configure [key] with [value]\n\r"
+    "  c: Print configuration \n\r"
+    "  d: Debug info\n\r"
     "  s [node] [message]: Send a [message] to [node]\n\r";
 
 const PROGMEM char pgm_list[] = "No nodes available\n\r";
-const PROGMEM char pgm_send[] = "Sending message ...\n\r";
+const PROGMEM char pgm_ok[] = "OK\n\r";
 const PROGMEM char pgm_prompt[] = "$ ";
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
     "error: src=0x%x, line=%d\n\r"
@@ -42,7 +42,7 @@ static char *cmd;
 static cmd_fn cmd_fn_instance;
 static struct pt pt_main, pt_cmd;
 
-PT_THREAD(shell_watchdog)(void)
+PT_THREAD(shell_debug)(void)
 {
   PT_BEGIN(&pt_cmd);
 
@@ -76,7 +76,7 @@ PT_THREAD(shell_tx)(void)
 
   PT_WAIT_THREAD(&pt_cmd, l3_tx(cmd_buf));
   UART_WAIT(&pt_cmd);
-  UART_TX_PGM(&pt_cmd, pgm_send, out_buf);
+  UART_TX_PGM(&pt_cmd, pgm_ok, out_buf);
 
   PT_END(&pt_cmd);
 }
@@ -99,8 +99,8 @@ shell_data_parse(void)
       return shell_list;
     case 's':
       return shell_tx;
-    case 'w':
-      return shell_watchdog;
+    case 'd':
+      return shell_debug;
     default:
       return shell_help;
   }
