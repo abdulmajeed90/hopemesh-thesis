@@ -11,13 +11,12 @@
 
 struct pt_sem uart_mutex;
 
-#define UART_TX_PGM(pt, pgm, buf, buf_ptr) \
-  buf_ptr = NULL; \
-  PT_WAIT_UNTIL(pt, uart_tx_pgmstr(pgm, buf, &buf_ptr)); \
+#define UART_TX_PGM(pt, pgm, buf) \
+  PT_WAIT_UNTIL(pt, uart_tx_pgmstr(pgm, buf)); \
   UART_SIGNAL(pt);
 
-#define UART_TX(pt, buf_ptr) \
-  PT_WAIT_UNTIL(pt, uart_tx_str(&buf_ptr)); \
+#define UART_TX(pt, buf) \
+  PT_WAIT_UNTIL(pt, uart_tx_str(buf)); \
   UART_SIGNAL(pt);
 
 #define UART_WAIT(pt) \
@@ -33,10 +32,10 @@ bool
 uart_tx(const char what);
 
 bool
-uart_tx_pgmstr(PGM_P src, char *buf, const char **ptr);
+uart_tx_pgmstr(PGM_P str, char *buf);
 
 bool
-uart_tx_str(const char **str);
+uart_tx_str(const char *str);
 
 bool
 uart_rx(char *where);

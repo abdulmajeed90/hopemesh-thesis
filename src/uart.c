@@ -52,28 +52,37 @@ uart_tx(const char what)
   return result;
 }
 
+static const char *p;
+
 bool
-uart_tx_pgmstr(PGM_P src, char *buf, const char **ptr)
+uart_tx_pgmstr(PGM_P str, char *buf)
 {
-  if (*ptr == NULL) {
-    strcpy_P(buf, src);
-    *ptr = buf;
+  if (p == NULL) {
+    strcpy_P(buf, str);
   }
 
-  return uart_tx_str(ptr);
+  return uart_tx_str(buf);
 }
 
 bool
-uart_tx_str(const char **str)
+uart_tx_str(const char *str)
 {
   bool result = true;
 
-  if (**str) {
-    bool char_added = ringbuf_add(uart_out_buf, **str);
+  if (p == NULL) {
+    p = str;
+  }
+
+  if (*p) {
+    bool char_added = ringbuf_add(uart_out_buf, *p);
+
     if (char_added) {
-      (*str)++;
+      p++;
     }
+
     result = false;
+  } else {
+    p = NULL;
   }
 
   return result;

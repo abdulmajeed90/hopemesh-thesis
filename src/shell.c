@@ -40,7 +40,6 @@ const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *cmd_buf;
 static char *cmd;
-static const char *out_ptr = NULL;
 static cmd_fn cmd_fn_instance;
 static struct pt pt_main, pt_cmd;
 
@@ -55,10 +54,9 @@ PT_THREAD(shell_watchdog)(void)
       out_buf,
       pgm_wd,
       watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), radio_status, debug);
-  out_ptr = out_buf;
 
   UART_WAIT(&pt_cmd);
-  UART_TX(&pt_cmd, out_ptr);
+  UART_TX(&pt_cmd, out_buf);
 
   PT_END(&pt_cmd);
 }
@@ -68,7 +66,7 @@ PT_THREAD(shell_list)(void)
   PT_BEGIN(&pt_cmd);
 
   UART_WAIT(&pt_cmd);
-  UART_TX_PGM(&pt_cmd, pgm_list, out_buf, out_ptr);
+  UART_TX_PGM(&pt_cmd, pgm_list, out_buf);
 
   PT_END(&pt_cmd);
 }
@@ -79,7 +77,7 @@ PT_THREAD(shell_tx)(void)
 
   PT_WAIT_THREAD(&pt_cmd, l3_tx(cmd_buf));
   UART_WAIT(&pt_cmd);
-  UART_TX_PGM(&pt_cmd, pgm_send, out_buf, out_ptr);
+  UART_TX_PGM(&pt_cmd, pgm_send, out_buf);
 
   PT_END(&pt_cmd);
 }
@@ -89,7 +87,7 @@ PT_THREAD(shell_help)(void)
   PT_BEGIN(&pt_cmd);
 
   UART_WAIT(&pt_cmd);
-  UART_TX_PGM(&pt_cmd, pgm_help, out_buf, out_ptr);
+  UART_TX_PGM(&pt_cmd, pgm_help, out_buf);
 
   PT_END(&pt_cmd);
 }
@@ -161,14 +159,14 @@ PT_THREAD(shell(void))
   PT_BEGIN(&pt_main);
 
   UART_WAIT(&pt_main);
-  UART_TX_PGM(&pt_main, pgm_prompt, out_buf, out_ptr);
+  UART_TX_PGM(&pt_main, pgm_prompt, out_buf);
 
   while (true) {
     PT_WAIT_UNTIL(&pt_main, shell_data_available());
     PT_WAIT_THREAD(&pt_main, cmd_fn_instance());
 
     UART_WAIT(&pt_main);
-    UART_TX_PGM(&pt_main, pgm_prompt, out_buf, out_ptr);
+    UART_TX_PGM(&pt_main, pgm_prompt, out_buf);
   }
 
   PT_END(&pt_main);
