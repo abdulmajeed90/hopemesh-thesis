@@ -32,9 +32,8 @@ const PROGMEM char pgm_list[] = "No nodes available\n\r";
 const PROGMEM char pgm_send[] = "Sending message ...\n\r";
 const PROGMEM char pgm_prompt[] = "$ ";
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
-    "source: 0x%x\n\r"
-    "line: %d\n\r\n\r"
-    "rfm12 status: 0x%x\n\r"
+    "error: src=0x%x, line=%d\n\r"
+    "rfm12: 0x%x\n\r"
     "debug: 0x%x\n\r";
 
 typedef PT_THREAD((*cmd_fn))(void);
