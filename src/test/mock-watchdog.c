@@ -3,16 +3,18 @@
 
 #include "../watchdog.h"
 
+#include "test-util.h"
+
 void
 watchdog_init(void)
 {
-  printf("watchdog_init\n");
+  _printf("watchdog_init\n");
 }
 
 void
 watchdog_error_line(uint16_t source, uint16_t line)
 {
-  printf("Aborting program, source: %d, line: %d\n", source, line);
+  _printf("Aborting program, source: %d, line: %d\n", source, line);
   exit(0);
 }
 
@@ -22,7 +24,7 @@ watchdog(void)
 }
 
 uint8_t
-watchdog_mcusr(void)
+watchdog_mcucsr(void)
 {
   return 0x8;
 }

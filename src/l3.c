@@ -9,7 +9,6 @@
 #include "pt-sem.h"
 
 #define TTL 50
-#define MAX_BUF_LEN 256
 
 static struct pt pt, pt_tx, pt_rx;
 static struct pt_sem mutex;

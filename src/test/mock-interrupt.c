@@ -15,14 +15,10 @@ void
 cli(void)
 {
   int_enabled = false;
-  printf("cli\n");
-  fflush(stdout);
 }
 
 void
 sei(void)
 {
   int_enabled = true;
-  printf("sei\n");
-  fflush(stdout);
 }

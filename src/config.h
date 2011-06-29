@@ -3,7 +3,6 @@
 
 #include <avr/io.h>
 
-#if defined(__AVR_ATmega162__)
 #define UCSRB UCSR0B
 #define TXEN TXEN0
 #define RXEN RXEN0
@@ -22,7 +21,6 @@
 #define UDR UDR0
 #define SIG_USART_DATA SIG_USART0_DATA
 #define SIG_USART_RECV SIG_USART0_RECV
-#endif
 
 #define BAUD 38400
 

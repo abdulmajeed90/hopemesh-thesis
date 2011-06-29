@@ -33,6 +33,7 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <avr/io.h>
+#include <string.h>
 
 #ifndef __ATTR_CONST__
 #define __ATTR_CONST__
@@ -142,6 +143,9 @@ extern "C"
 #define PGM_VOID_P const prog_void *
 #endif
 
+#define strcpy_P(a, b) strcpy(a, b)
+#define sprintf_P(str, format, args...) sprintf(str, format, ## args)
+
   extern PGM_VOID_P memchr_P(PGM_VOID_P, int __val, size_t __len)
       __ATTR_CONST__;
   extern int
@@ -160,8 +164,6 @@ extern "C"
   extern PGM_P strchrnul_P(PGM_P, int __val) __ATTR_CONST__;
   extern int
   strcmp_P(const char *, PGM_P) __ATTR_PURE__;
-  extern char *
-  strcpy_P(char *, PGM_P);
   extern int
   strcasecmp_P(const char *, PGM_P) __ATTR_PURE__;
   extern char *

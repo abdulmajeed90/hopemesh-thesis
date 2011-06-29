@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <curses.h>
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
 #include "../pt.h"
 #include "../llc.h"
@@ -10,10 +14,9 @@
 #include "../timer.h"
 #include "../clock.h"
 #include "../debug.h"
-#include "avr/io.h"
-#include "avr/interrupt.h"
 
 #include "mock-spi.h"
+#include "test-util.h"
 
 static const char *text = "lorem ipsum";
 static const char *text2 = "s1234567890";
@@ -51,7 +54,7 @@ PT_THREAD(rx(void))
   PT_BEGIN(&pt_rx);
 
   PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
-  printf("--- %s\n", buf);
+  _printf("RX: %s\n", buf);
 
   PT_END(&pt_rx);
 }
@@ -62,15 +65,19 @@ PT_THREAD(tx(void))
   PT_WAIT_UNTIL(&pt_tx, !fin_tx);
 
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text2));
+  _printf("TX: %s\n", text2);
   PT_YIELD(&pt_tx);
 
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
+  _printf("TX: %s\n", bytes);
   PT_YIELD(&pt_tx);
 
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
+  _printf("TX: %s\n", text);
   PT_YIELD(&pt_tx);
 
   PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
+  _printf("TX: %s\n", text);
   PT_YIELD(&pt_tx);
 
   fin_tx = true;
@@ -80,7 +87,7 @@ PT_THREAD(tx(void))
 void
 clock(void)
 {
-  printf("time: %d\n", clock_get_time());
+  _printf("time: %d\n", clock_get_time());
 }
 
 void
@@ -102,6 +109,7 @@ mainloop(void)
 int
 main(int argc, char **argv)
 {
+  curses_init();
   timer_init();
   spi_init();
   clock_init();
@@ -117,5 +125,6 @@ main(int argc, char **argv)
   mainloop();
 
   spi_mock_close();
+  curses_close();
   return 0;
 }

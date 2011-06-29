@@ -19,17 +19,17 @@
 #define MAX_OUT_BUF 256
 
 const PROGMEM char pgm_bootmsg[] =
-    "\x1b[31mHopeMesh booted and ready ...\x1b[37m\r\n";
-const PROGMEM char pgm_help[] = "Help:\r\n"
-    "  ?: Prints this help\r\n"
-    "  l: List all known nodes\r\n"
-    "  c [key] [value]: Configures [key] with [value]\r\n"
-    "  c: Prints all configured keys and values \r\n"
-    "  w: Prints watchdog and error info\r\n"
-    "  s [node] [message]: Send a [message] to [node]\r\n";
+    "\x1b[31mHopeMesh booted and ready ...\x1b[37m\n\r";
+const PROGMEM char pgm_help[] = "Help:\n\r"
+    "  ?: Prints this help\n\r"
+    "  l: List all known nodes\n\r"
+    "  c [key] [value]: Configures [key] with [value]\n\r"
+    "  c: Prints all configured keys and values \n\r"
+    "  w: Prints watchdog and error info\n\r"
+    "  s [node] [message]: Send a [message] to [node]\n\r";
 
-const PROGMEM char pgm_list[] = "No nodes available\r\n";
-const PROGMEM char pgm_send[] = "Sending message ...\r\n";
+const PROGMEM char pgm_list[] = "No nodes available\n\r";
+const PROGMEM char pgm_send[] = "Sending message ...\n\r";
 const PROGMEM char pgm_prompt[] = "$ ";
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
     "source: 0x%x\n\r"
@@ -110,6 +110,41 @@ shell_data_parse(void)
   }
 }
 
+bool
+shell_data_available(void)
+{
+  bool result = uart_rx(cmd);
+
+  if (result) {
+    switch (*cmd) {
+      case '\n': // enter
+      case '\r':
+        *cmd = '\0';
+        cmd_fn_instance = shell_data_parse();
+        cmd = cmd_buf;
+        break;
+
+      case 0x7f: // delete
+      case '\b': // backspace
+        if (cmd != cmd_buf) {
+          cmd--;
+        }
+        result = false;
+        break;
+
+      default:
+        // any other character pressed
+        if (cmd != cmd_buf + (MAX_CMD_BUF - 1)) {
+          cmd++;
+        }
+        result = false;
+        break;
+    }
+  }
+
+  return result;
+}
+
 void
 shell_init(void)
 {
@@ -120,41 +155,6 @@ shell_init(void)
 
   PT_INIT(&pt_main);
   PT_INIT(&pt_cmd);
-}
-
-bool
-shell_data_available(void)
-{
-  bool result = uart_rx(cmd);
-
-  if (result) {
-    switch (*cmd) {
-      case '\r':
-        // newline pressed. finalize cmd_buf string
-        // put a 0 character at the end
-        *cmd = '\0';
-        cmd = cmd_buf;
-        cmd_fn_instance = shell_data_parse();
-        result = true;
-        break;
-      case 0x7f:
-      case '\b':
-        // backslash pressed
-        if (cmd != cmd_buf) {
-          cmd--;
-        }
-        result = false;
-        break;
-      default:
-        // any other character pressed
-        if (cmd != cmd_buf + MAX_CMD_BUF - 1) {
-          cmd++;
-        }
-        result = false;
-    }
-  }
-
-  return result;
 }
 
 PT_THREAD(shell(void))
