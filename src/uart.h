@@ -7,6 +7,24 @@
 #include <avr/pgmspace.h>
 
 #include "config.h"
+#include "pt-sem.h"
+
+struct pt_sem uart_mutex;
+
+#define UART_TX_PGM(pt, pgm, buf, buf_ptr) \
+  buf_ptr = NULL; \
+  PT_WAIT_UNTIL(pt, uart_tx_pgmstr(pgm, buf, &buf_ptr)); \
+  UART_SIGNAL(pt);
+
+#define UART_TX(pt, buf_ptr) \
+  PT_WAIT_UNTIL(pt, uart_tx_str(&buf_ptr)); \
+  UART_SIGNAL(pt);
+
+#define UART_WAIT(pt) \
+  PT_SEM_WAIT(pt, &uart_mutex);
+
+#define UART_SIGNAL(pt) \
+  PT_SEM_SIGNAL(pt, &uart_mutex);
 
 void
 uart_init(void);

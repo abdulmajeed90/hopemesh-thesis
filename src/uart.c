@@ -42,12 +42,7 @@ uart_init(void)
 
   uart_out_buf = ringbuf_new(10);
   uart_in_buf = ringbuf_new(10);
-}
-
-bool
-uart_ready(void)
-{
-  return (UCSRA & (1 << UDRE));
+  PT_SEM_INIT(&uart_mutex, 1);
 }
 
 bool

@@ -51,16 +51,14 @@ PT_THREAD(shell_watchdog)(void)
   uint16_t radio_status = rfm12_status();
   uint16_t debug = debug_get_cnt();
 
-  sprintf_P(out_buf, pgm_wd, watchdog_mcucsr(), watchdog_get_source(),
-      watchdog_get_line(), radio_status, debug);
-
+  sprintf_P(
+      out_buf,
+      pgm_wd,
+      watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), radio_status, debug);
   out_ptr = out_buf;
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
 
-  out_ptr = debug_getstr();
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_str(&out_ptr));
-  out_ptr = NULL;
-  debug_strclear();
+  UART_WAIT(&pt_cmd);
+  UART_TX(&pt_cmd, out_ptr);
 
   PT_END(&pt_cmd);
 }
@@ -69,8 +67,8 @@ PT_THREAD(shell_list)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_pgmstr(pgm_list, out_buf, &out_ptr));
+  UART_WAIT(&pt_cmd);
+  UART_TX_PGM(&pt_cmd, pgm_list, out_buf, out_ptr);
 
   PT_END(&pt_cmd);
 }
@@ -80,9 +78,8 @@ PT_THREAD(shell_tx)(void)
   PT_BEGIN(&pt_cmd);
 
   PT_WAIT_THREAD(&pt_cmd, l3_tx(cmd_buf));
-
-  out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_pgmstr(pgm_send, out_buf, &out_ptr));
+  UART_WAIT(&pt_cmd);
+  UART_TX_PGM(&pt_cmd, pgm_send, out_buf, out_ptr);
 
   PT_END(&pt_cmd);
 }
@@ -90,8 +87,10 @@ PT_THREAD(shell_tx)(void)
 PT_THREAD(shell_help)(void)
 {
   PT_BEGIN(&pt_cmd);
-  out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_cmd, uart_tx_pgmstr(pgm_help, out_buf, &out_ptr));
+
+  UART_WAIT(&pt_cmd);
+  UART_TX_PGM(&pt_cmd, pgm_help, out_buf, out_ptr);
+
   PT_END(&pt_cmd);
 }
 
@@ -161,15 +160,15 @@ PT_THREAD(shell(void))
 {
   PT_BEGIN(&pt_main);
 
-  out_ptr = NULL;
-  PT_WAIT_UNTIL(&pt_main, uart_tx_pgmstr(pgm_prompt, out_buf, &out_ptr));
+  UART_WAIT(&pt_main);
+  UART_TX_PGM(&pt_main, pgm_prompt, out_buf, out_ptr);
 
   while (true) {
     PT_WAIT_UNTIL(&pt_main, shell_data_available());
     PT_WAIT_THREAD(&pt_main, cmd_fn_instance());
 
-    out_ptr = NULL;
-    PT_WAIT_UNTIL(&pt_main, uart_tx_pgmstr(pgm_prompt, out_buf, &out_ptr));
+    UART_WAIT(&pt_main);
+    UART_TX_PGM(&pt_main, pgm_prompt, out_buf, out_ptr);
   }
 
   PT_END(&pt_main);
