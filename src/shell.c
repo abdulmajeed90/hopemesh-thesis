@@ -77,7 +77,9 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  PT_WAIT_THREAD(&pt_cmd, l3_tx(cmd_buf));
+  memcpy(out_buf, cmd_buf, strlen(cmd_buf) + 1);
+  PT_WAIT_THREAD(&pt_cmd, l3_tx(out_buf));
+
   UART_WAIT(&pt_cmd);
   UART_TX_PGM(&pt_cmd, pgm_ok, out_buf);
 
