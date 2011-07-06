@@ -14,8 +14,11 @@ struct pt_sem uart_mutex;
 #define UART_TX_NOSIGNAL(pt, buf) \
   PT_WAIT_UNTIL(pt, uart_tx_str(buf));
 
+#define UART_TX_PGM_NOSIGNAL(pt, pgm, buf) \
+  PT_WAIT_UNTIL(pt, uart_tx_pgmstr(pgm, buf));
+
 #define UART_TX_PGM(pt, pgm, buf) \
-  PT_WAIT_UNTIL(pt, uart_tx_pgmstr(pgm, buf)); \
+  UART_TX_PGM_NOSIGNAL(pt, pgm, buf); \
   UART_SIGNAL(pt);
 
 #define UART_TX(pt, buf) \

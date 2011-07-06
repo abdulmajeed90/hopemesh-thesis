@@ -18,8 +18,7 @@
 #define MAX_CMD_BUF 80
 #define MAX_OUT_BUF 256
 
-const PROGMEM char pgm_bootmsg[] =
-    "\x1b[31mHopeMesh booted and ready ...\x1b[37m\n\r";
+const PROGMEM char pgm_bootmsg[] = "HopeMesh ready ...\n\r";
 
 const PROGMEM char pgm_help[] = "Help:\n\r"
     "  ?: Help\n\r"
@@ -33,12 +32,12 @@ const PROGMEM char pgm_list[] = "No nodes available\n\r";
 
 const PROGMEM char pgm_ok[] = "OK\n\r";
 
-const PROGMEM char pgm_prompt[] = "$ ";
-
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
     "error: src=0x%x, line=%d\n\r"
     "rfm12: 0x%x\n\r"
     "debug: 0x%x\n\r";
+
+static const char txt_prompt[] = "$ ";
 
 typedef PT_THREAD((*cmd_fn))(void);
 static char *out_buf, *cmd_buf;
@@ -140,7 +139,6 @@ shell_data_available(void)
       case '\n': // enter
       case '\r':
         *cmd = '\0';
-        cmd_fn_instance = shell_data_parse();
         cmd = cmd_buf;
         break;
 
@@ -182,14 +180,16 @@ PT_THREAD(shell(void))
   PT_BEGIN(&pt_main);
 
   UART_WAIT(&pt_main);
-  UART_TX_PGM(&pt_main, pgm_prompt, out_buf);
+  UART_TX_PGM_NOSIGNAL(&pt_main, pgm_bootmsg, out_buf);
+  UART_TX(&pt_main, txt_prompt);
 
   while (true) {
     PT_WAIT_UNTIL(&pt_main, shell_data_available());
+    cmd_fn_instance = shell_data_parse();
     PT_WAIT_THREAD(&pt_main, cmd_fn_instance());
 
     UART_WAIT(&pt_main);
-    UART_TX_PGM(&pt_main, pgm_prompt, out_buf);
+    UART_TX(&pt_main, txt_prompt);
   }
 
   PT_END(&pt_main);
