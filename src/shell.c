@@ -40,7 +40,7 @@ const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
 static const char txt_prompt[] = "$ ";
 
 typedef PT_THREAD((*cmd_fn))(void);
-static char *out_buf, *cmd_buf;
+static char out_buf[MAX_OUT_BUF], cmd_buf[MAX_CMD_BUF];
 static char *cmd;
 static cmd_fn cmd_fn_instance;
 static struct pt pt_main, pt_cmd;
@@ -168,9 +168,6 @@ shell_data_available(void)
 void
 shell_init(void)
 {
-  cmd_buf = stralloc(MAX_CMD_BUF);
-  out_buf = stralloc(MAX_OUT_BUF);
-
   cmd = cmd_buf;
 
   PT_INIT(&pt_main);
