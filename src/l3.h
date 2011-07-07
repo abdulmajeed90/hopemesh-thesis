@@ -19,4 +19,7 @@ l3_rx(char *dest));
 PT_THREAD(
 l3_thread(void));
 
+void
+l3_timer_cb(void);
+
 #endif

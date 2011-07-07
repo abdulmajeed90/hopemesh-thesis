@@ -62,7 +62,7 @@ PT_THREAD(l3_thread(void))
 }
 
 void
-ogm_timer_cb(void)
+l3_timer_cb(void)
 {
   ogm_tx = true;
 }
@@ -76,5 +76,5 @@ l3_init(void)
   PT_SEM_INIT(&mutex, 1);
 
   ogm_tx = false;
-  timer_register_cb(ogm_timer_cb);
+  timer_register_cb(l3_timer_cb);
 }

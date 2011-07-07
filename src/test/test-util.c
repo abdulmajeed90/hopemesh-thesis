@@ -44,7 +44,7 @@ curses_init(void)
   spi_win = newwin(0, 0, 0, 0);
   scrollok(spi_win, true);
   spi_panel = new_panel(spi_win);
-  timeout(1);
+  timeout(3);
 #endif
 }
 
@@ -59,6 +59,7 @@ curses_getch(uint8_t *dest)
 
   switch (ch) {
     case ERR:
+      // no key was pressed
       break;
     case KEY_F(2):
       hide_panel(spi_panel);

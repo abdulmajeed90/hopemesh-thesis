@@ -3,15 +3,6 @@
 
 #include <stdint.h>
 
-const char *
-debug_getstr(void);
-
-void
-debug_char(char what);
-
-void
-debug_strclear(void);
-
 void
 debug_cnt(void);
 

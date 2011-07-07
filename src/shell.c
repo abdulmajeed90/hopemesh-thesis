@@ -77,7 +77,12 @@ PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  memcpy(out_buf, cmd_buf, strlen(cmd_buf) + 1);
+  uint8_t start = 1;
+  if (cmd_buf[1] == ' ') {
+    start += 1;
+  }
+  memcpy(out_buf, cmd_buf + start, strlen(cmd_buf) - start + 1);
+
   PT_WAIT_THREAD(&pt_cmd, l3_tx(out_buf));
 
   UART_WAIT(&pt_cmd);
@@ -126,6 +131,9 @@ shell_data_parse(void)
       return shell_config;
     case 'd':
       return shell_debug;
+    case 'o':
+      l3_timer_cb();
+      return NULL;
     default:
       return shell_help;
   }
@@ -185,7 +193,10 @@ PT_THREAD(shell(void))
   while (true) {
     PT_WAIT_UNTIL(&pt_main, shell_data_available());
     cmd_fn_instance = shell_data_parse();
-    PT_WAIT_THREAD(&pt_main, cmd_fn_instance());
+
+    if (cmd_fn_instance != NULL) {
+      PT_WAIT_THREAD(&pt_main, cmd_fn_instance());
+    }
 
     UART_WAIT(&pt_main);
     UART_TX(&pt_main, txt_prompt);
