@@ -1,6 +1,7 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#include <stdint.h>
 #include <avr/io.h>
 
 #define UCSRB UCSR0B
@@ -42,5 +43,8 @@ config_get(uint8_t index);
 
 void
 config_init(void);
+
+void
+config_set(uint8_t index, uint16_t value);
 
 #endif

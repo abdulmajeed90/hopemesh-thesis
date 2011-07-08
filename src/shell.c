@@ -15,6 +15,7 @@
 #include "rfm12.h"
 #include "spi.h"
 #include "clock.h"
+#include "config.h"
 
 #define MAX_CMD_BUF 80
 #define MAX_OUT_BUF 256
@@ -50,18 +51,14 @@ static struct pt pt_main, pt_cmd;
 PT_THREAD(shell_debug)(void)
 {
   PT_BEGIN(&pt_cmd);
-
-  uint16_t radio_status = rfm12_status();
-  uint16_t debug = debug_get_cnt();
+  UART_WAIT(&pt_cmd);
 
   sprintf_P(
       out_buf,
       pgm_wd,
-      watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), radio_status, debug, clock_get_time());
+      watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), rfm12_status(), debug_get_cnt(), clock_get_time());
 
-  UART_WAIT(&pt_cmd);
   UART_TX(&pt_cmd, out_buf);
-
   PT_END(&pt_cmd);
 }
 
@@ -104,20 +101,23 @@ PT_THREAD(shell_help)(void)
 }
 
 static uint8_t i;
-
 PT_THREAD(shell_config)(void)
 {
   PT_BEGIN(&pt_cmd);
-
   UART_WAIT(&pt_cmd);
 
-  for (i = 0; i < MAX_CONFIGS; i++) {
-    sprintf(out_buf, "0x%04x\n\r", config_get(i));
-    UART_TX_NOSIGNAL(&pt_cmd, out_buf);
+  int cfg_i, cfg_val;
+  if (2 == sscanf(cmd_buf, "c %d 0x%x", &cfg_i, &cfg_val)) {
+    config_set(cfg_i, cfg_val);
+    UART_TX_PGM_NOSIGNAL(&pt_cmd, pgm_ok, out_buf);
+  } else {
+    for (i = 0; i < MAX_CONFIGS; i++) {
+      sprintf(out_buf, "0x%04x\n\r", config_get(i));
+      UART_TX_NOSIGNAL(&pt_cmd, out_buf);
+    }
   }
 
   UART_SIGNAL(&pt_cmd);
-
   PT_END(&pt_cmd);
 }
 
@@ -134,7 +134,7 @@ shell_data_parse(void)
     case 'd':
       return shell_debug;
     case 'o':
-      l3_timer_cb();
+      l3_send_ogm();
       return NULL;
     default:
       return shell_help;

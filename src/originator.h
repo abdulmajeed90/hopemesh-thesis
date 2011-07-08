@@ -13,7 +13,7 @@ void
 ogm_free(ogm_packet_t *p);
 
 void
-l3_timer_cb(void);
+l3_send_ogm(void);
 
 void
 ogm_init(void);

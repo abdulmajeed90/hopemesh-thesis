@@ -20,6 +20,6 @@ PT_THREAD(
 l3_thread(void));
 
 void
-l3_timer_cb(void);
+l3_send_ogm(void);
 
 #endif
