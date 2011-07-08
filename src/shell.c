@@ -14,6 +14,7 @@
 #include "l3.h"
 #include "rfm12.h"
 #include "spi.h"
+#include "clock.h"
 
 #define MAX_CMD_BUF 80
 #define MAX_OUT_BUF 256
@@ -35,7 +36,8 @@ const PROGMEM char pgm_ok[] = "OK\n\r";
 const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
     "error: src=0x%x, line=%d\n\r"
     "rfm12: 0x%x\n\r"
-    "debug: 0x%x\n\r";
+    "debug: 0x%x\n\r"
+    "uptime: %d\n\r";
 
 static const char txt_prompt[] = "$ ";
 
@@ -55,7 +57,7 @@ PT_THREAD(shell_debug)(void)
   sprintf_P(
       out_buf,
       pgm_wd,
-      watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), radio_status, debug);
+      watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), radio_status, debug, clock_get_time());
 
   UART_WAIT(&pt_cmd);
   UART_TX(&pt_cmd, out_buf);

@@ -82,11 +82,10 @@ mac_rx_rfm12(rfm12_rx_t *rx)
 PT_THREAD(mac_tx(void))
 {
   PT_BEGIN(&pt);
+  PT_WAIT_THREAD(&pt, rfm12_lock());
 
   state = PREAMBLE;
   p = preamble;
-
-  PT_WAIT_THREAD(&pt, rfm12_lock());
 
   if (config_get(CONFIG_FLAGS) & (1 << CONFIG_FLAG_COLLISION_DETECTION)) {
     PT_WAIT_UNTIL(&pt, rfm12_is_carrier_free());
