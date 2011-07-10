@@ -6,11 +6,7 @@
 #include <stdint.h>
 #include "pt.h"
 #include "mac.h"
-
-typedef enum
-{
-  UNICAST, BROADCAST
-} llc_packet_type_t;
+#include "net.h"
 
 bool
 llc_tx_mac(uint8_t *dest);
@@ -22,7 +18,7 @@ void
 llc_init(void);
 
 bool
-llc_rx(uint8_t *dest, llc_packet_type_t *type);
+llc_rx(llc_packet_t *dest);
 
 PT_THREAD(
 llc_tx(llc_packet_type_t type, uint8_t *data, uint16_t len));

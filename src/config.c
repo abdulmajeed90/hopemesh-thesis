@@ -10,6 +10,8 @@ static uint16_t int_settings[MAX_CONFIGS];
 static uint16_t EEMEM int_settings_eemem[MAX_CONFIGS] = {
 // CONFIG_NODE_ADDR
     NODE_ADDR,
+    // CONFIG_TTL
+    10,
     // CONFIG_FLAGS
     0x0000
     // | (1 << CONFIG_FLAG_RSSI_DETECTION)

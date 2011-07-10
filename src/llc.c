@@ -17,19 +17,11 @@ typedef enum
   LLC_STATE_HEADER, LLC_STATE_DATA, LLC_STATE_ABORTED, LLC_STATE_FIN
 } llc_state_e;
 
-typedef struct
-{
-  llc_packet_type_t type :4;
-  uint16_t len :12;
-  uint16_t crc;
-} llc_packet_header_t;
-
 #define LLC_PACKET_HEADER_LEN_SIZE (sizeof(uint16_t))
 
 typedef struct
 {
-  llc_packet_header_t header;
-  uint8_t *data;
+  llc_packet_t packet;
   uint16_t cnt;
   bool hasnext;
   uint8_t nextbyte;
@@ -38,7 +30,7 @@ typedef struct
 
 static llc_state_t state_tx, state_rx;
 static uint8_t buf_rx[MAX_BUF_LEN];
-static bool needspoll_rx;
+static bool needs_processing;
 
 static inline void
 llc_tx_frame(llc_state_t *s)
@@ -49,18 +41,18 @@ llc_tx_frame(llc_state_t *s)
 
   switch (s->state) {
     case (LLC_STATE_HEADER):
-      pp = ((uint8_t *) &s->header) + pos;
+      pp = ((uint8_t *) &s->packet) + pos;
       s->nextbyte = *pp;
-      if (pos == sizeof(llc_packet_header_t) - 1) {
+      if (pos == sizeof(llc_packet_t) - sizeof(uint8_t *) - 1) {
         s->state = LLC_STATE_DATA;
       }
       break;
 
     case (LLC_STATE_DATA):
-      pos -= 3;
+      pos -= sizeof(llc_packet_t) - sizeof(uint8_t *);
 
-      s->nextbyte = *s->data++;
-      if (pos == s->header.len) {
+      s->nextbyte = *s->packet.data++;
+      if (pos == s->packet.len) {
         s->state = LLC_STATE_FIN;
         s->hasnext = false;
       }
@@ -94,14 +86,14 @@ llc_rx_frame(llc_state_t *s)
 
   switch (s->state) {
     case (LLC_STATE_HEADER):
-      pp = ((uint8_t *) &s->header) + pos;
+      pp = ((uint8_t *) &s->packet) + pos;
 
       if ((pos == LLC_PACKET_HEADER_LEN_SIZE - 1)
-          && (s->header.len > MAX_BUF_LEN)) {
+          && (s->packet.len > MAX_BUF_LEN)) {
         s->state = LLC_STATE_ABORTED;
       }
 
-      if (pos == sizeof(llc_packet_header_t) - 1) {
+      if (pos == sizeof(llc_packet_t) - sizeof(uint8_t *) - 1) {
         s->state = LLC_STATE_DATA;
       }
 
@@ -109,16 +101,16 @@ llc_rx_frame(llc_state_t *s)
       break;
 
     case (LLC_STATE_DATA):
-      pos -= 3;
+      pos -= sizeof(llc_packet_t) - sizeof(uint8_t *);
 
-      if (pos >= MAX_BUF_LEN) {
+      if (pos >= MAX_BUF_LEN - 1) {
         // received more bytes than possible,
         // therefore abort reception
         s->hasnext = false;
         s->state = LLC_STATE_ABORTED;
       } else {
-        s->data[pos - 1] = s->nextbyte;
-        if (pos == s->header.len) {
+        s->packet.data[pos] = s->nextbyte;
+        if (pos == s->packet.len - 1) {
           s->state = LLC_STATE_FIN;
           s->hasnext = false;
         }
@@ -138,16 +130,16 @@ llc_rx_reset(llc_state_t *s)
   s->hasnext = false;
   s->nextbyte = 0;
 
-  s->header.len = 0;
-  s->data = buf_rx;
-  s->header.crc = 0xffff;
+  s->packet.len = 0;
+  s->packet.data = buf_rx;
+  s->packet.crc = 0xffff;
 }
 
 void
 llc_rx_mac(mac_rx_t *mac_rx)
 {
-  if (needspoll_rx) {
-    // drop packet, because there is a packet not being proceeded
+  if (needs_processing) {
+    // drop byte, because there is still a previous packet not being processed
     return;
   }
 
@@ -163,7 +155,7 @@ llc_rx_mac(mac_rx_t *mac_rx)
 
     case (MAC_RX_FIN):
       if (state_rx.state == LLC_STATE_FIN) {
-        needspoll_rx = true;
+        needs_processing = true;
       } else {
         llc_rx_reset(&state_rx);
       }
@@ -176,28 +168,31 @@ llc_rx_mac(mac_rx_t *mac_rx)
 }
 
 bool
-llc_rx(uint8_t *dest, llc_packet_type_t *type)
+llc_rx(llc_packet_t *dest)
 {
   bool packet_arrived = false;
 
-  if (needspoll_rx) {
+  if (needs_processing) {
     uint16_t crc = 0xffff;
-    crc = _crc16_update(crc, (uint8_t) (state_rx.header.len >> 8));
-    crc = _crc16_update(crc, (uint8_t) state_rx.header.len);
+    crc = _crc16_update(crc,
+        (uint8_t) (state_rx.packet.len >> sizeof(uint8_t) * 8));
+    crc = _crc16_update(crc, (uint8_t) state_rx.packet.len);
 
-    uint8_t *data = state_rx.data;
-    for (uint16_t i = 0; i < state_rx.header.len; i++) {
+    uint8_t *data = state_rx.packet.data;
+    for (uint16_t i = 0; i < state_rx.packet.len; i++) {
       crc = _crc16_update(crc, *data++);
     }
 
-    if (crc == state_rx.header.crc) {
-      memcpy(dest, state_rx.data, state_rx.header.len);
-      *type = state_rx.header.type;
+    if (crc == state_rx.packet.crc) {
+      uint8_t *buf = dest->data;
+      memcpy(dest, &state_rx.packet, sizeof(llc_packet_t));
+      memcpy(buf, state_rx.packet.data, state_rx.packet.len);
+      dest->data = buf;
       packet_arrived = true;
     }
 
     llc_rx_reset(&state_rx);
-    needspoll_rx = false;
+    needs_processing = false;
   }
 
   return packet_arrived;
@@ -213,16 +208,16 @@ PT_THREAD(llc_tx(llc_packet_type_t type, uint8_t *data, uint16_t len))
 
   state_tx.cnt = 0;
   state_tx.state = LLC_STATE_HEADER;
-  state_tx.data = data;
-  state_tx.header.len = len;
-  state_tx.header.type = type;
+  state_tx.packet.data = data;
+  state_tx.packet.len = len;
+  state_tx.packet.type = type;
 
-  state_tx.header.crc = 0xffff;
-  state_tx.header.crc = _crc16_update(state_tx.header.crc,
+  state_tx.packet.crc = 0xffff;
+  state_tx.packet.crc = _crc16_update(state_tx.packet.crc,
       (uint8_t) (len >> 8));
-  state_tx.header.crc = _crc16_update(state_tx.header.crc, (uint8_t) len);
+  state_tx.packet.crc = _crc16_update(state_tx.packet.crc, (uint8_t) len);
   for (uint16_t i = 0; i < len; i++) {
-    state_tx.header.crc = _crc16_update(state_tx.header.crc, *data++);
+    state_tx.packet.crc = _crc16_update(state_tx.packet.crc, *data++);
   }
 
   PT_WAIT_THREAD(&pt_tx, mac_tx());
@@ -234,5 +229,5 @@ llc_init(void)
 {
   PT_INIT(&pt_tx);
   llc_rx_reset(&state_rx);
-  needspoll_rx = false;
+  needs_processing = false;
 }

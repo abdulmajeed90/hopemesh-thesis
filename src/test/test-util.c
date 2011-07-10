@@ -17,12 +17,16 @@ static uint8_t row;
 void
 curses_spi_nl(void)
 {
+#ifdef USE_NCURSES
   if ((cnt % 10) == 0) {
     cnt = 0;
     wprintw(curses_get_spi_window(), "\n");
     wprintw(curses_get_spi_window(), LINE_FORMAT, row++);
   }
   cnt++;
+#else
+  printf("\n");
+#endif
 }
 
 WINDOW *

@@ -4,7 +4,8 @@ CFLAGS=-Wall -Wno-unused-but-set-variable
 CFLAGS+=-std=gnu99 -I. -g
 CFLAGS+=-DLC_INCLUDE='"../lc-addrlabels.h"'
 CFLAGS+=-DF_CPU=16000000UL
- 
+CFLAGS+=-Wl,--wrap=llc_rx
+
 LIBS=
 
 CFLAGS+=$(shell ncurses5-config --cflags)
@@ -14,7 +15,8 @@ DEPS=\
 	avr-config.o avr-rfm12.o avr-l3.o avr-mac.o \
     avr-llc.o avr-debug.o avr-hamming.o avr-ringbuf.o avr-timer.o \
     avr-shell.o avr-clock.o avr-uart.o avr-util.o avr-rxthread.o \
-    test-util.o mock-watchdog.o mock-crc16.o mock-io.o mock-interrupt.o mock-spi.o
+    test-util.o mock-watchdog.o mock-crc16.o mock-io.o mock-interrupt.o mock-spi.o \
+    intercept-llc.o
 
 all: test-shell
 
