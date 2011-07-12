@@ -20,9 +20,9 @@
 #define MAX_CMD_BUF 80
 #define MAX_OUT_BUF 256
 
-const PROGMEM char pgm_bootmsg[] = "HopeMesh ready ...\n\r";
+static const char bootmsg[] = "HopeMesh ready ...\n\r";
 
-const PROGMEM char pgm_help[] = "Help:\n\r"
+static const char help[] = "Help:\n\r"
     "  ?: Help\n\r"
     "  l: List nodes\n\r"
     "  c [key] [value]: Configure [key] with [value]\n\r"
@@ -30,11 +30,9 @@ const PROGMEM char pgm_help[] = "Help:\n\r"
     "  d: Debug info\n\r"
     "  s [node] [message]: Send a [message] to [node]\n\r";
 
-const PROGMEM char pgm_list[] = "No nodes available\n\r";
+static const char ok[] = "OK\n\r";
 
-const PROGMEM char pgm_ok[] = "OK\n\r";
-
-const PROGMEM char pgm_wd[] = "MCUCSR: 0x%x\n\r"
+static const char debug[] = "MCUCSR: 0x%x\n\r"
     "error: src=0x%x, line=%d\n\r"
     "rfm12: 0x%x\n\r"
     "debug: 0x%x\n\r"
@@ -48,15 +46,16 @@ static char *cmd;
 static cmd_fn cmd_fn_instance;
 static struct pt pt_main, pt_cmd;
 
+static uint16_t i;
+static route_t *route_table;
+
 PT_THREAD(shell_debug)(void)
 {
   PT_BEGIN(&pt_cmd);
   UART_WAIT(&pt_cmd);
 
-  sprintf_P(
-      out_buf,
-      pgm_wd,
-      watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), rfm12_status(), debug_get_cnt(), clock_get_time());
+  sprintf(out_buf, debug, watchdog_mcucsr(), watchdog_get_source(),
+      watchdog_get_line(), rfm12_status(), debug_get_cnt(), clock_get_time());
 
   UART_TX(&pt_cmd, out_buf);
   PT_END(&pt_cmd);
@@ -65,10 +64,19 @@ PT_THREAD(shell_debug)(void)
 PT_THREAD(shell_list)(void)
 {
   PT_BEGIN(&pt_cmd);
-
   UART_WAIT(&pt_cmd);
-  UART_TX_PGM(&pt_cmd, pgm_list, out_buf);
 
+  i = 0;
+  route_table = route_get();
+  while ((i != MAX_ROUTE_ENTRIES) && (route_table[i].neighbour_addr != 0)) {
+    sprintf(out_buf, "target_addr: 0x%x, neighbour_addr: 0x%x, seqno: %d\n\r",
+        route_table[i].target_add, route_table[i].neighbour_addr,
+        route_table[i].seqno);
+    UART_TX_NOSIGNAL(&pt_cmd, out_buf);
+    i++;
+  }
+
+  UART_SIGNAL(&pt_cmd);
   PT_END(&pt_cmd);
 }
 
@@ -85,7 +93,7 @@ PT_THREAD(shell_tx)(void)
   PT_WAIT_THREAD(&pt_cmd, l3_tx(out_buf));
 
   UART_WAIT(&pt_cmd);
-  UART_TX_PGM(&pt_cmd, pgm_ok, out_buf);
+  UART_TX(&pt_cmd, ok);
 
   PT_END(&pt_cmd);
 }
@@ -95,12 +103,11 @@ PT_THREAD(shell_help)(void)
   PT_BEGIN(&pt_cmd);
 
   UART_WAIT(&pt_cmd);
-  UART_TX_PGM(&pt_cmd, pgm_help, out_buf);
+  UART_TX(&pt_cmd, help);
 
   PT_END(&pt_cmd);
 }
 
-static uint8_t i;
 PT_THREAD(shell_config)(void)
 {
   PT_BEGIN(&pt_cmd);
@@ -109,7 +116,7 @@ PT_THREAD(shell_config)(void)
   int cfg_i, cfg_val;
   if (2 == sscanf(cmd_buf, "c %d 0x%x", &cfg_i, &cfg_val)) {
     config_set(cfg_i, cfg_val);
-    UART_TX_PGM_NOSIGNAL(&pt_cmd, pgm_ok, out_buf);
+    UART_TX_NOSIGNAL(&pt_cmd, ok);
   } else {
     for (i = 0; i < MAX_CONFIGS; i++) {
       sprintf(out_buf, "0x%04x\n\r", config_get(i));
@@ -189,7 +196,7 @@ PT_THREAD(shell(void))
   PT_BEGIN(&pt_main);
 
   UART_WAIT(&pt_main);
-  UART_TX_PGM_NOSIGNAL(&pt_main, pgm_bootmsg, out_buf);
+  UART_TX_NOSIGNAL(&pt_main, bootmsg);
   UART_TX(&pt_main, txt_prompt);
 
   while (true) {

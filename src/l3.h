@@ -6,6 +6,16 @@
 #include <stdbool.h>
 
 #include "pt.h"
+#include "net.h"
+
+#define MAX_ROUTE_ENTRIES 255
+
+typedef struct
+{
+  addr_t target_add;
+  addr_t neighbour_addr;
+  uint16_t seqno;
+} route_t;
 
 void
 l3_init(void);
@@ -19,7 +29,9 @@ l3_rx(char *dest));
 PT_THREAD(
 l3_thread(void));
 
-void
-l3_send_ogm(void);
+void l3_send_ogm(void);
+
+route_t *
+route_get(void);
 
 #endif

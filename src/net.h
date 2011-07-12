@@ -1,8 +1,6 @@
 #ifndef __NET_H__
 #define __NET_H__
 
-#define OGM_VERSION 1
-
 typedef enum
 {
   UNICAST, BROADCAST
@@ -17,6 +15,8 @@ typedef struct
 } llc_packet_t;
 
 typedef uint16_t addr_t;
+
+#define OGM_VERSION 1
 
 #define OGM_FLAG_IS_DIRECT 0
 #define OGM_FLAG_UNIDIRECTIONAL 1

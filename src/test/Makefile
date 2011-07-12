@@ -4,27 +4,30 @@ CFLAGS=-Wall -Wno-unused-but-set-variable
 CFLAGS+=-std=gnu99 -I. -g
 CFLAGS+=-DLC_INCLUDE='"../lc-addrlabels.h"'
 CFLAGS+=-DF_CPU=16000000UL
-CFLAGS+=-Wl,--wrap=llc_rx
 
 LIBS=
 
-CFLAGS+=$(shell ncurses5-config --cflags)
-LIBS+=-lpanel $(shell ncurses5-config --libs)
+CFLAGS_CURSES=$(shell ncurses5-config --cflags)
+LIBS_CURSES=-lpanel $(shell ncurses5-config --libs)
 
 DEPS=\
 	avr-config.o avr-rfm12.o avr-l3.o avr-mac.o \
     avr-llc.o avr-debug.o avr-hamming.o avr-ringbuf.o avr-timer.o \
     avr-shell.o avr-clock.o avr-uart.o avr-util.o avr-rxthread.o \
-    test-util.o mock-watchdog.o mock-crc16.o mock-io.o mock-interrupt.o mock-spi.o \
-    intercept-llc.o
+    test-util.o mock-watchdog.o mock-crc16.o mock-io.o mock-interrupt.o mock-spi.o
 
 all: test-shell
 
 test-shell: CFLAGS+=-DUSE_NCURSES=1
-test-shell: test-shell.o $(DEPS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+test-shell: CFLAGS+=-Wl,--wrap=llc_rx
+test-shell: CFLAGS+=$(CFLAGS_CURSES)
+test-shell: LIBS+=$(LIBS_CURSES)
+test-shell: test-shell.o $(DEPS) intercept-llc.o
 
-test-tx: test-tx.o $(DEPS)
+test-batman: CFLAGS+=-Wl,--wrap=llc_rx
+test-batman: CFLAGS+=-Wl,--wrap=llc_tx
+
+test-%: test-%.o $(DEPS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 avr-%.o: ../%.c

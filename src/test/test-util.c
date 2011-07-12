@@ -7,12 +7,13 @@
 
 #define LINE_FORMAT "%0003d: "
 
+#ifdef USE_NCURSES
 static PANEL *stdscr_panel;
 static PANEL *spi_panel;
 static WINDOW *spi_win;
-
 static uint8_t cnt;
 static uint8_t row;
+#endif
 
 void
 curses_spi_nl(void)
@@ -29,11 +30,13 @@ curses_spi_nl(void)
 #endif
 }
 
+#ifdef USE_NCURSES
 WINDOW *
 curses_get_spi_window(void)
 {
   return spi_win;
 }
+#endif
 
 void
 curses_init(void)
@@ -74,6 +77,14 @@ curses_getch(uint8_t *dest)
     case KEY_F(12):
       curses_close();
       exit(0);
+      break;
+    case KEY_BACKSPACE:
+      hide_panel(spi_panel);
+
+      move(getcury(stdscr), getcurx(stdscr) - 1);
+      delch();
+      *dest = '\b';
+      result = true;
       break;
     case '\n':
       if (!panel_hidden(spi_panel)) {
