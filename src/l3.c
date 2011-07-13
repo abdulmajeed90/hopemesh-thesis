@@ -13,7 +13,7 @@ static bool send_ogm;
 static ogm_packet_t ogm_tx;
 static llc_packet_t rx;
 static ogm_packet_t *ogm_rx;
-static uint16_t seqno = 0;
+static uint16_t seqno = 1;
 static route_t route_table[MAX_ROUTE_ENTRIES];
 
 route_t *
@@ -78,8 +78,10 @@ PT_THREAD(l3_rx(char *dest))
         // RFC 5.1.4 -> 5.3
         if (ogm_rx->originator_addr == config_get(CONFIG_NODE_ADDR)) {
           // add direct neighbour to routing table. a bidirectional connection exists
-          if (ogm_rx->flags & (1 << OGM_FLAG_IS_DIRECT)) {
+          if (ogm_rx->flags & (1 << OGM_FLAG_IS_DIRECT)
+              && !(route_is_bidirectional(ogm_rx))) {
             ogm_rx->originator_addr = ogm_rx->sender_addr;
+            ogm_rx->seqno = 0;
             route_add(ogm_rx);
           }
         } else {
