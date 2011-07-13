@@ -6,6 +6,7 @@ CFLAGS+=-DLC_INCLUDE='"../lc-addrlabels.h"'
 CFLAGS+=-DF_CPU=16000000UL
 
 LIBS=
+LDFLAGS=
 
 CFLAGS_CURSES=$(shell ncurses5-config --cflags)
 LIBS_CURSES=-lpanel $(shell ncurses5-config --libs)
@@ -19,16 +20,16 @@ DEPS=\
 all: test-shell
 
 test-shell: CFLAGS+=-DUSE_NCURSES=1
-test-shell: CFLAGS+=-Wl,--wrap=llc_rx
 test-shell: CFLAGS+=$(CFLAGS_CURSES)
 test-shell: LIBS+=$(LIBS_CURSES)
+test-shell: LDFLAGS+=-Wl,--wrap=llc_rx
 test-shell: test-shell.o $(DEPS) intercept-llc.o
 
-test-batman: CFLAGS+=-Wl,--wrap=llc_rx
-test-batman: CFLAGS+=-Wl,--wrap=llc_tx
+test-batman: LDFLAGS+=-Wl,--wrap=llc_rx
+test-batman: LDFLAGS+=-Wl,--wrap=llc_tx
 
 test-%: test-%.o $(DEPS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 avr-%.o: ../%.c
 	$(CC) -o $@ -c $< $(CFLAGS)

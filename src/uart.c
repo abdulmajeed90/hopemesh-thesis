@@ -80,7 +80,7 @@ uart_tx_str(const char *str)
     result = false;
   } else {
     p = NULL;
-    result = +true;
+    result = true;
   }
 
   uart_enable_udrie_isr();

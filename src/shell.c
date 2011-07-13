@@ -20,9 +20,9 @@
 #define MAX_CMD_BUF 80
 #define MAX_OUT_BUF 256
 
-static const char bootmsg[] = "HopeMesh ready ...\n\r";
+static PROGMEM const char pgm_bootmsg[] = "HopeMesh ready ...\n\r";
 
-static const char help[] = "Help:\n\r"
+static PROGMEM const char pgm_help[] = "Help:\n\r"
     "  ?: Help\n\r"
     "  l: List nodes\n\r"
     "  c [key] [value]: Configure [key] with [value]\n\r"
@@ -32,7 +32,7 @@ static const char help[] = "Help:\n\r"
 
 static const char ok[] = "OK\n\r";
 
-static const char debug[] = "MCUCSR: 0x%x\n\r"
+static PROGMEM const char pgm_debug[] = "MCUCSR: 0x%x\n\r"
     "error: src=0x%x, line=%d\n\r"
     "rfm12: 0x%x\n\r"
     "debug: 0x%x\n\r"
@@ -54,8 +54,10 @@ PT_THREAD(shell_debug)(void)
   PT_BEGIN(&pt_cmd);
   UART_WAIT(&pt_cmd);
 
-  sprintf(out_buf, debug, watchdog_mcucsr(), watchdog_get_source(),
-      watchdog_get_line(), rfm12_status(), debug_get_cnt(), clock_get_time());
+  sprintf_P(
+      out_buf,
+      pgm_debug,
+      watchdog_mcucsr(), watchdog_get_source(), watchdog_get_line(), rfm12_status(), debug_get_cnt(), clock_get_time());
 
   UART_TX(&pt_cmd, out_buf);
   PT_END(&pt_cmd);
@@ -103,7 +105,7 @@ PT_THREAD(shell_help)(void)
   PT_BEGIN(&pt_cmd);
 
   UART_WAIT(&pt_cmd);
-  UART_TX(&pt_cmd, help);
+  UART_TX_PGM(&pt_cmd, pgm_help, out_buf);
 
   PT_END(&pt_cmd);
 }
@@ -196,7 +198,7 @@ PT_THREAD(shell(void))
   PT_BEGIN(&pt_main);
 
   UART_WAIT(&pt_main);
-  UART_TX_NOSIGNAL(&pt_main, bootmsg);
+  UART_TX_PGM_NOSIGNAL(&pt_main, pgm_bootmsg, out_buf);
   UART_TX(&pt_main, txt_prompt);
 
   while (true) {

@@ -12,9 +12,8 @@ void
 print_ogm(ogm_packet_t *ogm)
 {
   printf(
-      "sender_addr=0x%x, originator_addr=0x%x, flags=0x%x, seqno=%d, ttl=%d, version=%d\n",
-      ogm->sender_addr, ogm->originator_addr, ogm->flags, ogm->seqno, ogm->ttl,
-      ogm->version);
+      "sender_addr=0x%x, originator_addr=0x%x, flags=0x%x, seqno=%d, ttl=%d\n",
+      ogm->sender_addr, ogm->originator_addr, ogm->flags, ogm->seqno, ogm->ttl);
 }
 
 PT_THREAD(__wrap_llc_tx(llc_packet_type_t type, uint8_t *data, uint16_t len))
@@ -37,7 +36,7 @@ __wrap_llc_rx(llc_packet_t *dest)
       ogm.version = OGM_VERSION;
       ogm.flags = 0;
       ogm.ttl = config_get(CONFIG_TTL);
-      ogm.seqno = 0;
+      ogm.seqno = 90;
       ogm.originator_addr = 0x000b;
       ogm.sender_addr = 0x000b;
 
@@ -49,7 +48,7 @@ __wrap_llc_rx(llc_packet_t *dest)
       ogm.version = OGM_VERSION;
       ogm.flags = (1 << OGM_FLAG_UNIDIRECTIONAL) | (1 << OGM_FLAG_IS_DIRECT);
       ogm.ttl = 9;
-      ogm.seqno = 0;
+      ogm.seqno = 10;
       ogm.originator_addr = config_get(CONFIG_NODE_ADDR);
       ogm.sender_addr = 0x000c;
 
@@ -61,7 +60,7 @@ __wrap_llc_rx(llc_packet_t *dest)
       ogm.version = OGM_VERSION;
       ogm.flags = 0;
       ogm.ttl = 5;
-      ogm.seqno = 0;
+      ogm.seqno = 20;
       ogm.originator_addr = 0x000d;
       ogm.sender_addr = 0x000c;
 
@@ -73,7 +72,7 @@ __wrap_llc_rx(llc_packet_t *dest)
       ogm.version = OGM_VERSION;
       ogm.flags = 0;
       ogm.ttl = 5;
-      ogm.seqno = 0;
+      ogm.seqno = 33;
       ogm.originator_addr = 0x000e;
       ogm.sender_addr = 0x000c;
 
@@ -85,7 +84,7 @@ __wrap_llc_rx(llc_packet_t *dest)
       ogm.version = OGM_VERSION;
       ogm.flags = (1 << OGM_FLAG_UNIDIRECTIONAL) | (1 << OGM_FLAG_IS_DIRECT);
       ogm.ttl = 5;
-      ogm.seqno = 0;
+      ogm.seqno = 45;
       ogm.originator_addr = 0x000a;
       ogm.sender_addr = 0x000b;
 
@@ -117,6 +116,8 @@ main(int argc, char **argv)
 
   uint16_t i = 0;
   route_t *route_table = route_get();
+
+  printf("\nrouting table: \n");
   while ((i != MAX_ROUTE_ENTRIES) && (route_table[i].neighbour_addr != 0)) {
     printf("target_addr: 0x%x, neighbour_addr: 0x%x, seqno: %d\n",
         route_table[i].target_add, route_table[i].neighbour_addr,
