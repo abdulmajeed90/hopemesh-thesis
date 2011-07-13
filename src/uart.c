@@ -45,13 +45,6 @@ uart_init(void)
   PT_SEM_INIT(&uart_mutex, 1);
 }
 
-bool
-uart_tx(const char what)
-{
-  bool result = ringbuf_add(uart_out_buf, what);
-  return result;
-}
-
 static const char *p;
 
 bool
@@ -67,24 +60,30 @@ uart_tx_pgmstr(PGM_P str, char *buf)
 bool
 uart_tx_str(const char *str)
 {
+  uart_disable_udrie_isr();
   bool result = true;
 
   if (p == NULL) {
     p = str;
   }
 
-  if (*p) {
-    bool char_added = ringbuf_add(uart_out_buf, *p);
+  bool char_added = true;
 
+  while (*p && char_added) {
+    char_added = ringbuf_add(uart_out_buf, *p);
     if (char_added) {
       p++;
     }
+  }
 
+  if (*p) {
     result = false;
   } else {
     p = NULL;
+    result = +true;
   }
 
+  uart_enable_udrie_isr();
   return result;
 }
 
