@@ -1,7 +1,10 @@
 #include "../l3.h"
 #include "../net.h"
 #include "../config.h"
+#include "../timer.h"
+#include "../clock.h"
 #include "test-util.h"
+#include <avr/interrupt.h>
 
 static struct pt pt;
 static char buf[256];
@@ -11,15 +14,14 @@ ogm_packet_t ogm;
 void
 print_routing_table(void)
 {
-  uint16_t i = 0;
-  route_t *route_table = route_get();
+  route_t *r = route_get();
 
   printf("\nrouting table: \n");
-  while ((i != MAX_ROUTE_ENTRIES) && (route_table[i].neighbour_addr != 0)) {
-    printf("target_addr: 0x%x, neighbour_addr: 0x%x, seqno: %d\n",
-        route_table[i].target_add, route_table[i].neighbour_addr,
-        route_table[i].seqno);
-    i++;
+  while (r != NULL) {
+    printf(
+        "target_addr: 0x%x, gateway_addr: 0x%x, seqno: %u, cnt: %u, time: %u\n",
+        r->target_addr, r->gateway_addr, r->seqno, r->cnt, r->time);
+    r = r->next;
   }
   printf("\n");
 }
@@ -28,7 +30,7 @@ void
 print_ogm(ogm_packet_t *ogm)
 {
   printf(
-      "sender_addr=0x%x, originator_addr=0x%x, flags=0x%x, seqno=%d, ttl=%d\n",
+      "sender_addr=0x%x, originator_addr=0x%x, flags=0x%x, seqno=%u, ttl=%u\n",
       ogm->sender_addr, ogm->originator_addr, ogm->flags, ogm->seqno, ogm->ttl);
 }
 
@@ -99,7 +101,7 @@ __wrap_llc_rx(llc_packet_t *dest)
       break;
     case 4:
       ogm.version = OGM_VERSION;
-      ogm.flags = (1 << OGM_FLAG_IS_DIRECT);
+      ogm.flags = 0;
       ogm.ttl = 49;
       ogm.seqno = 23;
       ogm.originator_addr = 0x000d;
@@ -157,11 +159,23 @@ __wrap_llc_rx(llc_packet_t *dest)
       dest->len = sizeof(ogm);
       dest->data = (uint8_t *) &ogm;
       break;
+    case 9:
+      ogm.version = OGM_VERSION;
+      ogm.flags = 0;
+      ogm.ttl = 49;
+      ogm.seqno = 24;
+      ogm.originator_addr = 0x000d;
+      ogm.sender_addr = 0x000c;
+
+      dest->type = BROADCAST;
+      dest->len = sizeof(ogm);
+      dest->data = (uint8_t *) &ogm;
+      break;
     default:
       break;
   }
 
-  if (cnt++ < 9) {
+  if (cnt++ < 10) {
     printf("rx: ");
     print_ogm(&ogm);
 
@@ -174,8 +188,20 @@ int
 main(int argc, char **argv)
 {
   PT_INIT(&pt);
+  timer_init();
+  clock_init();
   config_init();
+  sei();
   config_set(0, 0x000a);
   l3_init();
   l3_rx(buf);
+
+  uint16_t i;
+  for (i = 0; i < 1000; i++) {
+    CALL_ISR(SIG_OVERFLOW0);
+    timer_thread();
+  }
+
+  print_routing_table();
+  printf("%u\n", clock_get_time());
 }

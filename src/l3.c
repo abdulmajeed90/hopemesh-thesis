@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "config.h"
 #include "pt-sem.h"
+#include "clock.h"
 
 static struct pt pt, pt_tx, pt_rx;
 static struct pt_sem mutex;
@@ -13,8 +14,8 @@ static bool send_ogm;
 static ogm_packet_t ogm_tx;
 static llc_packet_t rx;
 static ogm_packet_t *ogm_rx;
-static uint16_t seqno = 1;
-static route_t route_table[MAX_ROUTE_ENTRIES];
+static uint16_t seqno = 0;
+static route_t *route_table;
 
 route_t *
 route_get(void)
@@ -22,40 +23,81 @@ route_get(void)
   return route_table;
 }
 
+static inline void
+route_delete(route_t *entry)
+{
+  route_t *cur = NULL;
+  route_t *prev = NULL;
+
+  for (cur = route_table; cur != NULL; prev = cur, cur = cur->next) {
+    if (cur == entry) {
+      if (prev == NULL) {
+        route_table = cur->next;
+      } else {
+        prev->next = cur->next;
+      }
+
+      free(cur);
+      return;
+    }
+  }
+}
+
 static inline bool
 route_is_bidirectional(ogm_packet_t *ogm)
 {
-  uint16_t i = 0;
+  route_t *r = route_table;
 
-  while ((i != MAX_ROUTE_ENTRIES) && (route_table[i].neighbour_addr != 0)) {
-    if (route_table[i].neighbour_addr == ogm->sender_addr) {
+  while (r != NULL) {
+    if (r->gateway_addr == ogm->sender_addr) {
       return true;
-    } else {
-      i++;
     }
+
+    r = r->next;
   }
 
   return false;
 }
 
 static inline void
-route_add(ogm_packet_t *ogm)
+route_save_or_update(addr_t target_addr, addr_t gateway_addr, uint16_t seqno)
 {
-  uint16_t i = 0;
+  route_t *r = route_table;
+  route_t *prev = NULL;
+  uint16_t cnt = 0;
 
-  while ((i != MAX_ROUTE_ENTRIES) && (route_table[i].neighbour_addr != 0)) {
-    if (route_table[i].target_add == ogm->originator_addr) {
+  while (r != NULL) {
+    if ((r->target_addr == target_addr) && (r->gateway_addr == gateway_addr)) {
       break;
     } else {
-      i++;
+      cnt++;
+      prev = r;
+      r = r->next;
     }
   }
 
-  if (i != MAX_ROUTE_ENTRIES) {
-    route_table[i].target_add = ogm->originator_addr;
-    route_table[i].neighbour_addr = ogm->sender_addr;
-    route_table[i].seqno = ogm->seqno;
+  if (r == NULL) {
+    if (cnt != MAX_ROUTE_ENTRIES) {
+      r = malloc(sizeof(route_t));
+      r->cnt = 0;
+      r->next = NULL;
+      if (prev != NULL) {
+        prev->next = r;
+      }
+
+      if (route_table == NULL) {
+        route_table = r;
+      }
+    } else {
+      return;
+    }
   }
+
+  r->gateway_addr = gateway_addr;
+  r->target_addr = target_addr;
+  r->seqno = seqno;
+  r->time = clock_get_time();
+  r->cnt++;
 }
 
 PT_THREAD(l3_rx(char *dest))
@@ -69,29 +111,28 @@ PT_THREAD(l3_rx(char *dest))
       ogm_rx = (ogm_packet_t *) rx.data;
       bool examine_packet = false;
 
+      // RFC 5.2.1, 5.2.2 (5.2.3 not relevant)
       examine_packet = (ogm_rx->version == OGM_VERSION);
       examine_packet &= (ogm_rx->sender_addr != config_get(CONFIG_NODE_ADDR));
       examine_packet &= (ogm_rx->ttl > 0);
 
-      // RFC 5.1.1, 5.1.2 (5.1.3 not relevant)
       if (examine_packet) {
-        // RFC 5.1.4 -> 5.3
         if (ogm_rx->originator_addr == config_get(CONFIG_NODE_ADDR)) {
-          // add direct neighbour to routing table. a bidirectional connection exists
-          if (ogm_rx->flags & (1 << OGM_FLAG_IS_DIRECT)
-              && !(route_is_bidirectional(ogm_rx))) {
-            ogm_rx->originator_addr = ogm_rx->sender_addr;
-            ogm_rx->seqno = 0;
-            route_add(ogm_rx);
+          // RFC 5.2.4 -> 5.3
+          examine_packet = ogm_rx->flags & (1 << OGM_FLAG_IS_DIRECT);
+          examine_packet &= !route_is_bidirectional(ogm_rx);
+          if (examine_packet) {
+            route_save_or_update(ogm_rx->sender_addr, ogm_rx->sender_addr, 0);
           }
         } else {
-          // RFC 5.1.5
+          // RFC 5.2.5
           if (!(ogm_rx->flags & (1 << OGM_FLAG_UNIDIRECTIONAL))) {
             ogm_rx->flags = 0;
 
             if (route_is_bidirectional(ogm_rx)) {
-              // RFC 5.1.6
-              route_add(ogm_rx);
+              // RFC 5.2.6
+              route_save_or_update(ogm_rx->originator_addr, ogm_rx->sender_addr,
+                  ogm_rx->seqno);
             } else {
               // ogm is not in routing table, therefore unidirectional
               ogm_rx->flags |= (1 << OGM_FLAG_UNIDIRECTIONAL);
@@ -102,7 +143,7 @@ PT_THREAD(l3_rx(char *dest))
               ogm_rx->flags |= (1 << OGM_FLAG_IS_DIRECT);
             }
 
-            // RFC 5.1.7
+            // RFC 5.2.7
             ogm_rx->sender_addr = config_get(CONFIG_NODE_ADDR);
             ogm_rx->ttl--;
             PT_SEM_WAIT(&pt_rx, &mutex);
@@ -155,8 +196,20 @@ PT_THREAD(l3_thread(void))
 }
 
 void
-l3_send_ogm(void)
+l3_one_second_elapsed(void)
 {
+  uint16_t current_time = clock_get_time();
+  route_t *r = route_table;
+  route_t *next = NULL;
+
+  while (r != NULL) {
+    next = r->next;
+    if ((current_time - r->time) > PURGE_TIMEOUT) {
+      route_delete(r);
+    }
+    r = next;
+  }
+
   send_ogm = true;
 }
 
@@ -167,8 +220,8 @@ l3_init(void)
   PT_INIT(&pt_rx);
   PT_INIT(&pt);
   PT_SEM_INIT(&mutex, 1);
-  route_table[0].neighbour_addr = 0;
+  route_table = NULL;
 
   send_ogm = false;
-  timer_register_cb(l3_send_ogm);
+  timer_register_cb(l3_one_second_elapsed);
 }

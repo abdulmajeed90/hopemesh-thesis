@@ -33,10 +33,13 @@ static PROGMEM const char pgm_help[] = "Help:\n\r"
 static const char ok[] = "OK\n\r";
 
 static PROGMEM const char pgm_debug[] = "MCUCSR: 0x%x\n\r"
-    "error: src=0x%x, line=%d\n\r"
+    "error: src=0x%x, line=%u\n\r"
     "rfm12: 0x%x\n\r"
     "debug: 0x%x\n\r"
-    "uptime: %d\n\r";
+    "uptime: %u\n\r";
+
+static PROGMEM const char route_entry[] =
+    "target_addr: 0x%x, gateway_addr: 0x%x, seqno: %u, cnt: %u, time: %u\n\r";
 
 static const char txt_prompt[] = "$ ";
 
@@ -47,7 +50,7 @@ static cmd_fn cmd_fn_instance;
 static struct pt pt_main, pt_cmd;
 
 static uint16_t i;
-static route_t *route_table;
+static route_t *r;
 
 PT_THREAD(shell_debug)(void)
 {
@@ -69,13 +72,13 @@ PT_THREAD(shell_list)(void)
   UART_WAIT(&pt_cmd);
 
   i = 0;
-  route_table = route_get();
-  while ((i != MAX_ROUTE_ENTRIES) && (route_table[i].neighbour_addr != 0)) {
-    sprintf(out_buf, "target_addr: 0x%x, neighbour_addr: 0x%x, seqno: %d\n\r",
-        route_table[i].target_add, route_table[i].neighbour_addr,
-        route_table[i].seqno);
+  r = route_get();
+
+  while (r != NULL) {
+    sprintf_P(out_buf, route_entry,
+        r->target_addr, r->gateway_addr, r->seqno, r->cnt, r->time);
     UART_TX_NOSIGNAL(&pt_cmd, out_buf);
-    i++;
+    r = r->next;
   }
 
   UART_SIGNAL(&pt_cmd);
@@ -143,7 +146,7 @@ shell_data_parse(void)
     case 'd':
       return shell_debug;
     case 'o':
-      l3_send_ogm();
+      l3_one_second_elapsed();
       return NULL;
     default:
       return shell_help;

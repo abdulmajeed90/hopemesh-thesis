@@ -21,6 +21,9 @@ typedef uint16_t addr_t;
 #define OGM_FLAG_IS_DIRECT 0
 #define OGM_FLAG_UNIDIRECTIONAL 1
 
+#define BI_LINK_TIMEOUT 10
+#define PURGE_TIMEOUT 30
+
 typedef struct
 {
   uint8_t version :4;
