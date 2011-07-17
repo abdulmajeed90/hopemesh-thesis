@@ -1,5 +1,5 @@
-#ifndef __L3_H__
-#define __L3_H__
+#ifndef __BATMAN_H__
+#define __BATMAN_H__
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -21,18 +21,18 @@ typedef struct route_t
 } route_t;
 
 void
-l3_init(void);
+batman_init(void);
 
 PT_THREAD(
-l3_tx(const char *data));
+batman_tx(const char *data));
 
 PT_THREAD(
-l3_rx(char *dest));
+batman_rx(char *dest));
 
 PT_THREAD(
-l3_thread(void));
+batman_thread(void));
 
-void l3_one_second_elapsed(void);
+void batman_one_second_elapsed(void);
 
 route_t *
 route_get(void);

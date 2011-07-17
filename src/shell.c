@@ -11,7 +11,7 @@
 #include "watchdog.h"
 #include "error.h"
 #include "util.h"
-#include "l3.h"
+#include "batman.h"
 #include "rfm12.h"
 #include "spi.h"
 #include "clock.h"
@@ -95,7 +95,7 @@ PT_THREAD(shell_tx)(void)
   }
   memcpy(out_buf, cmd_buf + start, strlen(cmd_buf) - start + 1);
 
-  PT_WAIT_THREAD(&pt_cmd, l3_tx(out_buf));
+  PT_WAIT_THREAD(&pt_cmd, batman_tx(out_buf));
 
   UART_WAIT(&pt_cmd);
   UART_TX(&pt_cmd, ok);
@@ -146,7 +146,7 @@ shell_data_parse(void)
     case 'd':
       return shell_debug;
     case 'o':
-      l3_one_second_elapsed();
+      batman_one_second_elapsed();
       return NULL;
     default:
       return shell_help;

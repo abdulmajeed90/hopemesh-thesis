@@ -1,4 +1,4 @@
-#include "../l3.h"
+#include "../batman.h"
 #include "../net.h"
 #include "../config.h"
 #include "../timer.h"
@@ -193,8 +193,8 @@ main(int argc, char **argv)
   config_init();
   sei();
   config_set(0, 0x000a);
-  l3_init();
-  l3_rx(buf);
+  batman_init();
+  batman_rx(buf);
 
   uint16_t i;
   for (i = 0; i < 1000; i++) {

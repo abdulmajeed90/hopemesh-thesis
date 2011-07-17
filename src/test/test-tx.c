@@ -8,7 +8,7 @@
 #include "../llc.h"
 #include "../mac.h"
 #include "../rfm12.h"
-#include "../l3.h"
+#include "../batman.h"
 #include "../spi.h"
 #include "../config.h"
 #include "../timer.h"
@@ -53,7 +53,7 @@ PT_THREAD(rx(void))
 {
   PT_BEGIN(&pt_rx);
 
-  PT_WAIT_THREAD(&pt_rx, l3_rx(buf));
+  PT_WAIT_THREAD(&pt_rx, batman_rx(buf));
   _printf("RX: %s\n", buf);
 
   PT_END(&pt_rx);
@@ -64,19 +64,19 @@ PT_THREAD(tx(void))
   PT_BEGIN(&pt_tx);
   PT_WAIT_UNTIL(&pt_tx, !fin_tx);
 
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text2));
+  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) text2));
   _printf("TX: %s\n", text2);
   PT_YIELD(&pt_tx);
 
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) bytes));
+  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) bytes));
   _printf("TX: %s\n", bytes);
   PT_YIELD(&pt_tx);
 
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
+  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) text));
   _printf("TX: %s\n", text);
   PT_YIELD(&pt_tx);
 
-  PT_WAIT_THREAD(&pt_tx, l3_tx((char *) text));
+  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) text));
   _printf("TX: %s\n", text);
   PT_YIELD(&pt_tx);
 
@@ -97,7 +97,7 @@ mainloop(void)
     CALL_ISR(SIG_OVERFLOW0);
     CALL_ISR(SIG_INTERRUPT0);
     timer_thread();
-    l3_thread();
+    batman_thread();
     rx();
     tx();
     if (debug_get_cnt() == 10) {
@@ -116,7 +116,7 @@ main(int argc, char **argv)
   rfm12_init();
   mac_init();
   llc_init();
-  l3_init();
+  batman_init();
   config_init();
   PT_INIT(&pt_tx);
   PT_INIT(&pt_rx);

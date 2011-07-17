@@ -39,7 +39,7 @@ OBJDIR = .
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = main.c uart.c ringbuf.c watchdog.c shell.c spi.c util.c rfm12.c \
-      mac.c llc.c l3.c hamming.c debug.c rxthread.c timer.c \
+      mac.c llc.c batman.c hamming.c debug.c rxthread.c timer.c \
       config.c timer.c clock.c
 
 # List Assembler source files here.

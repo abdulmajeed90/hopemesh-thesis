@@ -13,7 +13,7 @@
 #include "../rfm12.h"
 #include "../mac.h"
 #include "../llc.h"
-#include "../l3.h"
+#include "../batman.h"
 #include "../clock.h"
 #include "../rxthread.h"
 
@@ -32,7 +32,7 @@ main(int argc, char **argv)
   rfm12_init();
   mac_init();
   llc_init();
-  l3_init();
+  batman_init();
   rx_thread_init();
   shell_init();
   sei();
@@ -41,7 +41,7 @@ main(int argc, char **argv)
 //    CALL_ISR(SIG_OVERFLOW0);
     CALL_ISR(SIG_INTERRUPT0);
     timer_thread();
-    l3_thread();
+    batman_thread();
 
     shell();
     uart_tx_thread();

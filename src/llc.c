@@ -5,7 +5,7 @@
 #include "llc.h"
 #include "mac.h"
 #include "hamming.h"
-#include "l3.h"
+#include "batman.h"
 #include "watchdog.h"
 
 #define MAX_BUF_LEN 256

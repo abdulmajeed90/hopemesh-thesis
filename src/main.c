@@ -12,7 +12,7 @@
 #include "rfm12.h"
 #include "mac.h"
 #include "llc.h"
-#include "l3.h"
+#include "batman.h"
 #include "rxthread.h"
 #include "timer.h"
 #include "clock.h"
@@ -79,7 +79,7 @@ main_init(void)
   rfm12_init();
   mac_init();
   llc_init();
-  l3_init();
+  batman_init();
   rx_thread_init();
 
   sei();
@@ -92,7 +92,7 @@ main(void)
 
   while (true) {
     shell();
-    l3_thread();
+    batman_thread();
     rx_thread();
     uart_tx_thread();
     watchdog();

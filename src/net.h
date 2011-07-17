@@ -22,7 +22,7 @@ typedef uint16_t addr_t;
 #define OGM_FLAG_UNIDIRECTIONAL 1
 
 #define BI_LINK_TIMEOUT 10
-#define PURGE_TIMEOUT 30
+#define PURGE_TIMEOUT 10
 
 typedef struct
 {
