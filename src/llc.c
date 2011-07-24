@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <string.h>
 #include <util/crc16.h>
 
@@ -8,20 +9,16 @@
 #include "batman.h"
 #include "watchdog.h"
 
-#define MAX_BUF_LEN 256
-
 static struct pt pt_tx;
 
 typedef enum
 {
-  LLC_STATE_HEADER, LLC_STATE_DATA, LLC_STATE_ABORTED, LLC_STATE_FIN
+  LLC_STATE_DATA, LLC_STATE_ABORTED, LLC_STATE_FIN
 } llc_state_e;
-
-#define LLC_PACKET_HEADER_LEN_SIZE (sizeof(uint16_t))
 
 typedef struct
 {
-  llc_packet_t packet;
+  packet_t *packet;
   uint16_t cnt;
   bool hasnext;
   uint8_t nextbyte;
@@ -29,7 +26,7 @@ typedef struct
 } llc_state_t;
 
 static llc_state_t state_tx, state_rx;
-static uint8_t buf_rx[MAX_BUF_LEN];
+static packet_t packet_rx;
 static bool needs_processing;
 
 static inline void
@@ -37,22 +34,14 @@ llc_tx_frame(llc_state_t *s)
 {
   s->hasnext = true;
   uint16_t pos = (s->cnt >> 1);
-  uint8_t *pp = NULL;
 
   switch (s->state) {
-    case (LLC_STATE_HEADER):
-      pp = ((uint8_t *) &s->packet) + pos;
-      s->nextbyte = *pp;
-      if (pos == sizeof(llc_packet_t) - sizeof(uint8_t *) - 1) {
-        s->state = LLC_STATE_DATA;
-      }
-      break;
-
     case (LLC_STATE_DATA):
-      pos -= sizeof(llc_packet_t) - sizeof(uint8_t *);
+      s->nextbyte = s->packet->data[pos];
 
-      s->nextbyte = *s->packet.data++;
-      if (pos == s->packet.len) {
+      llc_t *llc = (llc_t *) packet_get_llc(s->packet);
+
+      if (pos == LLC_HEADER_SIZE + llc->len - 1) {
         s->state = LLC_STATE_FIN;
         s->hasnext = false;
       }
@@ -81,36 +70,25 @@ static inline void
 llc_rx_frame(llc_state_t *s)
 {
   uint16_t pos = (s->cnt >> 1) - 1;
-  uint8_t *pp = NULL;
   s->hasnext = true;
+  llc_t *llc = (llc_t *) packet_get_llc(s->packet);
+  bool fin = false;
 
   switch (s->state) {
-    case (LLC_STATE_HEADER):
-      pp = ((uint8_t *) &s->packet) + pos;
-
-      if ((pos == LLC_PACKET_HEADER_LEN_SIZE - 1)
-          && (s->packet.len > MAX_BUF_LEN)) {
-        s->state = LLC_STATE_ABORTED;
-      }
-
-      if (pos == sizeof(llc_packet_t) - sizeof(uint8_t *) - 1) {
-        s->state = LLC_STATE_DATA;
-      }
-
-      *pp = s->nextbyte;
-      break;
-
     case (LLC_STATE_DATA):
-      pos -= sizeof(llc_packet_t) - sizeof(uint8_t *);
+      fin = (pos == LLC_HEADER_SIZE - 1)
+          && (llc->len > PACKET_MAX_SIZE - LLC_HEADER_SIZE);
 
-      if (pos >= MAX_BUF_LEN - 1) {
-        // received more bytes than possible,
-        // therefore abort reception
-        s->hasnext = false;
+      fin |= pos >= PACKET_MAX_SIZE;
+
+      if (fin) {
         s->state = LLC_STATE_ABORTED;
       } else {
-        s->packet.data[pos] = s->nextbyte;
-        if (pos == s->packet.len - 1) {
+        s->packet->data[pos] = s->nextbyte;
+
+        fin = (pos == LLC_HEADER_SIZE + llc->len - 1);
+
+        if (fin) {
           s->state = LLC_STATE_FIN;
           s->hasnext = false;
         }
@@ -125,14 +103,15 @@ llc_rx_frame(llc_state_t *s)
 static inline void
 llc_rx_reset(llc_state_t *s)
 {
-  s->state = LLC_STATE_HEADER;
+  s->state = LLC_STATE_DATA;
   s->cnt = 0;
   s->hasnext = false;
   s->nextbyte = 0;
+  s->packet = &packet_rx;
 
-  s->packet.len = 0;
-  s->packet.data = buf_rx;
-  s->packet.crc = 0xffff;
+  llc_t *rx = (llc_t *) packet_get_llc(s->packet);
+  rx->len = 0;
+  rx->crc = 0xffff;
 }
 
 void
@@ -168,26 +147,24 @@ llc_rx_mac(mac_rx_t *mac_rx)
 }
 
 bool
-llc_rx(llc_packet_t *dest)
+llc_rx(packet_t *packet)
 {
   bool packet_arrived = false;
 
   if (needs_processing) {
-    uint16_t crc = 0xffff;
-    crc = _crc16_update(crc,
-        (uint8_t) (state_rx.packet.len >> sizeof(uint8_t) * 8));
-    crc = _crc16_update(crc, (uint8_t) state_rx.packet.len);
+    llc_t *rx = (llc_t *) packet_get_llc(state_rx.packet);
 
-    uint8_t *data = state_rx.packet.data;
-    for (uint16_t i = 0; i < state_rx.packet.len; i++) {
+    uint16_t crc = 0xffff;
+    crc = _crc16_update(crc, (uint8_t) (rx->len >> sizeof(uint8_t) * 8));
+    crc = _crc16_update(crc, (uint8_t) rx->len);
+
+    uint8_t *data = packet_get_batman(state_rx.packet);
+    for (uint16_t i = 0; i < rx->len; i++) {
       crc = _crc16_update(crc, *data++);
     }
 
-    if (crc == state_rx.packet.crc) {
-      uint8_t *buf = dest->data;
-      memcpy(dest, &state_rx.packet, sizeof(llc_packet_t));
-      memcpy(buf, state_rx.packet.data, state_rx.packet.len);
-      dest->data = buf;
+    if (crc == rx->crc) {
+      memcpy(packet, state_rx.packet, PACKET_MAX_SIZE);
       packet_arrived = true;
     }
 
@@ -198,26 +175,26 @@ llc_rx(llc_packet_t *dest)
   return packet_arrived;
 }
 
-PT_THREAD(llc_tx(llc_packet_type_t type, uint8_t *data, uint16_t len))
+PT_THREAD(llc_tx(packet_t *packet, llc_type_t type, uint16_t data_len))
 {
   PT_BEGIN(&pt_tx);
 
-  if (len > MAX_BUF_LEN) {
-    watchdog_error(ERR_LLC);
-  }
-
   state_tx.cnt = 0;
-  state_tx.state = LLC_STATE_HEADER;
-  state_tx.packet.data = data;
-  state_tx.packet.len = len;
-  state_tx.packet.type = type;
+  state_tx.state = LLC_STATE_DATA;
+  state_tx.packet = packet;
 
-  state_tx.packet.crc = 0xffff;
-  state_tx.packet.crc = _crc16_update(state_tx.packet.crc,
-      (uint8_t) (len >> 8));
-  state_tx.packet.crc = _crc16_update(state_tx.packet.crc, (uint8_t) len);
-  for (uint16_t i = 0; i < len; i++) {
-    state_tx.packet.crc = _crc16_update(state_tx.packet.crc, *data++);
+  llc_t *tx = (llc_t *) packet_get_llc(packet);
+
+  tx->len = data_len;
+  tx->type = type;
+
+  tx->crc = 0xffff;
+  tx->crc = _crc16_update(tx->crc, (uint8_t) (data_len >> 8));
+  tx->crc = _crc16_update(tx->crc, (uint8_t) data_len);
+
+  uint8_t *data = packet_get_batman(packet);
+  for (uint16_t i = 0; i < data_len; i++) {
+    tx->crc = _crc16_update(tx->crc, *data++);
   }
 
   PT_WAIT_THREAD(&pt_tx, mac_tx());

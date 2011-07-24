@@ -24,10 +24,10 @@ void
 batman_init(void);
 
 PT_THREAD(
-batman_tx(const char *data));
+batman_tx(packet_t *packet, addr_t dest_addr, uint16_t data_len));
 
 PT_THREAD(
-batman_rx(char *dest));
+batman_rx(packet_t *packet));
 
 PT_THREAD(
 batman_thread(void));

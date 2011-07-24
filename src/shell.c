@@ -11,6 +11,7 @@
 #include "watchdog.h"
 #include "error.h"
 #include "util.h"
+#include "l4.h"
 #include "batman.h"
 #include "rfm12.h"
 #include "spi.h"
@@ -45,6 +46,7 @@ static const char txt_prompt[] = "$ ";
 
 typedef PT_THREAD((*cmd_fn))(void);
 static char out_buf[MAX_OUT_BUF], cmd_buf[MAX_CMD_BUF];
+static packet_t packet_tx;
 static char *cmd;
 static cmd_fn cmd_fn_instance;
 static struct pt pt_main, pt_cmd;
@@ -85,20 +87,17 @@ PT_THREAD(shell_list)(void)
   PT_END(&pt_cmd);
 }
 
+static unsigned short int dest;
 PT_THREAD(shell_tx)(void)
 {
   PT_BEGIN(&pt_cmd);
 
-  uint8_t start = 1;
-  if (cmd_buf[1] == ' ') {
-    start += 1;
+  if (2 == sscanf(cmd_buf, "s 0x%hx %[^\n]", &dest, out_buf)) {
+    PT_WAIT_THREAD(&pt_cmd, l4_tx(&packet_tx, out_buf, dest));
+
+    UART_WAIT(&pt_cmd);
+    UART_TX(&pt_cmd, ok);
   }
-  memcpy(out_buf, cmd_buf + start, strlen(cmd_buf) - start + 1);
-
-  PT_WAIT_THREAD(&pt_cmd, batman_tx(out_buf));
-
-  UART_WAIT(&pt_cmd);
-  UART_TX(&pt_cmd, ok);
 
   PT_END(&pt_cmd);
 }
@@ -118,8 +117,8 @@ PT_THREAD(shell_config)(void)
   PT_BEGIN(&pt_cmd);
   UART_WAIT(&pt_cmd);
 
-  int cfg_i, cfg_val;
-  if (2 == sscanf(cmd_buf, "c %d 0x%x", &cfg_i, &cfg_val)) {
+  unsigned short int cfg_i, cfg_val;
+  if (2 == sscanf(cmd_buf, "c %hd 0x%hx", &cfg_i, &cfg_val)) {
     config_set(cfg_i, cfg_val);
     UART_TX_NOSIGNAL(&pt_cmd, ok);
   } else {
@@ -162,6 +161,7 @@ shell_data_available(void)
     switch (*cmd) {
       case '\n': // enter
       case '\r':
+        *cmd++ = '\n';
         *cmd = '\0';
         cmd = cmd_buf;
         break;
@@ -176,7 +176,7 @@ shell_data_available(void)
 
       default:
         // any other character pressed
-        if (cmd != cmd_buf + (MAX_CMD_BUF - 1)) {
+        if (cmd != cmd_buf + (MAX_CMD_BUF - 2)) {
           cmd++;
         }
         result = false;
@@ -205,6 +205,7 @@ PT_THREAD(shell(void))
   UART_TX(&pt_main, txt_prompt);
 
   while (true) {
+    memset(out_buf, '\0', MAX_OUT_BUF);
     PT_WAIT_UNTIL(&pt_main, shell_data_available());
     cmd_fn_instance = shell_data_parse();
 

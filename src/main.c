@@ -13,6 +13,7 @@
 #include "mac.h"
 #include "llc.h"
 #include "batman.h"
+#include "l4.h"
 #include "rxthread.h"
 #include "timer.h"
 #include "clock.h"
@@ -80,6 +81,7 @@ main_init(void)
   mac_init();
   llc_init();
   batman_init();
+  l4_init();
   rx_thread_init();
 
   sei();

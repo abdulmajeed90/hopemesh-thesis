@@ -4,15 +4,17 @@
 #include "test-util.h"
 
 extern bool
-__real_llc_rx(llc_packet_t *dest);
+__real_llc_rx(packet_t *packet);
 
 bool
-__wrap_llc_rx(llc_packet_t *dest)
+__wrap_llc_rx(packet_t *packet)
 {
-  bool packet_arrived = __real_llc_rx(dest);
+  bool packet_arrived = __real_llc_rx(packet);
   if (packet_arrived) {
-    for (uint16_t i = 0; i < dest->len; i++) {
-      uint8_t data = dest->data[i];
+    llc_t *llc = (llc_t *) packet_get_llc(packet);
+
+    for (uint16_t i = 0; i < llc->len; i++) {
+      uint8_t data = packet->data[i + LLC_OFFSET];
       _spi_printf("llc_rx>0x%02x  |", data);
     }
   }

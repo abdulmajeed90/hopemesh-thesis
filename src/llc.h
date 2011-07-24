@@ -18,9 +18,9 @@ void
 llc_init(void);
 
 bool
-llc_rx(llc_packet_t *dest);
+llc_rx(packet_t *packet);
 
 PT_THREAD(
-llc_tx(llc_packet_type_t type, uint8_t *data, uint16_t len));
+llc_tx(packet_t *packet, llc_type_t type, uint16_t data_len));
 
 #endif
