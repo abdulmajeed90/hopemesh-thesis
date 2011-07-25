@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdio.h>
 #include <curses.h>
 
@@ -14,11 +15,13 @@
 #include "../timer.h"
 #include "../clock.h"
 #include "../debug.h"
+#include "../net.h"
+#include "../l4.h"
 
 #include "mock-spi.h"
 #include "test-util.h"
 
-static const char *text = "lorem ipsum";
+static const char *text = "01234";
 static const char *text2 = "s1234567890";
 static const uint8_t bytes[] = { 0xff, 0xff, 0xff, 0xff, '\0' };
 static const uint8_t long_packet[] =
@@ -45,16 +48,23 @@ static const uint8_t long_packet[] =
         0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff,
         0xee, 0xee, 0xee, 0xee, 0xee, 0xee, 0xee, '\0' };
 
-static char buf[255];
+static packet_t packet_rx, packet_tx;
 static bool fin_rx = false, fin_tx = false;
 static struct pt pt_tx, pt_rx;
+static uint8_t cnt_rx = 0;
 
 PT_THREAD(rx(void))
 {
   PT_BEGIN(&pt_rx);
 
-  PT_WAIT_THREAD(&pt_rx, batman_rx(buf));
-  _printf("RX: %s\n", buf);
+  PT_WAIT_THREAD(&pt_rx, batman_rx(&packet_rx));
+  const char *rx = (const char *) packet_get_l4(&packet_rx);
+
+  _printf("RX: %s\n", rx);
+
+  if (++cnt_rx == 3) {
+    fin_rx = true;
+  }
 
   PT_END(&pt_rx);
 }
@@ -64,20 +74,18 @@ PT_THREAD(tx(void))
   PT_BEGIN(&pt_tx);
   PT_WAIT_UNTIL(&pt_tx, !fin_tx);
 
-  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) text2));
+  PT_WAIT_THREAD(&pt_tx, l4_tx(&packet_tx, text, config_get(CONFIG_NODE_ADDR)));
+  _printf("TX: %s\n", text);
+  PT_YIELD(&pt_tx);
+
+  PT_WAIT_THREAD(&pt_tx,
+      l4_tx(&packet_tx, text2, config_get(CONFIG_NODE_ADDR)));
   _printf("TX: %s\n", text2);
   PT_YIELD(&pt_tx);
 
-  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) bytes));
-  _printf("TX: %s\n", bytes);
-  PT_YIELD(&pt_tx);
-
-  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) text));
-  _printf("TX: %s\n", text);
-  PT_YIELD(&pt_tx);
-
-  PT_WAIT_THREAD(&pt_tx, batman_tx((char *) text));
-  _printf("TX: %s\n", text);
+  PT_WAIT_THREAD(&pt_tx,
+      l4_tx(&packet_tx, (const char *) bytes, config_get(CONFIG_NODE_ADDR)));
+  _printf("TX: %s\n", (const char *) bytes);
   PT_YIELD(&pt_tx);
 
   fin_tx = true;
@@ -100,9 +108,6 @@ mainloop(void)
     batman_thread();
     rx();
     tx();
-    if (debug_get_cnt() == 10) {
-      fin_rx = true;
-    }
   }
 }
 

@@ -34,6 +34,9 @@ test-%: test-%.o $(DEPS)
 avr-%.o: ../%.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+%.deps : %.c
+	$(CC) -M $(CFLAGS) $< -o $@
+
 %.o: %.c
 	$(CC) -c $< $(CFLAGS)
 
@@ -42,6 +45,7 @@ avr-%-prep.c: ../%.c
 
 clean:
 	rm -f *.o
+	rm -f *.deps
 	find . -executable -name 'test*' -exec rm '{}' ';'
 
 .PHONY : clean

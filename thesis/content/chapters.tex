@@ -1,25 +1,57 @@
 \chapter{Introduction}
 \input{content/motivation}
 \section{Research overview}
-\section{Mesh networks in embedded devices}
 
 \chapter{Evaluation}
-\section{Existing solutions}
+\section{Existing solution}
 \section{Assumptions}
 \section{Requirements}
 
-\chapter{Architecture}
-\section{Algorithms}
-\input{content/concurrency}
-\subsection{Routing design}
-\subsection{Protocol design}
+\chapter{Hardware Design}
+\section{RAM}
+\begin{itemize}
+\item Harvard architecture
+\item RAM bus
+\item Latch
+\end{itemize}
+\section{USB Serial Device}
+\section{RFM12B Radio}
+\section{Keyboard}
 
-\section{Implementation}
-\input{content/hardware}
-\input{content/software}
+\chapter{Software Modules}
+\section{UART}
+\section{SPI}
+\section{RFM12 Driver}
+\section{Watchdog}
+\section{Clock}
+\section{Shell}
+
+\chapter{Software Algorithms}
+\section{Protothreads}
+Concurrently executing tasks \\
+Problem: No operating system \\
+"Traditional" embedded implementations are using state machines. Especially the existing thesis uses state machine based algorithms a lot, although the author does not mention this fact at all. \\
+
+Alternatives: \\
+- Heavyweight: Real Operating System. Enumarate them and compare ... \\
+- Lightweight: Thread implementations. Problem: Each thread has its own stack which consumes a lot of memory. \\
+- More Lightweight: Protothreads. Best compromise between classical state machines and real threads. \\
+
+\section{Ring Buffers}
+\section{Half-Duplex Radio Access (Petri Net)}
+
+\chapter{Network Stack}
+\section{Layer 2a: MAC Layer}
+\section{Layer 2b: Logical Link Control}
+\section{Layer 3: Batman Routing}
+\section{Layer 7: Application}
 
 \chapter{Research}
-\section{Methodology}
+\section{Simulations}
+\subsection{Shell}
+\subsection{Routing}
+\subsection{Radio Transmission}
+\section{Mesh evaluation}
 \section{Results}
 
 \chapter{Conclusion}
