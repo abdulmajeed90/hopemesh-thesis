@@ -27,3 +27,6 @@ test-tx
 .*
 *.gdb
 *.tmp
+*.ilg
+*.ind
+*.bak

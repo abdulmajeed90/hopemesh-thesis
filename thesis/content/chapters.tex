@@ -21,19 +21,51 @@
 \chapter{Software Modules}
 \section{UART}
 \section{SPI}
-\section{RFM12 Driver}
 \section{Watchdog}
 \section{Clock}
 \section{Shell}
+\section{Network Stack}
+\section{RFM12 Driver}
 
 \chapter{Software Algorithms}
 \section{Protothreads}
-Concurrently executing tasks \\
-Problem: No operating system \\
+Designing a software system that executes on embedded micro-controllers implies a lot of challenges when many software modules are involved and complexity grows. The conceptually defined modules must be somehow implemented. If the micro-controller lacks an operating system then there is no possibility of using provided abstractions and APIs for module orchestration and execution. Another challenge are limited hardware resources which prevent the deployment of many existing operating system kernels. Basically there are two types of execution models which can be implemented in micro-controllers:
+
+\minisec{Sequential execution}
+
+\begin{figure}
+    \centering
+    \import{images/}{sequential_execution.pdf_tex}
+    \caption{Sequential execution model}
+\end{figure}
+
+This type sequentially executes all modules starting from the first module until the last one. Once the last module ends the execution starts again from the first module. The pseudo code for this execution model is visible in listing \ref{lst:sequential execution}.
+
+\noindent\begin{minipage}{\textwidth}
+\begin{lstlisting}[frame=single,caption=Sequential execution pseudo code,label=lst:sequential execution]
+function main() {
+    while(true) {
+        module_1();
+        module_2();
+        ...
+        module_n();
+    }
+}
+\end{lstlisting}
+\end{minipage}
+
+\minisec{Concurrent execution}
+
+\begin{figure}
+\centering
+\import{images/}{concurrent_execution.pdf_tex}
+\caption[]{Concurrent execution model}
+\end{figure}
+
 "Traditional" embedded implementations are using state machines. Especially the existing thesis uses state machine based algorithms a lot, although the author does not mention this fact at all. \\
 
 Alternatives: \\
-- Heavyweight: Real Operating System. Enumarate them and compare ... \\
+- Heavyweight: Real Operating System. Enumerate them and compare ... \\
 - Lightweight: Thread implementations. Problem: Each thread has its own stack which consumes a lot of memory. \\
 - More Lightweight: Protothreads. Best compromise between classical state machines and real threads. \\
 
@@ -55,4 +87,3 @@ Alternatives: \\
 \section{Results}
 
 \chapter{Conclusion}
-
