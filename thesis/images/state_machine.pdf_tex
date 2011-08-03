@@ -1,6 +1,6 @@
 %% Creator: Inkscape inkscape 0.48.1, www.inkscape.org
 %% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
-%% Accompanies image file 'concurrent_execution.pdf' (pdf, eps, ps)
+%% Accompanies image file 'state_machine.pdf' (pdf, eps, ps)
 %%
 %% To include the image in your LaTeX document, write
 %%   \input{<filename>.pdf_tex}
@@ -36,16 +36,19 @@
   }
   \providecommand\rotatebox[2]{#2}
   \ifx\svgwidth\undefined
-    \setlength{\unitlength}{416.8pt}
+    \setlength{\unitlength}{250.08510742pt}
   \else
     \setlength{\unitlength}{\svgwidth}
   \fi
   \global\let\svgwidth\undefined
   \makeatother
-  \begin{picture}(1,0.25143954)%
-    \put(0,0){\includegraphics[width=\unitlength]{concurrent_execution.pdf}}%
-    \put(0.12200046,0.07142413){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 1}}}%
-    \put(0.44637666,0.06854512){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 2}}}%
-    \put(0.81105996,0.06854512){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module n}}}%
+  \begin{picture}(1,0.70695938)%
+    \put(0,0){\includegraphics[width=\unitlength]{state_machine.pdf}}%
+    \put(0.4808507,0.64138166){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{1}}}%
+    \put(0.41649922,0.593398){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Waiting}}}%
+    \put(0.4808507,0.19353413){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{2}}}%
+    \put(0.39035436,0.14555046){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Processing}}}%
+    \put(-0.00188096,0.35188022){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Resource available}}}%
+    \put(0.63790129,0.35188022){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Processing finished}}}%
   \end{picture}%
 \endgroup

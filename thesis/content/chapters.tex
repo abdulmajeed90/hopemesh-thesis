@@ -22,7 +22,7 @@
 \section{UART}
 \section{SPI}
 \section{Watchdog}
-\section{Clock}
+\section{Timer}
 \section{Shell}
 \section{Network Stack}
 \section{RFM12 Driver}
@@ -31,28 +31,112 @@
 \section{Protothreads}
 Designing a software system that executes on embedded micro-controllers implies a lot of challenges when many software modules are involved and complexity grows. The conceptually defined modules must be somehow implemented. If the micro-controller lacks an operating system then there is no possibility of using provided abstractions and APIs for module orchestration and execution. Another challenge are limited hardware resources which prevent the deployment of many existing operating system kernels. Basically there are two types of execution models which can be implemented in micro-controllers:
 
-\minisec{Sequential execution}
-
-\begin{figure}
+\begin{figure}[H]
     \centering
     \import{images/}{sequential_execution.pdf_tex}
     \caption{Sequential execution model}
 \end{figure}
 
-This type sequentially executes all modules starting from the first module until the last one. Once the last module ends the execution starts again from the first module. The pseudo code for this execution model is visible in listing \ref{lst:sequential execution}.
+\minisec{Sequential execution}
+This type sequentially executes all modules starting from the first module until the last one. Once the last module ends the execution starts again from the first module. It is a very simple model that does not need any operating system support or frameworks. It can be simply implemented as a sequence of function calls inside an infinite loop as shown in algorithm \ref{alg:sequential execution}.
 
-\noindent\begin{minipage}{\textwidth}
-\begin{lstlisting}[frame=single,caption=Sequential execution pseudo code,label=lst:sequential execution]
-function main() {
-    while(true) {
-        module_1();
-        module_2();
-        ...
-        module_n();
-    }
-}
+\begin{algorithm}[H]
+\caption{Sequential model algorithm}
+\label{alg:sequential execution}
+\begin{algorithmic}
+\WHILE{$true$}
+\STATE $module_1$
+\STATE $module_2$
+\STATE $...$
+\STATE $module_n$
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+There is one challenge that comes with this type of execution model. That is that only one module can execute at a time due to its sequential nature. If a module i.e. waits for an external resource to provide data it must not block the execution of the main loop until the external resources becomes ready. This would prevent the execution of the other modules. The classic solution to this problem is the introduction of states in modules. Module states can be implemented as classical Finite State Machines (\cite{booth}).
+
+\minisec{}
+If we take the example from above about waiting for external resources a finite state machine for modules can be modeled as shown in figure \ref{fig:statemachine}.
+\begin{figure}[H]
+\centering
+\import{images/}{state_machine.pdf_tex}
+\caption{State Machine for a module}
+\label{fig:statemachine}
+\end{figure}
+
+State machine models can be implemented using \texttt{if} or \texttt{case} statements which is shown in algorithm \ref{alg:statemachine}. The nice side effect of a state machine based implementation is the non-blocking nature of the module execution. Take for instance the execution of state 1 "Waiting" as shown in figure \ref{fig:statemachine}. The CPU only needs to execute as many instructions as are necessary to check if the awaited resource is available. If the resource is not available the execution returns to the main loop and the next module (together with its state machine) is being executed.
+
+\begin{algorithm}[H]
+\caption{State machine algorithm}
+\label{alg:statemachine}
+\begin{algorithmic}
+\IF{state is WAITING}
+    \IF{resource is available}
+        \STATE set state to PROCESSING
+    \ELSE
+        \STATE return
+    \ENDIF
+\ELSIF{state is PROCESSING}
+    \STATE process data
+    \STATE set state to WAITING
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+This implementation emulates a concurrent execution of modules. The context switch between module executions is being done by the modules themselves (using self-interruption) and no external scheduler is involved. This form of concurrent behavior can therefore be described as a non-preemptive or cooperative multi-tasking between modules. The predecessor thesis \cite{korniowski} implementation heavily used the described state machine algorithm although the model theory behind the implementation was not being mentioned in the thesis. Listing \ref{lst:korniowski_main} shows the main function of the predecessor thesis implementation.
+
+\begin{lstlisting}[label=lst:korniowski_main,caption=main function implementation in \cite{korniowski}]
+382 while(0x01)
+383 {
+384         if(uartInterrupt == ON) // got a character from RS232
+385 +---- 44 lines: 
+429 
+430 
+431         // --- RECEIVE A DATAGRAM ---
+432 
+433         else if((datagramReceived = datagramReceive(...)) 
+                    && netState > 0)     
+434 +----182 lines: 
+616 
+617     
+618         else if(helloTime) // prepare periodic Hello message
+619 +---- 19 lines: 
+638 
+639 
+640     
+641         // --- SEND A DATAGRAM ---
+642     
+643         if(datagramReady && netState > 0)
+644 +----  8 lines: 
+652 
+653 }
 \end{lstlisting}
-\end{minipage}
+
+A couple of problems arise from the existing implementation. First of all listing \ref{lst:korniowski_main} reveals the following modules:
+
+\begin{itemize}
+\item UART Module
+\item Datagram Receiver Module
+\item Hello Message Sender Module
+\item Datagram Sender Module
+\end{itemize}
+
+Which module is being executed depends on the state of the main module being represented by the main function. The state of the main module on the other hand depends directly from the state of the submodules. The main module therefore acts more like a controller of the submodules and takes away the responsibility of the submodule's state management. Furthermore the main function is very long and complex (271 lines of code). The lack of a clear separation of module responsibility and conformance the state machine theory led to a completely new implementation as show in listing \ref{lst:urbaniak_main}.
+
+\begin{lstlisting}[label=lst:urbaniak_main,caption=main function implementation]
+ 95 while (true) {
+ 96   shell();
+ 97   batman_thread();
+ 98   rx_thread();
+ 99   uart_tx_thread();
+100   watchdog();
+101   timer_thread();
+102 }
+\end{lstlisting}
+
+The new implementation makes it very clear which modules are being executed sequentially. Furthermore the main function does not act as a controller but rather leaves the state management in the module's responsibility.
+
+The state explosion problem \cite{katoen}.
 
 \minisec{Concurrent execution}
 
