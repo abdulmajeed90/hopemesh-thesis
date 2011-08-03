@@ -136,17 +136,41 @@ Which module is being executed depends on the state of the main module being rep
 
 The new implementation makes it very clear which modules are being executed sequentially. Furthermore the main function does not act as a controller but rather leaves the state management in the module's responsibility.
 
-The state explosion problem \cite{katoen}.
+\minisec{}
+There is a problem though in state machine based implementations and that is the rapidly growing complexity. This problem is called "state explosion problem" and has even a exponential behavior as shown in \cite{katoen}. The equation \ref{eq:state explosion} shows that the number of states is dependent on the number of program locations, the number of used variables and their dimensions.
 
-\minisec{Concurrent execution}
+\begin{equation}
+\label{eq:state explosion}
+\#states = \abs{\#locations} \cdot \prod_{variable \: x} \: \abs{dom(x)}
+\end{equation}
 
-\begin{figure}
+This equation shows that for instance a program having 10 locations and only 3 boolean variables already has 80 different states. Although this equation might not apply exactly to state machine based implementations it underlines the practical experience of big state-machine based implementations. The alternative to state-machine based applications are thread or process based implementations using the concurrent execution model as shown below.
+
+\begin{figure}[H]
 \centering
 \import{images/}{concurrent_execution.pdf_tex}
 \caption[]{Concurrent execution model}
 \end{figure}
 
-"Traditional" embedded implementations are using state machines. Especially the existing thesis uses state machine based algorithms a lot, although the author does not mention this fact at all. \\
+\minisec{Concurrent execution}
+This execution model executes modules concurrently. Instead of heaving an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules. Each module runs in isolation and can have its own main loop or terminate immediately. This model requires support from an existing operating system. An existing framework or API provides the necessary abstraction to create new concurrent modules. In terms of operating systems two abstractions are wide-spread for concurrently running software modules:
+
+\begin{itemize}
+\item \textbf{Processes}: Processes are usually considered as seperately concurrently running programs. Usually each process owns its own memory space and communication with other processes happens through abstractions like pipes or shared memory.
+\item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data.
+\end{itemize}
+
+Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of micro-controllers these concepts also are implemented in very lightweight implementations. Many solutions exist like:
+
+\begin{enumerate}
+\item FreeRTOS (http://www.freertos.org)
+\item TinyOS (http://www.tinyos.net)
+\item Atomthreads (http://http://atomthreads.com)
+\item Nut/OS (http://www.ethernut.de/en/firmware/nutos.html)
+\item BeRTOS (http://www.bertos.org)
+\end{enumerate}
+
+The above solutions have choosen different names for threads or processes (some call them "tasks") but essentially they all share the same concept of the concurrent execution model.
 
 Alternatives: \\
 - Heavyweight: Real Operating System. Enumerate them and compare ... \\
