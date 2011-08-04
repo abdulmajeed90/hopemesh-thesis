@@ -156,8 +156,8 @@ This equation shows that for instance a program having 10 locations and only 3 b
 This execution model executes modules concurrently. Instead of heaving an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules. Each module runs in isolation and can have its own main loop or terminate immediately. This model requires support from an existing operating system. An existing framework or API provides the necessary abstraction to create new concurrent modules. In terms of operating systems two abstractions are wide-spread for concurrently running software modules:
 
 \begin{itemize}
-\item \textbf{Processes}: Processes are usually considered as seperately concurrently running programs. Usually each process owns its own memory space and communication with other processes happens through abstractions like pipes or shared memory.
-\item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data.
+\item \textbf{Processes}: Processes are usually considered as seperately concurrently running programs. Usually each process owns its own memory context and communication with other processes happens through abstractions like pipes or shared memory.
+\item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data or the heap.
 \end{itemize}
 
 Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of micro-controllers these concepts also are implemented in very lightweight implementations. Many solutions exist like:
@@ -170,7 +170,69 @@ Processes as well as threads are widely known concepts in classical desktop oper
 \item BeRTOS (http://www.bertos.org)
 \end{enumerate}
 
-The above solutions have choosen different names for threads or processes (some call them "tasks") but essentially they all share the same concept of the concurrent execution model.
+The above solutions have chosen different names for threads or processes (some call them "tasks") but essentially they all share the same concept of the concurrent execution model and will be referred to as concurrent modules from now on. Algorithm \ref{alg:threads} shows the pseudo-code that initializes concurrent modules. One can see that in contrast to the sequential execution model the main loop actually does nothing.
+
+\begin{algorithm}[H]
+\caption{Concurrent model initialization}
+\label{alg:threads}
+\begin{algorithmic}
+
+\STATE start $module_1$
+\STATE start $module_2$
+\STATE ...
+\STATE start $module_n$
+
+\WHILE{true}
+    \STATE // no operation
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+But how does a context switch happen between concurrent modules? Two methodologies exist:
+
+\begin{itemize}
+\item \textbf{Cooperative}: The concurrent modules by themselves return the control to a scheduler which then delegates the control to a different module. Which concurrent module gets control is often based on priorities which are controlled by the scheduler.
+\item \textbf{Preemptive}: Here the concurrent modules do not have control about how and when they get interrupted. It can happen anytime during the execution. Again the context switch between concurrent modules is often handled using priorities in the scheduler.
+\end{itemize}
+
+Nearly all existing solutions have one feature in common. That is that every thread has its own seperate stack memory space. This is necessary in order to be able to run the same block of code (for instance a function) in multiple thread instances. On the other hand threads are being executed in the same memory context so sharing data between threads is possible by using the heap or static memory. All of the above mentioned frameworks provide common abstractions which are needed in thread based implementations:
+
+\begin{itemize}
+\item Semaphores
+\item Mutexes
+\item Yielding
+\end{itemize}
+
+\minisec{}
+In contrast to state machine based or sequential based concurrency thread based implementation can be expressed in very linear algorithms using the above mentioned abstractions. Take for instance the state-machine based algorithm \ref{alg:statemachine}. This could be translated into a linear thread-based algorithm as shown in \ref{alg:thread}.
+
+\begin{algorithm}[H]
+\caption{Thread based algorithm}
+\label{alg:thread}
+\begin{algorithmic}
+\WHILE{true}
+    \STATE wait for resource mutex
+    \STATE process data
+    \STATE release resource mutex
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+One can easily see that the thread-based algorithm \ref{alg:thread} is much more expressive than the state-machine based algorithm \ref{alg:statemachine}.
+
+\minisec{}
+Together with the necessity of having a scheduler these solutions can be considered as heavy-weight. The scheduler consumes additional CPU cycles and the seperate stack memory space per thread consumes additional memory which is very scarce in embedded micro-controller systems.
+
+\minisec{}
+Although ususally a concurrent execution model must be provided in form of an API or an existing kernel there is one exception in the context embedded micro-controllers and that are ISRs (Interrupt Service Routines). Interrupt service routines behave very much like preemptive concurrent modules with highest priority.
+
+\begin{figure}[H]
+\centering
+\import{images/}{isr.pdf_tex}
+\caption[]{Illustration of an Interrupt Service Routine}
+\end{figure}
+
+The ISR interrupts the main program at any time when an external resource triggers an event and executes the service routine. The scheduler in this case is the CPU itself. There is one caveat with ISRs. When one ISR is being executed no other ISR can be triggered. Therefore it is being considered best practice not to perform intense and long running operations in ISRs.
 
 Alternatives: \\
 - Heavyweight: Real Operating System. Enumerate them and compare ... \\
