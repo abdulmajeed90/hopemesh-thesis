@@ -232,7 +232,81 @@ Although ususally a concurrent execution model must be provided in form of an AP
 \caption[]{Illustration of an Interrupt Service Routine}
 \end{figure}
 
+\begin{lstlisting}[label=lst:urbaniak_main,caption=main function implementation]
+ 95 while (true) {
+ 96   shell();
+ 97   batman_thread();
+ 98   rx_thread();
+ 99   uart_tx_thread();
+100   watchdog();
+101   timer_thread();
+102 }
+\end{lstlisting}
+
 The ISR interrupts the main program at any time when an external resource triggers an event and executes the service routine. The scheduler in this case is the CPU itself. There is one caveat with ISRs. When one ISR is being executed no other ISR can be triggered. Therefore it is being considered best practice not to perform intense and long running operations in ISRs.
+
+\minisec{Conclusion}
+For the implementation of this thesis the following conclusions were drawn:
+
+\begin{itemize}
+\item Existing solutions supporting the concurrent execution model were considered too heavy-weight for this type of application. Although 32KB of RAM are available the purpose is the support of route storage and network support.
+\item A sequential execution model was favored instead of the concurrent execution model. On the other hand thread-like linear algorithms are definitely favored instead of state machine based implementations which could lead to a state explosion.
+\end{itemize}
+
+One framework exists which implements the sequential execution model but providing a linear thread-like API being called Protothreads as described in \cite{dunkels}. It is implemented using C macros and expands to switch statements (or to goto statements if the GCC compiler is being used). Instead of consuming a complete stack per thread the protothread implementation uses only two bytes per (proto)thread. Protothreads actually are stackless and variables initialized on the stack of a protothread function will stay initialized only during the very first call of the protothread.
+
+\begin{algorithm}[H]
+\caption{Simple linear algorithm}
+\label{alg:linear}
+\begin{algorithmic}
+\WHILE{true}
+    \STATE wait until timer expired
+    \STATE process data
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+Algorithm \ref{alg:linear} shows a very simple linear use case where it waits for an external resource. In this case it waits for the expiration of an external timer by merely watching the timer's state. Since this is a read-only operation no explicit mutual exclusion is needed. This algorithm expressed as a protothread implementation is shown in listing \ref{lst:linear_protothread}.
+
+\minisec{}
+\begin{lstlisting}[label=lst:linear_protothread,caption=linear protothread implementation]
+ 19 PT_THREAD(test(void))
+ 20 {
+ 21   PT_BEGIN(&pt);
+ 22   PT_WAIT_UNTIL(&pt, timer_ready());
+ 23   process_data();
+ 24   PT_END(&pt);
+ 25 }
+\end{lstlisting}
+
+The implementation of the algorithm is self-describing and corresponds to the APIs known from the concurrent execution model. The expanded version of the listing after the preprocessor stage is seen in \ref{lst:linear_protothread_expanded}.
+
+\begin{lstlisting}[label=lst:linear_protothread_expanded,caption=expanded linear protothread implementation]
+char
+test(void)
+{
+  // PT_BEGIN
+  switch((&pt)->lc) {
+    case 0:
+
+      // PT_WAIT_UNTIL
+      do {
+        (&pt)->lc = 22;
+    case 22:
+        if(!(timer_ready())) {
+          return 0;
+        }
+      } while(0);
+
+      process_data();
+  // PT_END
+  };
+  (&pt)->lc = 0;
+  return 3;
+}
+\end{lstlisting}
+
+Now the expanded version after the preprocessor stage of the implementation looks much more like a state machine based implementation from the sequential execution model.
 
 Alternatives: \\
 - Heavyweight: Real Operating System. Enumerate them and compare ... \\
