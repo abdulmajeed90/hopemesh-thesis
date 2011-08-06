@@ -30,3 +30,4 @@ test-tx
 *.ilg
 *.ind
 *.bak
+*.out

@@ -32,11 +32,11 @@ Designing a software system that executes on embedded micro-controllers implies 
 
 \begin{figure}[H]
     \centering
-    \import{images/}{sequential_execution.pdf_tex}
+    \import{figures/}{sequential_execution.pdf_tex}
     \caption{Sequential execution model}
 \end{figure}
 
-\minisec{Sequential execution}
+\textbf{Sequential execution}
 This type sequentially executes all modules starting from the first module until the last one. Once the last module ends the execution starts again from the first module. It is a very simple model that does not need any operating system support or frameworks. It can be simply implemented as a sequence of function calls inside an infinite loop as shown in algorithm \ref{alg:sequential execution}.
 
 \begin{algorithm}[H]
@@ -54,11 +54,10 @@ This type sequentially executes all modules starting from the first module until
 
 There is one challenge that comes with this type of execution model. That is that only one module can execute at a time due to its sequential nature. If a module i.e. waits for an external resource to provide data it must not block the execution of the main loop until the external resources becomes ready. This would prevent the execution of the other modules. The classic solution to this problem is the introduction of states in modules. Module states can be implemented as classical Finite State Machines (\cite{booth}).
 
-\minisec{}
 If we take the example from above about waiting for external resources a finite state machine for modules can be modeled as shown in figure \ref{fig:statemachine}.
 \begin{figure}[H]
 \centering
-\import{images/}{state_machine.pdf_tex}
+\import{figures/}{state_machine.pdf_tex}
 \caption{State Machine for a module}
 \label{fig:statemachine}
 \end{figure}
@@ -135,7 +134,6 @@ Which module is being executed depends on the state of the main module being rep
 
 The new implementation makes it very clear which modules are being executed sequentially. Furthermore the main function does not act as a controller but rather leaves the state management in the module's responsibility.
 
-\minisec{}
 There is a problem though in state machine based implementations and that is the rapidly growing complexity. This problem is called "state explosion problem" and has even a exponential behavior as shown in \cite{katoen}. The equation \ref{eq:state explosion} shows that the number of states is dependent on the number of program locations, the number of used variables and their dimensions.
 
 \begin{equation}
@@ -147,11 +145,11 @@ This equation shows that for instance a program having 10 locations and only 3 b
 
 \begin{figure}[H]
 \centering
-\import{images/}{concurrent_execution.pdf_tex}
+\import{figures/}{concurrent_execution.pdf_tex}
 \caption[]{Concurrent execution model}
 \end{figure}
 
-\minisec{Concurrent execution}
+\textbf{Concurrent execution}
 This execution model executes modules concurrently. Instead of heaving an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules. Each module runs in isolation and can have its own main loop or terminate immediately. This model requires support from an existing operating system. An existing framework or API provides the necessary abstraction to create new concurrent modules. In terms of operating systems two abstractions are wide-spread for concurrently running software modules:
 
 \begin{itemize}
@@ -202,7 +200,6 @@ Nearly all existing solutions have one feature in common. That is that every thr
 \item Yielding
 \end{itemize}
 
-\minisec{}
 In contrast to state machine based or sequential based concurrency thread based implementation can be expressed in very linear algorithms using the above mentioned abstractions. Take for instance the state-machine based algorithm \ref{alg:statemachine}. This could be translated into a linear thread-based algorithm as shown in \ref{alg:thread}.
 
 \begin{algorithm}[H]
@@ -219,21 +216,19 @@ In contrast to state machine based or sequential based concurrency thread based 
 
 One can easily see that the thread-based algorithm \ref{alg:thread} is much more expressive than the state-machine based algorithm \ref{alg:statemachine}.
 
-\minisec{}
 Together with the necessity of having a scheduler these solutions can be considered as heavy-weight. The scheduler consumes additional CPU cycles and the seperate stack memory space per thread consumes additional memory which is very scarce in embedded micro-controller systems.
 
-\minisec{}
 Although ususally a concurrent execution model must be provided in form of an API or an existing kernel there is one exception in the context embedded micro-controllers and that are ISRs (Interrupt Service Routines). Interrupt service routines behave very much like preemptive concurrent modules with highest priority.
 
 \begin{figure}[H]
 \centering
-\import{images/}{isr.pdf_tex}
+\import{figures/}{isr.pdf_tex}
 \caption[]{Illustration of an Interrupt Service Routine}
 \end{figure}
 
 The ISR interrupts the main program at any time when an external resource triggers an event and executes the service routine. The scheduler in this case is the CPU itself. There is one caveat with ISRs. When one ISR is being executed no other ISR can be triggered. Therefore it is being considered best practice not to perform intense and long running operations in ISRs.
 
-\minisec{Conclusion}
+\textbf{Conclusion}
 For the implementation of this thesis the following conclusions were drawn:
 
 \begin{itemize}
@@ -256,7 +251,6 @@ One framework exists which implements the sequential execution model but providi
 
 Algorithm \ref{alg:linear} shows a very simple linear use case where it waits for an external resource. In this case it waits for the expiration of an external timer by merely watching the timer's state. Since this is a read-only operation no explicit mutual exclusion is needed. This algorithm expressed as a protothread implementation is shown in listing \ref{lst:linear_protothread}.
 
-\minisec{}
 \begin{lstlisting}[label=lst:linear_protothread,caption=linear protothread implementation]
  19 PT_THREAD(test(void))
  20 {
@@ -307,7 +301,6 @@ void rsSend(uint8_t data)
 }
 \end{lstlisting}
 
-\minisec{}
 The listing \ref{lst:korniowski_uart} shows that the algorithm examines the UCSRA (USART Control and Status Register A) and blocks infinitely until the UDRE (USART Data Register Empty) bit becomes zero. The execution of all other concurrent modules and the main loop will be blocked until the UART becomes ready to accept data. In this time period no data can be received from the radio. The above mentioned implementation uses the same function for sending strings via the UART interface. For sending the string "hello" via the UART with a speed of 19.2kbps the main loop will be physically blocked for 2.5 milliseconds. In order to improve the implementation the following goals had to be accomplished:
 
 \begin{itemize}
@@ -324,12 +317,11 @@ The Atmega162 micro-processor offers the following ISRs for receiving and sendin
 
 So we have the possibility to send or receive data asynchronously from the main loop in the context of a concurrent execution model by using ISRs. Filling the UDR or reading the UDR in the main loop is actually not necessary at all. The main loop can communicate with the ISRs through a receiving and transmitting queue buffer where it writes data to the transmitting queue and reads data from receiving queue.
 
-\minisec{}
 As shown in \cite{linux_device_drivers}
 
 \begin{figure}[H]
 \centering
-\import{images/}{ringbuffer.pdf_tex}
+\import{figures/}{ringbuffer.pdf_tex}
 \caption[]{Illustration of ring buffer}
 \end{figure}
 
@@ -337,7 +329,7 @@ As shown in \cite{linux_device_drivers}
 
 \begin{figure}[H]
 \centering
-\import{images/}{mutex.pdf_tex}
+\import{figures/}{mutex.pdf_tex}
 \caption[]{Mutual exclusion model using a petri net}
 \end{figure}
 

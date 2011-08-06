@@ -1,89 +1,93 @@
-%% Dokumentenklasse (Koma Script) -----------------------------------------
-\documentclass[%
-   %draft,     % Entwurfsstadium
-   final,      % fertiges Dokument
-	 % --- Paper Settings ---
-   paper=a4,% [Todo: add alternatives]
-   paper=portrait, % landscape
-   pagesize=auto, % driver
-   % --- Base Font Size ---
-   fontsize=11pt,%
-	 % --- Koma Script Version ---
-   version=last, %
- ]{scrbook} % Classes: scrartcl, scrreprt, scrbook
+\documentclass[12pt, oneside]{_praca_dyplomowa}
 
+% rozmiar marginesÃ³w
+\usepackage[a4paper, left=3.5cm, right=2cm, bottom=2.5cm, top=3cm]{geometry}
+% zmieniony margines dla stron parzystych (druk dwustronny):
+%\usepackage[a4paper, left=2cm, right=3.5cm, bottom=2.5cm, top=3cm]{geometry}
+%\usepackage{times}
+%\usepackage[default, none]{oxford}
+%\usepackage{chicago}
+% polskie znaki
+\usepackage{setspace}
+\usepackage{amsmath}
+%\usepackage{graphs}
 
-% Encoding der Dateien (sonst funktionieren Umlaute nicht)
-% Fuer Linux -> utf8
-% Fuer Windows, alte Linux Distributionen -> latin1
+\usepackage[polish]{babel}
+%\usepackage[OT4]{polski}
+\usepackage[T1]{fontenc}
+%\usepackage[MeX]{polski}
+\usepackage[utf8]{inputenc}
 
-% Empfohlen latin1, da einige Pakete mit utf8 Zeichen nicht
-% funktionieren, z.B: listings, soul.
-\usepackage[latin1]{inputenc}
-%\usepackage[ansinew]{inputenc}
-%\usepackage[utf8]{inputenc}
-%\usepackage{ucs}
-%\usepackage[utf8x]{inputenc}
+%\usepackage[pausing]{tracefnt}
 
-%%% Preambel
-\input{preambel/settings}
-\input{preambel/preambel}
-%
-%%%% Neue Befehle
-\input{macros/newcommands}
-\input{macros/TableCommands}
+% rysunki w formacie EPS
+\usepackage[pdftex]{color,graphicx}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\graphicspath{{figures/}}
+\usepackage[pausing]{tracefnt}
+\usepackage{indentfirst} % akapit w pierwszej linii
+\usepackage{color}
+\definecolor{listing}{rgb}{0.1,0.3,0.3}
+\usepackage{hyperref}
+\hypersetup{
+	unicode=true,
+	pdftitle={Praca dyplomowa},
+	pdfauthor={Sergiusz Urbaniak},
+	pdfsubject={},
+	pdfborder={0 0 0},
+	pdfstartview=FitB,
+	pdflang=pl,
+	pdfdisplaydoctitle=true,
+	plainpages=false
+}
+\usepackage{rotating}
+\usepackage{import}
+\usepackage{algorithmic}
+\usepackage{algorithm}
 
-%%% Silbentrennung
-\input{preambel/Hyphenation}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily}
 
-%% Dokument Beginn %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\fontsize{10}{12pt}
+\providecommand{\abs}[1]{\lvert#1\rvert}
 
-% - Deckblatt,
-% - Inhaltsverzeichnis,
-% - Hauptteil gegliedert z.B. in
-%   Einleitung, Grundlagen, Experimente, Ergebnisse, Zusammenfassung
-% - Literaturverzeichnis,
-% - Abbildungsverzeichnis (ggf.),
-% - Tabellenverzeichnis (ggf.),
-% - Abkürzungsverzeichnis (ggf.),
-% - Formelverzeichnis (ggf.),
-% - Anhang, (nicht mehr Bestandteil der Arbeit! Wird daher nicht bewertet)
-% - Erklärung der Urheberschaft,
+%INFORMACJA O PRACY
+%==================
+\tytul{Communication algorithms and principles for a prototype of a wireless mesh network}
+\engtitle{Communication algorithms and principles for a prototype of a wireless mesh network}
+\autor{Sergiusz Urbaniak}
+\opiekun{dr inÅ¼. Remigiusz Olejnik}
+\rok{2009}
+\slowa{rf12b, rfm12b, hoperf, avr, atmega16, topologia kratowa, sieÃ¦}
+\opis{Description}
+\kwords{}
+\describe{Description}
+\sloppy
 
 \begin{document}
-% Deckblatt
-\input{content/Titel}
-\frontmatter
 
-\cleardoublepage
-% Inhaltsverzeichnis in den PDF-Links eintragen
-% \pdfbookmark[1]{Inhaltsverzeichnis}{toc}
+%\renewcommand\tablename{Tabela}
+%\renewcommand\figurename{Rys.}
+
+\include{strona_tytulowa}
+\setstretch{1.6}
+\include{oswiadczenie}
 \tableofcontents
-
-% Hauptteil
-\mainmatter
-% Demonstration der Vorlage
-% \input{content/Vorlage/demo.tex}
-
-\input{content/chapters}
-
-% Anhang (Bibliographie darf im deutschen nicht in den Anhang!)
-\bibliography{bib/BibtexDatabase}
-\clearpage
-% Abbildungs- und Tabellenverzeichnis
 \listoffigures
+%\renewcommand\listtablename{Spis tabel} 
 \listoftables
-% Anhang
+\include{content}
+
+\begin{appendix}
 \appendix
-% 'Anhang' ins Inhaltsverzeichnis
-%\phantomsection
-%\addcontentsline{toc}{part}{Anhang}
+%\include{dodatek_A}
+\end{appendix}
 
-\input{content/Z-Anhang}
+\addcontentsline{toc}{chapter}{Literatura}
+%\bibliographystyle{plain}
+%\bibliographystyle{abbrv}
+\bibliographystyle{is-unsrt}
+\bibliography{bibliography}
 
-\IfDefined{printindex}{\printindex}
-\IfDefined{printnomenclature}{\printnomenclature}
-
-%% Dokument ENDE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
-
