@@ -1,5 +1,4 @@
 \chapter{Introduction}
-\input{content/motivation}
 \section{Research overview}
 
 \chapter{Evaluation}
@@ -74,7 +73,7 @@ State machine models can be implemented using \texttt{if} or \texttt{case} state
     \IF{resource is available}
         \STATE set state to PROCESSING
     \ELSE
-        \STATE return
+        \STATE exit module
     \ENDIF
 \ELSIF{state is PROCESSING}
     \STATE process data
@@ -121,7 +120,7 @@ A couple of problems arise from the existing implementation. First of all listin
 \item Datagram Sender Module
 \end{itemize}
 
-Which module is being executed depends on the state of the main module being represented by the main function. The state of the main module on the other hand depends directly from the state of the submodules. The main module therefore acts more like a controller of the submodules and takes away the responsibility of the submodule's state management. Furthermore the main function is very long and complex (271 lines of code). The lack of a clear separation of module responsibility and conformance the state machine theory led to a completely new implementation as show in listing \ref{lst:urbaniak_main}.
+Which module is being executed depends on the state of the main module being represented by the main function. The state of the main module on the other hand depends directly from the state of the submodules. The main module therefore acts more like a controller of the submodules and takes away the responsibility of the submodule's state management. Furthermore the main function is very long and complex (271 lines of code). The lack of a clear separation of module responsibility and conformance to the state machine theory led me to a completely new implementation as show in listing \ref{lst:urbaniak_main}.
 
 \begin{lstlisting}[label=lst:urbaniak_main,caption=main function implementation]
  95 while (true) {
@@ -156,11 +155,11 @@ This equation shows that for instance a program having 10 locations and only 3 b
 This execution model executes modules concurrently. Instead of heaving an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules. Each module runs in isolation and can have its own main loop or terminate immediately. This model requires support from an existing operating system. An existing framework or API provides the necessary abstraction to create new concurrent modules. In terms of operating systems two abstractions are wide-spread for concurrently running software modules:
 
 \begin{itemize}
-\item \textbf{Processes}: Processes are usually considered as seperately concurrently running programs. Usually each process owns its own memory context and communication with other processes happens through abstractions like pipes or shared memory.
+\item \textbf{Processes}: Processes are usually considered as separately concurrently running programs. Usually each process owns its own memory context and communication with other processes happens through abstractions like pipes or shared memory.
 \item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data or the heap.
 \end{itemize}
 
-Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of micro-controllers these concepts also are implemented in very lightweight implementations. Many solutions exist like:
+Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of embedded micro-controllers these concepts also are implemented in many different implementations:
 
 \begin{enumerate}
 \item FreeRTOS (http://www.freertos.org)
@@ -232,17 +231,6 @@ Although ususally a concurrent execution model must be provided in form of an AP
 \caption[]{Illustration of an Interrupt Service Routine}
 \end{figure}
 
-\begin{lstlisting}[label=lst:urbaniak_main,caption=main function implementation]
- 95 while (true) {
- 96   shell();
- 97   batman_thread();
- 98   rx_thread();
- 99   uart_tx_thread();
-100   watchdog();
-101   timer_thread();
-102 }
-\end{lstlisting}
-
 The ISR interrupts the main program at any time when an external resource triggers an event and executes the service routine. The scheduler in this case is the CPU itself. There is one caveat with ISRs. When one ISR is being executed no other ISR can be triggered. Therefore it is being considered best practice not to perform intense and long running operations in ISRs.
 
 \minisec{Conclusion}
@@ -306,15 +294,52 @@ test(void)
 }
 \end{lstlisting}
 
-Now the expanded version after the preprocessor stage of the implementation looks much more like a state machine based implementation from the sequential execution model.
-
-Alternatives: \\
-- Heavyweight: Real Operating System. Enumerate them and compare ... \\
-- Lightweight: Thread implementations. Problem: Each thread has its own stack which consumes a lot of memory. \\
-- More Lightweight: Protothreads. Best compromise between classical state machines and real threads. \\
+The expanded version after the preprocessor stage of the implementation looks much more like a state machine based implementation from the sequential execution model. It uses a clever trick called loop unrolling (\cite{abrash}) which breaks ups the while statement using the switch statement. This technique is also known as Duff's device as described in \cite{duff}. Unfortunately this implementation has one drawback. One cannot (obviously) use switch statements in protothreads. A slightly more efficient implementation using GCC labels circumvents this and was used for the complete implementation of the thesis.
 
 \section{Ring Buffers}
+The predecessor thesis \cite{korniowski} used the UART interface in order to communicate with the user and to inform about incoming packets, changes to routes, etc.. As already analyzed in the previous chapter a state machine based sequential concurrent model was used to implement the UART module. There exists one problem with the current implementation.
+
+\begin{lstlisting}[float,label=lst:korniowski_uart,caption=UART module sending function from \cite{korniowski}]
+void rsSend(uint8_t data)
+{
+  while( !(UCSRA & (1<<UDRE)));
+  UDR = data;
+}
+\end{lstlisting}
+
+\minisec{}
+The listing \ref{lst:korniowski_uart} shows that the algorithm examines the UCSRA (USART Control and Status Register A) and blocks infinitely until the UDRE (USART Data Register Empty) bit becomes zero. The execution of all other concurrent modules and the main loop will be blocked until the UART becomes ready to accept data. In this time period no data can be received from the radio. The above mentioned implementation uses the same function for sending strings via the UART interface. For sending the string "hello" via the UART with a speed of 19.2kbps the main loop will be physically blocked for 2.5 milliseconds. In order to improve the implementation the following goals had to be accomplished:
+
+\begin{itemize}
+\item Refactoring to a non-blocking operation.
+\item Migration to a concurrent execution model using protothreads.
+\end{itemize}
+
+The Atmega162 micro-processor offers the following ISRs for receiving and sending data via the UART (\cite{atmega162datasheet}):
+
+\begin{itemize}
+\item \textbf{SIG\_USART\_RECV}: Is being invoked, when the UDR register contains a new byte received from the UART.
+\item \textbf{SIG\_USART\_DATA}: Is being invoked, when the UDR register is ready to be filled with a byte to be transmitted via the UART.
+\end{itemize}
+
+So we have the possibility to send or receive data asynchronously from the main loop in the context of a concurrent execution model by using ISRs. Filling the UDR or reading the UDR in the main loop is actually not necessary at all. The main loop can communicate with the ISRs through a receiving and transmitting queue buffer where it writes data to the transmitting queue and reads data from receiving queue.
+
+\minisec{}
+As shown in \cite{linux_device_drivers}
+
+\begin{figure}[H]
+\centering
+\import{images/}{ringbuffer.pdf_tex}
+\caption[]{Illustration of ring buffer}
+\end{figure}
+
 \section{Half-Duplex Radio Access (Petri Net)}
+
+\begin{figure}[H]
+\centering
+\import{images/}{mutex.pdf_tex}
+\caption[]{Mutual exclusion model using a petri net}
+\end{figure}
 
 \chapter{Network Stack}
 \section{Layer 2a: MAC Layer}
