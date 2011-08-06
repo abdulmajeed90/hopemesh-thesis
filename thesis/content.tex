@@ -216,9 +216,9 @@ In contrast to state machine based or sequential based concurrency thread based 
 
 One can easily see that the thread-based algorithm \ref{alg:thread} is much more expressive than the state-machine based algorithm \ref{alg:statemachine}.
 
-Together with the necessity of having a scheduler these solutions can be considered as heavy-weight. The scheduler consumes additional CPU cycles and the seperate stack memory space per thread consumes additional memory which is very scarce in embedded micro-controller systems.
+Together with the necessity of having a scheduler these solutions can be considered as heavy-weight. The scheduler consumes additional CPU cycles and the separate stack memory space per thread consumes additional memory which is very scarce in embedded micro-controller systems.
 
-Although ususally a concurrent execution model must be provided in form of an API or an existing kernel there is one exception in the context embedded micro-controllers and that are ISRs (Interrupt Service Routines). Interrupt service routines behave very much like preemptive concurrent modules with highest priority.
+Although usually a concurrent execution model must be provided in form of an API or an existing kernel there is one exception in the context embedded micro-controllers and that are ISRs (Interrupt Service Routines). Interrupt service routines behave very much like preemptive concurrent modules with highest priority.
 
 \begin{figure}[H]
 \centering
