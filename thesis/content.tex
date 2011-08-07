@@ -1,4 +1,6 @@
 \chapter{Introduction}
+cel
+tesa
 \section{Research overview}
 
 \chapter{Evaluation}
@@ -27,8 +29,10 @@
 \section{RFM12 Driver}
 
 \chapter{Software Algorithms}
-\section{Protothreads}
+\section{Module orchestration}
 Designing a software system that executes on embedded micro-controllers implies a lot of challenges when many software modules are involved and complexity grows. The conceptually defined modules must be somehow implemented. If the micro-controller lacks an operating system then there is no possibility of using provided abstractions and APIs for module orchestration and execution. Another challenge are limited hardware resources which prevent the deployment of many existing operating system kernels. Basically there are two types of execution models which can be implemented in micro-controllers:
+
+\begin{enumerate}
 
 \begin{figure}[H]
     \centering
@@ -36,8 +40,19 @@ Designing a software system that executes on embedded micro-controllers implies 
     \caption{Sequential execution model}
 \end{figure}
 
-\textbf{Sequential execution}
-This type sequentially executes all modules starting from the first module until the last one. Once the last module ends the execution starts again from the first module. It is a very simple model that does not need any operating system support or frameworks. It can be simply implemented as a sequence of function calls inside an infinite loop as shown in algorithm \ref{alg:sequential execution}.
+\item \textbf{Sequential execution model:} This type sequentially executes all modules inside an infinite main loop starting from the first module until the last one. Once the last module ends the execution starts again from the first module.
+
+\begin{figure}[H]
+\centering
+\import{figures/}{concurrent_execution.pdf_tex}
+\caption[]{Concurrent execution model}
+
+\end{figure}
+\item \textbf{Concurrent execution model:} This type executes modules concurrently. Instead of having an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules.
+\end{enumerate}
+
+\subsection{Sequential execution}
+This model does not necessarily needs operating system support or frameworks. It can be simply implemented as a sequence of function calls inside an infinite loop as shown in algorithm \ref{alg:sequential execution}.
 
 \begin{algorithm}[H]
 \caption{Sequential model algorithm}
@@ -55,6 +70,7 @@ This type sequentially executes all modules starting from the first module until
 There is one challenge that comes with this type of execution model. That is that only one module can execute at a time due to its sequential nature. If a module i.e. waits for an external resource to provide data it must not block the execution of the main loop until the external resources becomes ready. This would prevent the execution of the other modules. The classic solution to this problem is the introduction of states in modules. Module states can be implemented as classical Finite State Machines (\cite{booth}).
 
 If we take the example from above about waiting for external resources a finite state machine for modules can be modeled as shown in figure \ref{fig:statemachine}.
+
 \begin{figure}[H]
 \centering
 \import{figures/}{state_machine.pdf_tex}
@@ -143,14 +159,8 @@ There is a problem though in state machine based implementations and that is the
 
 This equation shows that for instance a program having 10 locations and only 3 boolean variables already has 80 different states. Although this equation might not apply exactly to state machine based implementations it underlines the practical experience of big state-machine based implementations. The alternative to state-machine based applications are thread or process based implementations using the concurrent execution model as shown below.
 
-\begin{figure}[H]
-\centering
-\import{figures/}{concurrent_execution.pdf_tex}
-\caption[]{Concurrent execution model}
-\end{figure}
-
-\textbf{Concurrent execution}
-This execution model executes modules concurrently. Instead of heaving an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules. Each module runs in isolation and can have its own main loop or terminate immediately. This model requires support from an existing operating system. An existing framework or API provides the necessary abstraction to create new concurrent modules. In terms of operating systems two abstractions are wide-spread for concurrently running software modules:
+\subsection{Concurrent execution}
+This model requires support from an existing operating system. An existing framework or API provides the necessary abstraction to create new concurrent modules. Each module runs in isolation and can have its own main loop or terminate immediately. In terms of operating systems two abstractions are widely used for concurrently running software modules:
 
 \begin{itemize}
 \item \textbf{Processes}: Processes are usually considered as separately concurrently running programs. Usually each process owns its own memory context and communication with other processes happens through abstractions like pipes or shared memory.
@@ -192,7 +202,7 @@ But how does a context switch happen between concurrent modules? Two methodologi
 \item \textbf{Preemptive}: Here the concurrent modules do not have control about how and when they get interrupted. It can happen anytime during the execution. Again the context switch between concurrent modules is often handled using priorities in the scheduler.
 \end{itemize}
 
-Nearly all existing solutions have one feature in common. That is that every thread has its own seperate stack memory space. This is necessary in order to be able to run the same block of code (for instance a function) in multiple thread instances. On the other hand threads are being executed in the same memory context so sharing data between threads is possible by using the heap or static memory. All of the above mentioned frameworks provide common abstractions which are needed in thread based implementations:
+Nearly all existing solutions have one feature in common. That is that every thread has its own separate stack memory space. This is necessary in order to be able to run the same block of code (for instance a function) in multiple thread instances. On the other hand threads are being executed in the same memory context so sharing data between threads is possible by using the heap or static memory. All of the above mentioned frameworks provide common abstractions which are needed in thread based implementations:
 
 \begin{itemize}
 \item Semaphores
@@ -218,7 +228,7 @@ One can easily see that the thread-based algorithm \ref{alg:thread} is much more
 
 Together with the necessity of having a scheduler these solutions can be considered as heavy-weight. The scheduler consumes additional CPU cycles and the separate stack memory space per thread consumes additional memory which is very scarce in embedded micro-controller systems.
 
-Although usually a concurrent execution model must be provided in form of an API or an existing kernel there is one exception in the context embedded micro-controllers and that are ISRs (Interrupt Service Routines). Interrupt service routines behave very much like preemptive concurrent modules with highest priority.
+Although usually a concurrent execution model must be provided in form of an API or an existing kernel there is one exception in the context embedded micro-controllers and that are ISRs (Interrupt Service Routines). Interrupt service routines behave like \emph{preemptive} concurrent modules with highest priority.
 
 \begin{figure}[H]
 \centering
@@ -228,7 +238,7 @@ Although usually a concurrent execution model must be provided in form of an API
 
 The ISR interrupts the main program at any time when an external resource triggers an event and executes the service routine. The scheduler in this case is the CPU itself. There is one caveat with ISRs. When one ISR is being executed no other ISR can be triggered. Therefore it is being considered best practice not to perform intense and long running operations in ISRs.
 
-\textbf{Conclusion}
+\subsection{Conclusion}
 For the implementation of this thesis the following conclusions were drawn:
 
 \begin{itemize}
@@ -263,7 +273,10 @@ Algorithm \ref{alg:linear} shows a very simple linear use case where it waits fo
 
 The implementation of the algorithm is self-describing and corresponds to the APIs known from the concurrent execution model. The expanded version of the listing after the preprocessor stage is seen in \ref{lst:linear_protothread_expanded}.
 
-\begin{lstlisting}[label=lst:linear_protothread_expanded,caption=expanded linear protothread implementation]
+\begin{lstlisting}[
+  label=lst:linear_protothread_expanded,
+  caption=expanded linear protothread implementation
+]
 char
 test(void)
 {
@@ -288,12 +301,14 @@ test(void)
 }
 \end{lstlisting}
 
-The expanded version after the preprocessor stage of the implementation looks much more like a state machine based implementation from the sequential execution model. It uses a clever trick called loop unrolling (\cite{abrash}) which breaks ups the while statement using the switch statement. This technique is also known as Duff's device as described in \cite{duff}. Unfortunately this implementation has one drawback. One cannot (obviously) use switch statements in protothreads. A slightly more efficient implementation using GCC labels circumvents this and was used for the complete implementation of the thesis.
+The expanded version after the preprocessor stage of the implementation looks much more like a state machine based implementation from the sequential execution model. It uses a clever trick called loop unrolling (\cite{abrash}) which breaks ups the while statement using the switch statement. This technique is also known as Duff's device as described in \cite{duff}. Unfortunately this implementation has one drawback. One cannot (obviously) use switch statements in protothreads. A slightly more efficient implementation using GCC labels circumvents this. Since the context switch is managed by the concurrent modules themselves the behavior can be classified as \emph{cooperative} multitasking.
+
+Due to the lightweight nature of protothreads and the possibility to express algorithms in a linear thread-like fashion this framework was chosen by the author for the implementation.
 
 \section{Ring Buffers}
 The predecessor thesis \cite{korniowski} used the UART interface in order to communicate with the user and to inform about incoming packets, changes to routes, etc.. As already analyzed in the previous chapter a state machine based sequential concurrent model was used to implement the UART module. There exists one problem with the current implementation.
 
-\begin{lstlisting}[float,label=lst:korniowski_uart,caption=UART module sending function from \cite{korniowski}]
+\begin{lstlisting}[float,label=lst:korniowski_uart,caption=UART module sending function from thesis \cite{korniowski}]
 void rsSend(uint8_t data)
 {
   while( !(UCSRA & (1<<UDRE)));
@@ -301,7 +316,7 @@ void rsSend(uint8_t data)
 }
 \end{lstlisting}
 
-The listing \ref{lst:korniowski_uart} shows that the algorithm examines the UCSRA (USART Control and Status Register A) and blocks infinitely until the UDRE (USART Data Register Empty) bit becomes zero. The execution of all other concurrent modules and the main loop will be blocked until the UART becomes ready to accept data. In this time period no data can be received from the radio. The above mentioned implementation uses the same function for sending strings via the UART interface. For sending the string "hello" via the UART with a speed of 19.2kbps the main loop will be physically blocked for 2.5 milliseconds. In order to improve the implementation the following goals had to be accomplished:
+Listing \ref{lst:korniowski_uart} shows that the algorithm examines the UCSRA (USART Control and Status Register A) and blocks infinitely until the UDRE (USART Data Register Empty) bit becomes zero. The execution of all other concurrent modules and the main loop will be blocked until the UART becomes ready to accept data. In this time period no data can be received from the radio. The above mentioned implementation uses the same function for sending strings via the UART interface. For sending the string "hello" via the UART with a speed of 19.2kbps the main loop will be physically blocked for 2.5 milliseconds. In order to improve the implementation the author wanted to accomplish the following goals:
 
 \begin{itemize}
 \item Refactoring to a non-blocking operation.
@@ -315,15 +330,63 @@ The Atmega162 micro-processor offers the following ISRs for receiving and sendin
 \item \textbf{SIG\_USART\_DATA}: Is being invoked, when the UDR register is ready to be filled with a byte to be transmitted via the UART.
 \end{itemize}
 
-So we have the possibility to send or receive data asynchronously from the main loop in the context of a concurrent execution model by using ISRs. Filling the UDR or reading the UDR in the main loop is actually not necessary at all. The main loop can communicate with the ISRs through a receiving and transmitting queue buffer where it writes data to the transmitting queue and reads data from receiving queue.
+So we have the possibility to send or receive data asynchronously from the main loop in the context of a concurrent execution model by using ISRs. Filling the UDR or reading the UDR in the main loop (and thus blocking it) is actually not necessary at all. The main loop can communicate with the ISRs through a receiving and transmitting queue buffer where it writes data to the transmitting queue and reads data from the receiving queue.
 
-As shown in \cite{linux_device_drivers}
+Using this sort of communication is known as the "producer-consumer problem". It can be implemented using a FIFO buffer. The Linux kernel (see \cite{linux_device_drivers} chapter 5.7.1) as well as (embedded) DSP micro-controllers (see \cite{ti_dsp}) use a very elegant FIFO-algorithm by providing a lock-free buffer being called "circular buffer" or "ring buffer".
 
 \begin{figure}[H]
 \centering
 \import{figures/}{ringbuffer.pdf_tex}
-\caption[]{Illustration of ring buffer}
+\caption[]{Illustration of a ring buffer}
+\label{fig:ringbuffer}
 \end{figure}
+
+Figure \ref{fig:ringbuffer} shows the basic principle of the algorithm. A circular buffer is defined by the following four pointers:
+
+\begin{itemize}
+\item \textbf{Start:} This pointer defines the beginning of the buffer in memory. This pointer is static.
+\item \textbf{End:} This pointer defines the end of the buffer in memory. It can also be expressed as the maximum length of the buffer. This pointer is static.
+\item \textbf{Head:} The head pointer is being changed dynamically by the producer. Whenever the producer wants to write data in the buffer the head pointer is increased and the corresponding memory filled. If the head points to the same address as the tail pointer the buffer is full or empty.
+\item \textbf{Tail:} The tail pointer is being changed dynamically by the consumer. Whenever the consumer wants to read data from the buffer the tail pointer is increased and the corresponding memory cleared. If the tail points to the same address as the head pointer the buffer is full or empty.
+\end{itemize}
+
+In order to distinguish whether the buffer is full or empty an additional size variable was implemented. The biggest advantage of the presented algorithm is the possibility to write and read data in a lock-free fashion. A consumer thread does not need to wait for a mutual exclusion on the buffer since the consumer thread is the only instance manipulating the tail pointer. The same applies for the producer being the only instance manipulating the head pointer.
+
+The complete listing of the ring-buffer implementation can be seen in appendix \ref{chapter:appendix_a} in the file \texttt{src/ringbuf.c}. There are two functions provided:
+
+\begin{itemize}
+\item \textbf{ringbuf\_add:} This function is being called by the producer. The function immediately returns \texttt{true} if a byte could be written to the the buffer or \texttt{false} if the buffer is full.
+\item \textbf{ringbuf\_remove:} This function is being called by the consumer. The function immediately returns \texttt{true} if a byte could read from the buffer or \texttt{false} if the buffer is empty.
+\end{itemize}
+
+The important nature of the above mentioned functions is that they are non-blocking because they return immediately. These functions could therefore be called from protothreads. A producer protothread running in the context of the main loop can write data like presented in listing \ref{lst:producer_ringbuf}. The consumer of this data is the SIG\_USART\_DATA ISR as presented in listing \ref{lst:consumer_ringbuf}.
+
+\begin{lstlisting}[
+    label=lst:producer_ringbuf,
+    caption=Producer writing data
+]
+PT_THREAD(producer(uint8_t data))
+{
+    PT_BEGIN(&pt);
+    PT_WAIT_UNTIL(&pt, ringbuf_add(buf, data));
+    PT_END(&pt);
+}
+\end{lstlisting}
+
+\begin{lstlisting}[
+    label=lst:consumer_ringbuf,
+    caption=Consumer reading data
+]
+ISR(SIG_USART_DATA)
+{
+  uint8_t c;
+  if (ringbuf_remove(buf, &c)) {
+    UDR = c;
+  }
+}
+\end{lstlisting}
+
+Instead of \emph{physically} blocking the algorithm expressed in listing \ref{lst:producer_ringbuf} only \emph{logically} blocks the protothread. If the buffer is full a context-switch back to the main loop is performed. The main loop sequentially executes all other concurrent modules and returns to the protothread which then again tries to add data into the ring buffer.
 
 \section{Half-Duplex Radio Access (Petri Net)}
 
@@ -333,9 +396,16 @@ As shown in \cite{linux_device_drivers}
 \caption[]{Mutual exclusion model using a petri net}
 \end{figure}
 
+\begin{figure}[H]
+\centering
+\import{figures/}{rfm12_petri.pdf_tex}
+\caption[]{Half duplex algorithm modeled as a petri net}
+\end{figure}
+
 \chapter{Network Stack}
 \section{Layer 2a: MAC Layer}
 \section{Layer 2b: Logical Link Control}
+Hamming Code
 \section{Layer 3: Batman Routing}
 \section{Layer 7: Application}
 

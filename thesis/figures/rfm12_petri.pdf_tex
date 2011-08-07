@@ -1,6 +1,6 @@
 %% Creator: Inkscape inkscape 0.48.1, www.inkscape.org
 %% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
-%% Accompanies image file 'concurrent_execution.pdf' (pdf, eps, ps)
+%% Accompanies image file 'rfm12_petri.pdf' (pdf, eps, ps)
 %%
 %% To include the image in your LaTeX document, write
 %%   \input{<filename>.pdf_tex}
@@ -36,16 +36,23 @@
   }
   \providecommand\rotatebox[2]{#2}
   \ifx\svgwidth\undefined
-    \setlength{\unitlength}{296.73999023pt}
+    \setlength{\unitlength}{269.07519531pt}
   \else
     \setlength{\unitlength}{\svgwidth}
   \fi
   \global\let\svgwidth\undefined
   \makeatother
-  \begin{picture}(1,0.27110337)%
-    \put(0,0){\includegraphics[width=\unitlength]{concurrent_execution.pdf}}%
-    \put(0.08846173,0.05599791){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 1}}}%
-    \put(0.41197728,0.05599789){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 2}}}%
-    \put(0.78941208,0.05599789){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module n}}}%
+  \begin{picture}(1,0.70017602)%
+    \put(0,0){\includegraphics[width=\unitlength]{rfm12_petri.pdf}}%
+    \put(0.90296846,0.3312977){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{nIRQ}}}%
+    \put(0.07507194,0.66895798){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{rfm12\_lock}}}%
+    \put(0.01780875,0.32857729){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex}}}%
+    \put(0.63107317,0.52257511){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.34862425,0.40364925){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.41496721,0.01549606){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.63107317,0.13420784){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.90704393,0.47635456){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{TX}}}%
+    \put(0.90799173,0.14865733){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{RX}}}%
+    \put(0.5164056,0.66960911){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{ISR}}}%
   \end{picture}%
 \endgroup

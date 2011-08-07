@@ -9,14 +9,28 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="161.5"
-   height="271.5"
+   width="111.42498"
+   height="171"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.1 r9760"
-   sodipodi:docname="sequential_execution.pdf">
+   sodipodi:docname="sequential_execution.svg">
   <defs
      id="defs4">
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend"
+       style="overflow:visible">
+      <path
+         id="path3814"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)"
+         inkscape:connector-curvature="0" />
+    </marker>
     <marker
        inkscape:stockid="Arrow2Lend"
        orient="auto"
@@ -39,9 +53,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="95.262573"
-     inkscape:cy="98.801178"
+     inkscape:zoom="2.8"
+     inkscape:cx="13.660368"
+     inkscape:cy="51.899417"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -49,10 +63,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="1280"
-     inkscape:window-height="974"
+     inkscape:window-width="1680"
+     inkscape:window-height="1001"
      inkscape:window-x="1440"
-     inkscape:window-y="26"
+     inkscape:window-y="25"
      inkscape:window-maximized="1"
      units="cm">
     <inkscape:grid
@@ -62,8 +76,9 @@
        visible="true"
        enabled="true"
        snapvisiblegridlinesonly="true"
-       spacingx="10px"
-       spacingy="10px" />
+       spacingx="5px"
+       spacingy="5px"
+       dotted="false" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -81,109 +96,103 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-179,-51.862183)">
+     transform="translate(-167.44098,-94.421169)">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1, 4;stroke-dashoffset:0"
+       d="m 227.94098,199.92117 0,15"
+       id="path4613"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:0.73192501;stroke-opacity:1"
+       id="rect2987"
+       width="100"
+       height="29.999996"
+       x="178.5"
+       y="104.36215"
+       rx="14.285714"
+       ry="14.999998" />
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="200.75365"
+       y="124.15015"
+       id="text3757"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3759"
+         x="200.75365"
+         y="124.15015"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'">Module 1</tspan></text>
+    <rect
+       ry="14.999998"
+       rx="14.285714"
+       y="154.92117"
+       x="177.94098"
+       height="29.999996"
+       width="100"
+       id="rect4238"
+       style="fill:none;stroke:#000000;stroke-width:0.73192501;stroke-opacity:1" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text4240"
+       y="174.70917"
+       x="200.19464"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"><tspan
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
+         y="174.70917"
+         x="200.19464"
+         id="tspan4242"
+         sodipodi:role="line">Module 2</tspan></text>
     <g
-       id="g5115">
+       id="g5265"
+       transform="translate(-260.55902,120.55902)">
       <rect
-         ry="20"
-         rx="20"
-         y="72.362183"
-         x="200"
-         height="40"
-         width="140"
-         id="rect2987"
-         style="fill:none;stroke:#000000;stroke-opacity:1" />
+         ry="14.999998"
+         rx="14.285714"
+         y="104.36216"
+         x="438.5"
+         height="29.999996"
+         width="100"
+         id="rect4248"
+         style="fill:none;stroke:#000000;stroke-width:0.73192501;stroke-opacity:1" />
       <text
          sodipodi:linespacing="125%"
-         id="text3757"
-         y="97.150185"
-         x="242.06224"
+         id="text4250"
+         y="124.15015"
+         x="460.75366"
          style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
          xml:space="preserve"><tspan
            style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
-           y="97.150185"
-           x="242.06224"
-           id="tspan3759"
-           sodipodi:role="line">Module 1</tspan></text>
+           y="124.15015"
+           x="460.75366"
+           id="tspan4252"
+           sodipodi:role="line">Module n</tspan></text>
     </g>
     <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:none;marker-mid:none;marker-end:url(#Arrow2Lend)"
-       d="m 270,112.36218 0,40"
-       id="path3801"
-       inkscape:connector-curvature="0" />
-    <g
-       id="g4799"
-       transform="translate(-0.5,-79.5)">
-      <path
-         inkscape:connector-curvature="0"
-         id="path4611"
-         d="m 270,272.36218 0,20"
-         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path4613"
-         d="m 270,292.36218 0,30"
-         style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1, 4;stroke-dashoffset:0" />
-      <path
-         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
-         d="m 270,322.36218 0,20"
-         id="path4615"
-         inkscape:connector-curvature="0" />
-    </g>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
-       d="m 269.5,302.86218 0,20 -90,0 0.5,-270.499997 90,0 0,20"
-       id="path4812"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
+       d="m 60,90.559013 0,19.999997"
+       id="path4523"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccc" />
-    <g
-       id="g5120">
-      <rect
-         style="fill:none;stroke:#000000;stroke-opacity:1"
-         id="rect3768"
-         width="140"
-         height="40"
-         x="200"
-         y="152.36218"
-         rx="20"
-         ry="20" />
-      <text
-         xml:space="preserve"
-         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-         x="242.06224"
-         y="177.15018"
-         id="text5065"
-         sodipodi:linespacing="125%"><tspan
-           sodipodi:role="line"
-           id="tspan5067"
-           x="242.06224"
-           y="177.15018"
-           style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'">Module 2</tspan></text>
-    </g>
-    <g
-       id="g5130"
-       transform="translate(-0.5,-79.5)">
-      <rect
-         ry="20"
-         rx="20"
-         y="342.36218"
-         x="200"
-         height="40"
-         width="140"
-         id="rect4806"
-         style="fill:none;stroke:#000000;stroke-opacity:1" />
-      <text
-         xml:space="preserve"
-         style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-         x="242.06224"
-         y="367.15018"
-         id="text5073"
-         sodipodi:linespacing="125%"><tspan
-           sodipodi:role="line"
-           id="tspan5075"
-           x="242.06224"
-           y="367.15018"
-           style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'">Module n</tspan></text>
-    </g>
+       transform="translate(167.94098,44.362156)" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path4709"
+       d="m 227.94098,184.92117 0,10"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:none"
+       sodipodi:nodetypes="cc" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:none;marker-end:url(#Arrow2Mend)"
+       d="m 227.94098,214.92117 0,10"
+       id="path4895"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Mend)"
+       d="m 60,210.55901 0,10 -60,0 0,-169.999997 60,0 0,10"
+       id="path5270"
+       inkscape:connector-curvature="0"
+       transform="translate(167.94098,44.362156)" />
   </g>
 </svg>

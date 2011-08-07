@@ -36,16 +36,16 @@
   }
   \providecommand\rotatebox[2]{#2}
   \ifx\svgwidth\undefined
-    \setlength{\unitlength}{129.2pt}
+    \setlength{\unitlength}{89.13998413pt}
   \else
     \setlength{\unitlength}{\svgwidth}
   \fi
   \global\let\svgwidth\undefined
   \makeatother
-  \begin{picture}(1,1.68111455)%
+  \begin{picture}(1,1.53466485)%
     \put(0,0){\includegraphics[width=\unitlength]{sequential_execution.pdf}}%
-    \put(0.39047827,1.40069349){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 1}}}%
-    \put(0.39047827,0.9053375){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 2}}}%
-    \put(0.38738229,0.22112697){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module n}}}%
+    \put(0.29896947,1.26785773){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 1}}}%
+    \put(0.29395259,0.8141083){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 2}}}%
+    \put(0.2939526,0.18588294){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module n}}}%
   \end{picture}%
 \endgroup
