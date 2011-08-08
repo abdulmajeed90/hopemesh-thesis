@@ -97,9 +97,11 @@ State machine models can be implemented using \texttt{if} or \texttt{case} state
 \end{algorithmic}
 \end{algorithm}
 
-This implementation emulates a concurrent execution of modules. The context switch between module executions is being done by the modules themselves (using self-interruption) and no external scheduler is involved. This form of concurrent behavior can therefore be described as a non-preemptive or cooperative multi-tasking between modules. The predecessor thesis \cite{korniowski} implementation heavily used the described state machine algorithm although the model theory behind the implementation was not being mentioned in the thesis. Listing \ref{lst:korniowski_main} shows the main function of the predecessor thesis implementation.
+This implementation emulates a concurrent execution of modules. The context switch between module executions is being done by the modules themselves (using self-interruption) and no external scheduler is involved. This form of concurrent behavior can therefore be described as a non-preemptive or cooperative multi-tasking between modules. The predecessor thesis \cite{korniowski} implementation heavily used the described state machine algorithm although the model theory behind the implementation was not being mentioned in the thesis. Listing \ref{lst:korniowski_main} shows the main function of the predecessor implementation.
 
-\begin{lstlisting}[label=lst:korniowski_main,caption=main function implementation in \cite{korniowski}]
+\begin{lstlisting}[
+	label=lst:korniowski_main,
+	caption=main loop routine (see \cite{korniowski})]
 382 while(0x01)
 383 {
 384         if(uartInterrupt == ON) // got a character from RS232
@@ -135,7 +137,14 @@ A couple of problems arise from the existing implementation. First of all listin
 \item Datagram Sender Module
 \end{itemize}
 
-Which module is being executed depends on the state of the main module being represented by the main function. The state of the main module on the other hand depends directly from the state of the submodules. The main module therefore acts more like a controller of the submodules and takes away the responsibility of the submodule's state management. Furthermore the main function is very long and complex (271 lines of code). The lack of a clear separation of module responsibility and conformance to the state machine theory led me to a completely new implementation as show in listing \ref{lst:urbaniak_main}.
+Which module is being executed depends on the state of the main module being represented by the main function. The state of the main module on the other hand depends directly from the state of the submodules. The main module therefore acts more like a controller of the submodules and takes away the responsibility of the submodule's state management. Furthermore the main function is very long and complex (271 lines of code). Therefore the following goals were defined by the author:
+
+\begin{itemize}
+\item Clear separation of responsibilities between the main loop and the concurrently running modules.
+\item Simplification of the main loop implementation.
+\end{itemize}
+
+Listing \ref{lst:urbaniak_main} shows the new implementation of the main loop. The new implementation makes it very clear which modules are being executed sequentially. Furthermore the main function does not act as a controller but rather leaves the state management in the module's responsibility.
 
 \begin{lstlisting}[label=lst:urbaniak_main,caption=main function implementation]
  95 while (true) {
@@ -148,9 +157,7 @@ Which module is being executed depends on the state of the main module being rep
 102 }
 \end{lstlisting}
 
-The new implementation makes it very clear which modules are being executed sequentially. Furthermore the main function does not act as a controller but rather leaves the state management in the module's responsibility.
-
-There is a problem though in state machine based implementations and that is the rapidly growing complexity. This problem is called "state explosion problem" and has even a exponential behavior as shown in \cite{katoen}. The equation \ref{eq:state explosion} shows that the number of states is dependent on the number of program locations, the number of used variables and their dimensions.
+The next question was how to implement the actual concurrently running modules. One possibility was to reuse the predecessor's methodology and use state machine based implementations. There is a problem though in state machine based implementations and that is the rapidly growing complexity. This problem is called "state explosion problem" and has even a exponential behavior as shown in \cite{katoen}. The equation \ref{eq:state explosion} shows that the number of states is dependent on the number of program locations, the number of used variables and their dimensions.
 
 \begin{equation}
 \label{eq:state explosion}
@@ -308,7 +315,10 @@ Due to the lightweight nature of protothreads and the possibility to express alg
 \section{Ring Buffers}
 The predecessor thesis \cite{korniowski} used the UART interface in order to communicate with the user and to inform about incoming packets, changes to routes, etc.. As already analyzed in the previous chapter a state machine based sequential concurrent model was used to implement the UART module. There exists one problem with the current implementation.
 
-\begin{lstlisting}[float,label=lst:korniowski_uart,caption=UART module sending function from thesis \cite{korniowski}]
+\begin{lstlisting}[
+	float,
+	label=lst:korniowski_uart,
+	caption=Sender route for the UART module (see \cite{korniowski})]
 void rsSend(uint8_t data)
 {
   while( !(UCSRA & (1<<UDRE)));
@@ -389,11 +399,71 @@ ISR(SIG_USART_DATA)
 Instead of \emph{physically} blocking the algorithm expressed in listing \ref{lst:producer_ringbuf} only \emph{logically} blocks the protothread. If the buffer is full a context-switch back to the main loop is performed. The main loop sequentially executes all other concurrent modules and returns to the protothread which then again tries to add data into the ring buffer.
 
 \section{Half-Duplex Radio Access (Petri Net)}
+The predecessor implementation used an identical (physically) blocking implementation in order to send or receive data via the RFM12B hardware module. Listing \ref{lst:rfm12b_predecessor_tx} shows the algorithm used for sending data.
+
+\begin{lstlisting}[
+    label=lst:rfm12b_predecessor_tx,
+    caption=Sender routine for the RFM12B hardware module (see \cite{korniowski})
+]
+void rfTx(uint8_t data)
+{
+        while(WAIT_NIRQ_LOW());
+        rfCmd(0xB800 + data);
+}
+\end{lstlisting}
+
+This implementation physically blocks the main loop the same way as the UART algorithm shown in listing \ref{lst:korniowski_uart}. In this case the algorithm does not wait for the status of an internal register to send data but rather waits for the external nIRQ pin from the RFM12B hardware module to go low. The official "RF12B programming guide" (see \cite{rf12b_programming_guide}) also proposes a physically blocking algorithm.
+
+The author wanted to improve the algorithm in a similar fashion as the UART algorithm. The nIRQ pin of the RFM12B was connected to the INT0 pin of the ATMega162 micro-processor allowing to execute the SIG\_INTERRUPT0 interrupt service routine asynchronously. But it turned out that the implementation could not be reused at all. The RFM12B radio hardware imposes the following algorithmic challenges for the driver implementation:
+\begin{itemize}
+\item \textbf{Single interrupt request for multiple events:} The RFM12 radio module uses only one nIRQ pin in order to generate an interrupt for the following events (see \cite{sis4221_datasheet}):
+\begin{itemize}
+\item The TX register is ready to receive the next byte (RGIT)
+\item The RX FIFO has received the preprogrammed amount of bits (FFIT)
+\end{itemize}
+The state management has to be implemented in software otherwise the current state of operation (sending or receiving) is undefined.
+\item \textbf{Half-Duplex operation:} The RFM12 radio module only allows either to receive or to send data at a time but not simultaneously.
+\end{itemize}
+
+The author abstracted the operation of the RFM12B driver algorithm as a (proto)thread. Interestingly enough the thread has a state modeled as a state machine depending whether it receives or sends data. The following states are valid:
+
+\begin{itemize}
+\item \textbf{RX:} This is the receiving state. The thread (logically) blocks until a complete packet has been received. Whether a packet is complete or not depends on the upper network stack layers.
+\item \textbf{TX:} This is the sending state. The thread (logically) blocks until a complete packet has been sent. Again the upper network stack layers decide whether the transmission is complete or not.
+\end{itemize}
+
+The abstract algorithm is shown in \ref{alg:rfm12b_thread}. The question is who sets the actual state of the radio driver. Receiving data is \emph{non-deterministic}. A packet can arrive at any time and thus the invocation of the SIG\_INTERRUPT0 interrupt service routine. Therefore the algorithm sets the RX state as the \emph{default} state for the radio thread.
+
+Sending data on the other hand is \emph{deterministic}. When a user hits the Enter key via the UART module a packet can be constructed. A 3rd party thread has to request the control over the radio module and occupy it until the packet has been fully transmitted. The author realized that this is a more or less classical concurrency problem between two threads and a single resource:
+\begin{itemize}
+\item \textbf{Sender Thread:} The sender thread wants to acquire the control over the radio module until the transmission of a packet is complete.
+\item \textbf{Receiver Thread:} The receiver thread also wants to acquire the control over the radio module until the packet reception is complete.
+\item \textbf{Single resource:} The external resource in this case is the radio module. Only the receiving radio driver thread or the transmitting sender thread can own the radio hardware resource at a time.
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{RFM12B driver thread algorithm}
+\label{alg:rfm12b_thread}
+\begin{algorithmic}
+\WHILE{$true$}
+    \IF{state is RX}
+        \STATE receive data
+    \ELSIF{state is TX}
+        \STATE send data
+    \ENDIF 
+
+    \STATE set state to RX
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+In classical multi-threaded algorithms this problem can be solved using mutual exclusion. Modeling such an algorithm can be done using petri nets as shown in figure \ref{fig:petri_mutex}.
 
 \begin{figure}[H]
 \centering
 \import{figures/}{mutex.pdf_tex}
 \caption[]{Mutual exclusion model using a petri net}
+\label{fig:petri_mutex}
 \end{figure}
 
 \begin{figure}[H]
