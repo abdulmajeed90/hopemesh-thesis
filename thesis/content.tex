@@ -9,18 +9,15 @@ This thesis has the goal to implement an advanced and refined version of the pre
 The author wants to prove that an implementation of a robust mesh network using embedded devices despite its constraints is quite possible. He wants to explore algorithms and software architectures usually hidden behind the curtain of operating systems.
 The desired end result is not only to have a working mesh network prototype but also an algorithmic framework for further development. Therefore the author also wanted to provide a framework which allows to try and research future algorithms on a regular PC.
 \section{Thesis overview}
-The thesis is structured in the same order as the above mentioned goals. The first part analyzes the existing prototype hardware and provides an enhanced version.
-\begin{itemize}
-\item an alternative CPU
-\item an external SRAM
-\item a level shifter for the RFM12B module
-\item an UART-USB interface
-\item connectors for an PS/2 keyboard and HD4780 based LCD module
-\end{itemize}
+The thesis is structured in the same order as the above mentioned goals. The first part analyzes the existing prototype hardware. An enhanced version is proposed by providing an alternative CPU and the connection of external RAM. Level shifters are introduced for the connection of the RFM12B radio module and the existing UART connection is being enhanced by an USB interface. Finally connectors for an external keyboard and an external LCD module are introduced.
 
-The second part elaborates on the envisioned architecture. It identifies the necessary software modules which have to be implemented in order to provide a robust design.
+The second part elaborates on the envisioned software architecture. It identifies the necessary software modules which have to be implemented in order to provide a robust design. It defines modules for the human interaction and for the internal state control. The network stack module and the RFM12B driver module are identified for the mesh network access.
 
-The third part explores algorithms and data structures 
+The third part explores the algorithmic foundations and data structures which are being used for the implementation. Different concurrency models are being analyzed and a threading framework for the software modules is proposed. An algorithm for the seamless integration of the UART module is being proposed and finally the complex concurrency behavior of the RFM12B driver module analyzed.
+
+The fourth part is solely dedicated to the network stack. The implemented network layers and packet structures are described as well the used transmission encoding (Hamming).
+
+The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
 
 \chapter{Hardware Design}
 \section{RAM}
