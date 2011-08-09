@@ -1,12 +1,26 @@
 \chapter{Introduction}
-cel
-tesa
-\section{Research overview}
+This thesis has the goal to implement an advanced and refined version of the predecessor implementation (see \cite{korniowski}) for a fail-safe mesh network prototype using embedded technologies. This goal can be split in the following aspects:
+\begin{itemize}
+\item \textbf{Hardware: } The goal is to explore alternative and enhanced hardware solutions for an embedded implementation.
+\item \textbf{Algorithms :} The goal is to explore and elaborate on enhanced algorithms and data structures.
+\item \textbf{Simulation :} The goal is to provide the basis for a simulation environment for the provided algorithms that can execute on regular PCs.
+\end{itemize}
 
-\chapter{Evaluation}
-\section{Existing solution}
-\section{Assumptions}
-\section{Requirements}
+The author wants to prove that an implementation of a robust mesh network using embedded devices despite its constraints is quite possible. He wants to explore algorithms and software architectures usually hidden behind the curtain of operating systems.
+The desired end result is not only to have a working mesh network prototype but also an algorithmic framework for further development. Therefore the author also wanted to provide a framework which allows to try and research future algorithms on a regular PC.
+\section{Thesis overview}
+The thesis is structured in the same order as the above mentioned goals. The first part analyzes the existing prototype hardware and provides an enhanced version.
+\begin{itemize}
+\item an alternative CPU
+\item an external SRAM
+\item a level shifter for the RFM12B module
+\item an UART-USB interface
+\item connectors for an PS/2 keyboard and HD4780 based LCD module
+\end{itemize}
+
+The second part elaborates on the envisioned architecture. It identifies the necessary software modules which have to be implemented in order to provide a robust design.
+
+The third part explores algorithms and data structures 
 
 \chapter{Hardware Design}
 \section{RAM}
@@ -45,8 +59,7 @@ Designing a software system that executes on embedded micro-controllers implies 
 \begin{figure}[H]
 \centering
 \import{figures/}{concurrent_execution.pdf_tex}
-\caption[]{Concurrent execution model}
-
+\caption{Concurrent execution model}
 \end{figure}
 \item \textbf{Concurrent execution model:} This type executes modules concurrently. Instead of having an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules.
 \end{enumerate}
@@ -240,7 +253,7 @@ Although usually a concurrent execution model must be provided in form of an API
 \begin{figure}[H]
 \centering
 \import{figures/}{isr.pdf_tex}
-\caption[]{Illustration of an Interrupt Service Routine}
+\caption{Illustration of an Interrupt Service Routine}
 \end{figure}
 
 The ISR interrupts the main program at any time when an external resource triggers an event and executes the service routine. The scheduler in this case is the CPU itself. There is one caveat with ISRs. When one ISR is being executed no other ISR can be triggered. Therefore it is being considered best practice not to perform intense and long running operations in ISRs.
@@ -347,7 +360,7 @@ Using this sort of communication is known as the "producer-consumer problem". It
 \begin{figure}[H]
 \centering
 \import{figures/}{ringbuffer.pdf_tex}
-\caption[]{Illustration of a ring buffer}
+\caption{Illustration of a ring buffer}
 \label{fig:ringbuffer}
 \end{figure}
 
@@ -434,10 +447,10 @@ The author abstracted the operation of the RFM12B driver algorithm as a (proto)t
 
 The abstract algorithm is shown in \ref{alg:rfm12b_thread}. The question is who sets the actual state of the radio driver. Receiving data is \emph{non-deterministic}. A packet can arrive at any time and thus the invocation of the SIG\_INTERRUPT0 interrupt service routine. Therefore the algorithm sets the RX state as the \emph{default} state for the radio thread.
 
-Sending data on the other hand is \emph{deterministic}. When a user hits the Enter key via the UART module a packet can be constructed. A 3rd party thread has to request the control over the radio module and occupy it until the packet has been fully transmitted. The author realized that this is a more or less classical concurrency problem between two threads and a single resource:
+Sending data on the other hand is \emph{deterministic}. When a user hits the Enter key via the UART module a packet can be constructed. A 3rd party thread has to request the control over the radio module and occupy it until the packet has been fully transmitted. The author realized that this is a concurrency problem between two threads and a single resource:
 \begin{itemize}
 \item \textbf{Sender Thread:} The sender thread wants to acquire the control over the radio module until the transmission of a packet is complete.
-\item \textbf{Receiver Thread:} The receiver thread also wants to acquire the control over the radio module until the packet reception is complete.
+\item \textbf{Radio Thread:} The radio thread also wants to acquire the control over the radio module until the packet reception is complete.
 \item \textbf{Single resource:} The external resource in this case is the radio module. Only the receiving radio driver thread or the transmitting sender thread can own the radio hardware resource at a time.
 \end{itemize}
 
@@ -462,14 +475,16 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
 \begin{figure}[H]
 \centering
 \import{figures/}{mutex.pdf_tex}
-\caption[]{Mutual exclusion model using a petri net}
+\caption{Mutual exclusion model using a petri net}
 \label{fig:petri_mutex}
 \end{figure}
+
+
 
 \begin{figure}[H]
 \centering
 \import{figures/}{rfm12_petri.pdf_tex}
-\caption[]{Half duplex algorithm modeled as a petri net}
+\caption{Half duplex algorithm modeled as a petri net}
 \end{figure}
 
 \chapter{Network Stack}
