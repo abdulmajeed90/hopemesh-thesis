@@ -1,34 +1,88 @@
 \chapter{Introduction}
 This thesis has the goal to implement an advanced and refined version of the predecessor implementation (see \cite{korniowski}) for a fail-safe mesh network prototype using embedded technologies. This goal can be split in the following aspects:
 \begin{itemize}
-\item \textbf{Hardware: } The goal is to explore alternative and enhanced hardware solutions for an embedded implementation.
+\item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
 \item \textbf{Algorithms :} The goal is to explore and elaborate on enhanced algorithms and data structures.
 \item \textbf{Simulation :} The goal is to provide the basis for a simulation environment for the provided algorithms that can execute on regular PCs.
 \end{itemize}
 
-The author wants to prove that an implementation of a robust mesh network using embedded devices despite its constraints is quite possible. He wants to explore algorithms and software architectures usually hidden behind the curtain of operating systems.
+The author wants to prove that an implementation of a robust and scalable mesh network using embedded devices despite its hardware constraints is quite possible. He wants to explore algorithms and software architectures usually hidden behind the curtain of operating systems.
 The desired end result is not only to have a working mesh network prototype but also an algorithmic framework for further development. Therefore the author also wanted to provide a framework which allows to try and research future algorithms on a regular PC.
+Finally the author wanted to provide a reproducible hardware design in order to able to equip a complete laboratory of mesh nodes for further research and investigation.
+
 \section{Thesis overview}
 The thesis is structured in the same order as the above mentioned goals. The first part analyzes the existing prototype hardware. An enhanced version is proposed by providing an alternative CPU and the connection of external RAM. Level shifters are introduced for the connection of the RFM12B radio module and the existing UART connection is being enhanced by an USB interface. Finally connectors for an external keyboard and an external LCD module are introduced.
 
 The second part elaborates on the envisioned software architecture. It identifies the necessary software modules which have to be implemented in order to provide a robust design. It defines modules for the human interaction and for the internal state control. The network stack module and the RFM12B driver module are identified for the mesh network access.
 
 The third part explores the algorithmic foundations and data structures which are being used for the implementation. Different concurrency models are being analyzed and a threading framework for the software modules is proposed. An algorithm for the seamless integration of the UART module is being proposed and finally the complex concurrency behavior of the RFM12B driver module analyzed.
-
 The fourth part is solely dedicated to the network stack. The implemented network layers and packet structures are described as well the used transmission encoding (Hamming).
 
 The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
 
 \chapter{Hardware Design}
-\section{RAM}
+\section{Hardware Modules}
+\subsection{RAM}
 \begin{itemize}
 \item Harvard architecture
 \item RAM bus
 \item Latch
 \end{itemize}
-\section{USB Serial Device}
-\section{RFM12B Radio}
-\section{Keyboard}
+\subsection{USB Serial Device}
+\subsection{RFM12B Radio}
+\subsection{Keyboard}
+
+\section{Schematic}
+\includepdf[
+    landscape,
+    addtolist={
+        1,
+        figure,
+        HopeMesh schematic,
+        fig:hopemesh-sch
+    }
+]{figures/hopemesh-sch.pdf}
+
+\includepdf[
+    landscape,
+    addtolist={
+        1,
+        figure,
+        HopeMesh level shifter schematic,
+        fig:hopemesh-sch-levelshifter
+    }
+]{figures/hopemesh-sch-levelshifter.pdf}
+
+\section{Printed Circuit Board}
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/2nd_rev_pcb_layout.png}
+\caption{2nd revision PCB layout}
+\end{figure}
+
+In order to able to set up future mesh nodes a reproducable hardware design had to designed. The goal was to be able to produce many mesh nodes and to be able to equip a whole laboratory. One possibility is to manually wire each mesh node. Due to the complexity of the schematic this solution was not acceptable. The author decided to design a printed circuit board (PCB) in order to be able to produce new mesh nodes quickly. The following design requirements were established by the author:
+
+\begin{itemize}
+\item \textbf{One sided PCB: } The PCB was aimed to be manufactured in an uncomplicated environment. Two-sided PCBs allow minimizing the physical size of the device but for research this is not an important requirement. On the other hand two-sided PCBs require additional effort. Through-holes have to be manufactured and eventually the upper side of the PCB has to be laminated in order to prevent shorts.
+\item \textbf{Non-SMD parts: } The author explicitly avoided SMD parts. The goal was to be able to solder the parts manually with commonly available electronic parts.
+\end{itemize}
+
+The actual design of the PCB (Printed Circuit Board) was performed in three iterative phases:
+\begin{itemize}
+\item \textbf{Manually wired prototype :} In order to have a proof of concept a first working prototype was constructed by the author manually. This board was not used for the final realization but was used in order to test the external RAM as well as the UART-USB connection.
+\item \textbf{1st revision PCB :} A first revision of the PCB was designed and manufactured. Despite a function node a few design improvements were identified. The trace count and surface mounting the existing resistors were identified as a further improvement.
+\item \textbf{2nd revision PCB :} The final revision of the PCB was designed in smaller dimensions and the design flaws from the first revision were corrected.
+\end{itemize}
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/prototype_pcb.jpg}
+\caption{Manually wired prototype board}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \import{figures/}{2nd_rev_pcb.pdf_tex}
+    \caption{2nd revision PCB areas}
+\end{figure}
 
 \chapter{Software Modules}
 \section{UART}
@@ -475,8 +529,6 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
 \caption{Mutual exclusion model using a petri net}
 \label{fig:petri_mutex}
 \end{figure}
-
-
 
 \begin{figure}[H]
 \centering
