@@ -21,6 +21,24 @@ The fourth part is solely dedicated to the network stack. The implemented networ
 The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
 
 \chapter{Hardware Design}
+\section{Introduction}
+The predecessor implementation uses an Atmel Atmega16 RISC microprocessor. The author decided to analyze whether this CPU is still adequate for the new implementation. The decision about a microprocessor to be used in an embedded application depends very much on the requirements. Not only that many vendors are available on the market but also each vendor has a very rich product portfolio of different microprocessors to choose from.
+
+The author set up the following requirements for the new hardware architecture:
+
+\begin{itemize}
+\item \textbf{GCC tool chain:} The author wanted to use an open source development environment. The existing GCC toolchain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
+\item \textbf{USB connectivity:} Instead of using the rather old and nowadays even mostly not available RS-232 connection the author wanted to migrate to an USB based connection type in order to use a regular PC as a terminal.
+\item \textbf{RAM:} In order to store many routing entries additional RAM is necessary as the predecessor thesis already pointed out. An address size of 16 bit theoretically allows addressing 65,536 nodes. If we wanted to store just every single address in a routing table we already need more than 130kB of RAM if only the target address had to be stored. Realistically the author wanted to store at least 1000 nodes in a routing table.
+
+\begin{tabular}{lll}
+Type & Name & Size (Byte) \\
+Address & Gateway & 2 \\
+\end{tabular}
+
+\item \textbf{}
+\end{itemize}
+
 \section{Hardware Modules}
 \subsection{RAM}
 \begin{itemize}
@@ -78,11 +96,22 @@ The actual design of the PCB (Printed Circuit Board) was performed in three iter
 \caption{Manually wired prototype board}
 \end{figure}
 
+The final version of the PCB was carefully designed to have a logical and effective layout of components. Figure \ref{fig:2ndrev_pcb} shows the zones which include the different hardware modules. The following zones were designed:
+
 \begin{figure}[H]
     \centering
     \import{figures/}{2nd_rev_pcb.pdf_tex}
     \caption{2nd revision PCB areas}
+    \label{fig:2ndrev_pcb}
 \end{figure}
+
+\begin{itemize}
+\item \textbf{USB: } The relevant parts and connectors for the USB connection are being placed here. In order to have a comfortable connection to the cable the USB connector was placed in the left upper corner.
+\item \textbf{Power supply: } Right next to the USB zone the PSU parts are placed.
+\item \textbf{RFM12B: } The radio modules as well as the level shifters were placed next to each other.
+\item \textbf{ISP: } The In-System-Programmer connector was placed next to the CPU in order to reduce scattering effects.
+\item \textbf{CPU, Latch \& SRAM: } These chips were placed next to each other in order to reduce the bus trace lengths as much as possible.
+\end{itemize}
 
 \chapter{Software Modules}
 \section{UART}
@@ -238,7 +267,7 @@ This model requires support from an existing operating system. An existing frame
 \item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data or the heap.
 \end{itemize}
 
-Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of embedded micro-controllers these concepts also are implemented in many different implementations:
+Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of embedded micro-controllers these concepts also are implemented in many different embedded operating systems:
 
 \begin{enumerate}
 \item FreeRTOS (http://www.freertos.org)
@@ -537,11 +566,20 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
 \end{figure}
 
 \chapter{Network Stack}
+
+\begin{figure}[H]
+    \centering
+    \import{figures/}{layers.pdf_tex}
+    \caption{Tannenbaum hybrid reference model (see \cite{tannenbaum})}
+    \label{fig:tannenbaum_model}
+\end{figure}
+
+\section{Reference model}
 \section{Layer 2a: MAC Layer}
 \section{Layer 2b: Logical Link Control}
 Hamming Code
 \section{Layer 3: Batman Routing}
-\section{Layer 7: Application}
+\section{Layer 5: Application}
 
 \chapter{Research}
 \section{Simulations}

@@ -36,22 +36,22 @@
   }
   \providecommand\rotatebox[2]{#2}
   \ifx\svgwidth\undefined
-    \setlength{\unitlength}{441pt}
+    \setlength{\unitlength}{437.46103516pt}
   \else
     \setlength{\unitlength}{\svgwidth}
   \fi
   \global\let\svgwidth\undefined
   \makeatother
-  \begin{picture}(1,1)%
+  \begin{picture}(1,0.87166167)%
     \put(0,0){\includegraphics[width=\unitlength]{2nd_rev_pcb.pdf}}%
-    \put(0.60317798,0.16342873){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{CPU, Latch \& SRAM}}}%
-    \put(0.50654618,0.73718018){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{RFM12B radio \& Level shifters}}}%
-    \put(0.02791668,0.15436945){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{USB}}}%
-    \put(0.12370621,0.15436945){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Power}}}%
-    \put(0.12303864,0.11964241){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Supply}}}%
-    \put(0.24362524,0.1539341){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{LCD \&}}}%
-    \put(0.24382842,0.11803878){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{PS/2}}}%
-    \put(0.24382842,0.08491538){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Keyboard}}}%
-    \put(0.39028603,0.1539341){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{ISP}}}%
+    \put(0.60590502,0.085176){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{CPU, Latch \& SRAM}}}%
+    \put(0.50849149,0.66356898){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{RFM12B radio \& Level shifters}}}%
+    \put(0.02598996,0.07604344){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{USB}}}%
+    \put(0.12255441,0.07604344){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Power}}}%
+    \put(0.12188145,0.04103546){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Supply}}}%
+    \put(0.24344356,0.07560456){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{LCD \&}}}%
+    \put(0.24364837,0.03941886){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{PS/2}}}%
+    \put(0.24364837,0.00602749){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Keyboard}}}%
+    \put(0.39129079,0.07560456){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{ISP}}}%
   \end{picture}%
 \endgroup

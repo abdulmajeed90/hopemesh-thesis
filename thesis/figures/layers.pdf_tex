@@ -1,0 +1,58 @@
+%% Creator: Inkscape inkscape 0.48.1, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'layers.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+
+\begingroup
+  \makeatletter
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}
+    \renewcommand\color[2][]{}%
+  }
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}
+    \renewcommand\transparent[1]{}%
+  }
+  \providecommand\rotatebox[2]{#2}
+  \ifx\svgwidth\undefined
+    \setlength{\unitlength}{123.99038086pt}
+  \else
+    \setlength{\unitlength}{\svgwidth}
+  \fi
+  \global\let\svgwidth\undefined
+  \makeatother
+  \begin{picture}(1,1.10841462)%
+    \put(0,0){\includegraphics[width=\unitlength]{layers.pdf}}%
+    \put(0.19959115,0.97837901){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Application Layer}}}%
+    \put(-0.00243878,0.97923711){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{5}}}%
+    \put(0.2298438,0.74572212){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Transport Layer}}}%
+    \put(-0.00243887,0.74658022){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{4}}}%
+    \put(0.25938859,0.51989815){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Network Layer}}}%
+    \put(-0.00243878,0.52075625){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{3}}}%
+    \put(0.25687345,0.29407418){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Data link layer}}}%
+    \put(-0.00243887,0.29493228){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{2}}}%
+    \put(0.27751517,0.06825021){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Physical layer}}}%
+    \put(-0.00243887,0.06910831){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{1}}}%
+  \end{picture}%
+\endgroup
