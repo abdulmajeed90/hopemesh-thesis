@@ -38,7 +38,7 @@ main(int argc, char **argv)
   sei();
 
   do {
-//    CALL_ISR(SIG_OVERFLOW0);
+    // CALL_ISR(SIG_OVERFLOW0);
     CALL_ISR(SIG_INTERRUPT0);
     timer_thread();
     batman_thread();
