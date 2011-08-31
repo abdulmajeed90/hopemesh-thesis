@@ -1,4 +1,4 @@
-update=Tue 30 Aug 2011 06:41:45 PM CEST
+update=Wed 31 Aug 2011 10:04:49 AM CEST
 last_client=pcbnew
 [common]
 NetDir=
