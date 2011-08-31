@@ -1,8 +1,53 @@
 \chapter{Introduction}
-This thesis has the goal to implement an advanced and refined version of the predecessor implementation (see \cite{korniowski}) for a fail-safe mesh network prototype using embedded technologies. This goal can be split in the following aspects:
+
+\begin{figure}[H]
+\begin{tikzpicture}
+\path[mindmap, concept color=lightgray!80]
+    node[concept] {HopeMesh}
+    [clockwise from=45]
+    child[concept color=lightgray!40] {node[concept] {\textbf{Hardware}}
+        [clockwise from=180]
+        child[concept color=lightgray!20] {node[concept] {CPU}}
+        child[concept color=lightgray!20] {node[concept] {Radio}}
+        child[concept color=lightgray!20] {node[concept] {RAM}}
+        child[concept color=lightgray!20] {node[concept] {...}}
+    }
+    child[concept color=lightgray!40] {node[concept] {Software}
+        child {node[concept] {\textbf{Modules}}
+            child {node[concept] {UART}}
+            child {node[concept] {SPI}}
+            child {node[concept] {...}}
+        }
+        child {node[concept] {\textbf{Core algorithms}}
+            [clockwise from=10]
+            child {node[concept] {Concurrency}}
+            child {node[concept] {Ring buffers}}
+            child {node[concept] {Radio Access}}
+        }
+        child {node[concept] {\textbf{Network}}
+            [clockwise from=330]
+            child {node[concept] {MAC}}
+            child {node[concept] {LLC}}
+            child {node[concept] {...}}
+        }
+        child {node[concept] {\textbf{Simulations}}
+            [clockwise from=240]
+            child {node[concept] {Shell}}
+            child {node[concept] {Routing}}
+            child {node[concept] {...}}
+        }
+    }
+    ;
+\end{tikzpicture}
+\caption{HopeMesh project mindmap}
+\end{figure}
+
+This thesis has the goal to implement an advanced and refined version of the predecessor implementation (see \cite{korniowski}) for a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HOPERF radio modules. This goal can be split in the following aspects:
 \begin{itemize}
 \item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
-\item \textbf{Algorithms :} The goal is to explore and elaborate on enhanced algorithms and data structures.
+\item \textbf{Modules:} The goal is to find the necessary software modules from an abstract architectural point of view.
+\item \textbf{Algorithms:} The goal is to explore and elaborate on concrete algorithms and data structures for the implementation of the software modules.
+\item \textbf{Network:} The goal is to implement a network stack which not only provides a mesh routing based on the B.A.T.M.A.N. algorithm but also provides lower network layers.
 \item \textbf{Simulation :} The goal is to provide the basis for a simulation environment for the provided algorithms that can execute on regular PCs.
 \end{itemize}
 
@@ -19,7 +64,6 @@ The third part explores the algorithmic foundations and data structures which ar
 The fourth part is solely dedicated to the network stack. The implemented network layers and packet structures are described as well the used transmission encoding (Hamming).
 
 The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
-
 \chapter{Hardware Design}
 \section{Introduction}
 The predecessor implementation uses an Atmel Atmega16 RISC microprocessor. The author decided to analyze whether this CPU is still adequate for the new implementation. The decision about a microprocessor to be used in an embedded application depends very much on the requirements. Not only that many vendors are available on the market but also each vendor has a very rich product portfolio of different microprocessors to choose from.
@@ -48,6 +92,8 @@ Address & Gateway & 2 \\
 \end{itemize}
 \subsection{USB Serial Device}
 \subsection{RFM12B Radio}
+\label{sec:rfm12b}
+
 \subsection{Keyboard}
 
 \section{Schematic}
@@ -492,6 +538,7 @@ ISR(SIG_USART_DATA)
 Instead of \emph{physically} blocking the algorithm expressed in listing \ref{lst:producer_ringbuf} only \emph{logically} blocks the protothread. If the buffer is full a context-switch back to the main loop is performed. The main loop sequentially executes all other concurrent modules and returns to the protothread which then again tries to add data into the ring buffer.
 
 \section{Half-Duplex Radio Access (Petri Net)}
+\label{sec:petri}
 The predecessor implementation used an identical (physically) blocking implementation in order to send or receive data via the RFM12B hardware module. Listing \ref{lst:rfm12b_predecessor_tx} shows the algorithm used for sending data.
 
 \begin{lstlisting}[
@@ -566,6 +613,7 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
 \end{figure}
 
 \chapter{Network Stack}
+\section{Reference model}
 
 \begin{figure}[H]
     \centering
@@ -574,11 +622,29 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
     \label{fig:tannenbaum_model}
 \end{figure}
 
-\section{Reference model}
+Explain each layer and its purposes. \\
+
+\section{Reference implementation}
+The implementation was heavily inspired by a project available at \cite{stahl}. \\
+
+Drawbacks: \\
+Unfortunately the project is only partly finished. Only the PHY and MAC layers are working. \\
+It is based on a sequential execution model using state machines. \\
+
+Pros: \\
+Division of each network layer in a separate source file. \\
+Communication between the layers through callbacks. \\
+
+\section{Layer 1: Physical}
+Refer to \ref{sec:petri} for the driver part and to \ref{sec:rfm12b} for the hardware part.
+
 \section{Layer 2a: MAC Layer}
+Frame format. \\
+A code which often alternates 1 and 0 in order to keep the PLL stable at the RX.
+
 \section{Layer 2b: Logical Link Control}
-Hamming Code
 \section{Layer 3: Batman Routing}
+\section{Layer 4: Transport}
 \section{Layer 5: Application}
 
 \chapter{Research}
