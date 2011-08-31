@@ -11,10 +11,7 @@
 static struct pt pt_thread, pt_tx, pt_rx;
 static struct pt_sem mutex;
 static bool send_ogm;
-static packet_t ogm_packet_tx;
-static uint16_t seqno = 0;
 static route_t *route_table;
-static bool loop_rx;
 
 route_t *
 route_get(void)
@@ -164,33 +161,6 @@ ogm_rebroadcast(ogm_t *ogm)
   return false;
 }
 
-PT_THREAD(batman_rx(packet_t *packet))
-{
-  PT_BEGIN(&pt_rx);
-
-  loop_rx = true;
-  while (loop_rx) {
-    PT_WAIT_UNTIL(&pt_rx, llc_rx(packet));
-    llc_t *llc = (llc_t *) packet_get_llc(packet);
-    if (llc->type == BROADCAST) {
-      ogm_t *ogm_rx = (ogm_t *) packet_get_ogm(packet);
-
-      if (ogm_rebroadcast(ogm_rx)) {
-        PT_SEM_WAIT(&pt_rx, &mutex);
-        PT_WAIT_THREAD(&pt_rx, llc_tx(packet, BROADCAST, OGM_HEADER_SIZE));
-        PT_SEM_SIGNAL(&pt_rx, &mutex);
-      }
-    } else {
-      batman_t *batman_packet = (batman_t *) packet_get_batman(packet);
-      if (batman_packet->dest_addr == config_get(CONFIG_NODE_ADDR)) {
-        loop_rx = false;
-      }
-    }
-  }
-
-  PT_END(&pt_rx);
-}
-
 PT_THREAD(batman_tx(packet_t *packet, addr_t dest_addr, uint16_t data_len))
 {
   PT_BEGIN(&pt_tx);
@@ -207,9 +177,44 @@ PT_THREAD(batman_tx(packet_t *packet, addr_t dest_addr, uint16_t data_len))
   PT_END(&pt_tx);
 }
 
+PT_THREAD(batman_rx(packet_t *packet))
+{
+  PT_BEGIN(&pt_rx);
+  static bool loop;
+  static batman_t *batman_packet;
+  static llc_t *llc;
+
+  loop = true;
+  while (loop) {
+    PT_WAIT_UNTIL(&pt_rx, llc_rx(packet));
+    batman_packet = (batman_t *) packet_get_batman(packet);
+    llc = (llc_t *) packet_get_llc(packet);
+    if (llc->type == BROADCAST) {
+      ogm_t *ogm_rx = (ogm_t *) packet_get_ogm(packet);
+
+      if (ogm_rebroadcast(ogm_rx)) {
+        PT_SEM_WAIT(&pt_rx, &mutex);
+        PT_WAIT_THREAD(&pt_rx, llc_tx(packet, BROADCAST, OGM_HEADER_SIZE));
+        PT_SEM_SIGNAL(&pt_rx, &mutex);
+      }
+    } else {
+      if (batman_packet->dest_addr == config_get(CONFIG_NODE_ADDR)) {
+        // packet received break this thread's main loop
+        loop = false;
+      } else {
+        PT_WAIT_THREAD(&pt_rx, batman_tx(packet, batman_packet->dest_addr, llc->len));
+      }
+    }
+  }
+
+  PT_END(&pt_rx);
+}
+
 PT_THREAD(batman_thread(void))
 {
   PT_BEGIN(&pt_thread);
+  static packet_t ogm_packet_tx;
+  static uint16_t seqno = 0;
 
   PT_WAIT_UNTIL(&pt_thread, send_ogm);
   send_ogm = false;
