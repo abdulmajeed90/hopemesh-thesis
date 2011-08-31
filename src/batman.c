@@ -161,14 +161,14 @@ ogm_rebroadcast(ogm_t *ogm)
   return false;
 }
 
-PT_THREAD(batman_tx(packet_t *packet, addr_t dest_addr, uint16_t data_len))
+PT_THREAD(batman_tx(packet_t *packet, addr_t target_addr, uint16_t data_len))
 {
   PT_BEGIN(&pt_tx);
   PT_SEM_WAIT(&pt_tx, &mutex);
 
   batman_t *route = (batman_t *) packet_get_batman(packet);
   route->originator_addr = config_get(CONFIG_NODE_ADDR);
-  route->dest_addr = dest_addr;
+  route->target_addr = target_addr;
 
   PT_WAIT_THREAD(&pt_tx,
       llc_tx(packet, UNICAST, BATMAN_HEADER_SIZE + data_len));
@@ -198,11 +198,11 @@ PT_THREAD(batman_rx(packet_t *packet))
         PT_SEM_SIGNAL(&pt_rx, &mutex);
       }
     } else {
-      if (batman_packet->dest_addr == config_get(CONFIG_NODE_ADDR)) {
+      if (batman_packet->target_addr == config_get(CONFIG_NODE_ADDR)) {
         // packet received break this thread's main loop
         loop = false;
       } else {
-        PT_WAIT_THREAD(&pt_rx, batman_tx(packet, batman_packet->dest_addr, llc->len));
+        PT_WAIT_THREAD(&pt_rx, batman_tx(packet, batman_packet->target_addr, llc->len));
       }
     }
   }
