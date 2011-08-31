@@ -50,6 +50,7 @@ __wrap_llc_rx(packet_t *packet)
 
   ogm_t *ogm = (ogm_t *) packet_get_ogm(packet);
   llc_t *dest = (llc_t *) packet_get_llc(packet);
+  addr_t gw;
 
   switch (cnt) {
     case 0:
@@ -154,6 +155,17 @@ __wrap_llc_rx(packet_t *packet)
     case 9:
       ogm->version = OGM_VERSION;
       ogm->flags = 0;
+      ogm->ttl = 50;
+      ogm->seqno = 3;
+      ogm->originator_addr = 0x000d;
+      ogm->sender_addr = 0x000d;
+
+      dest->type = BROADCAST;
+      dest->len = OGM_HEADER_SIZE;
+      break;
+    case 10:
+      ogm->version = OGM_VERSION;
+      ogm->flags = 0;
       ogm->ttl = 49;
       ogm->seqno = 24;
       ogm->originator_addr = 0x000d;
@@ -161,12 +173,31 @@ __wrap_llc_rx(packet_t *packet)
 
       dest->type = BROADCAST;
       dest->len = OGM_HEADER_SIZE;
+
+      route_present(0x000d, &gw);
+      printf("best route for 0x000d: 0x%hx\n\n", gw);
+
+      break;
+    case 11:
+      ogm->version = OGM_VERSION;
+      ogm->flags = 0;
+      ogm->ttl = 49;
+      ogm->seqno = 25;
+      ogm->originator_addr = 0x000d;
+      ogm->sender_addr = 0x000c;
+
+      dest->type = BROADCAST;
+      dest->len = OGM_HEADER_SIZE;
+
+      route_present(0x000d, &gw);
+      printf("best route for 0x000d: 0x%hx\n\n", gw);
+
       break;
     default:
       break;
   }
 
-  if (cnt++ < 10) {
+  if (cnt++ < 12) {
     printf("rx: ");
     print_ogm(ogm);
 

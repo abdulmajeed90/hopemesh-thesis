@@ -25,6 +25,7 @@ tags
 session.vim
 test-tx
 test-shell
+test-batman
 .*
 *.gdb
 *.tmp

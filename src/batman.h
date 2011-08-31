@@ -20,6 +20,9 @@ typedef struct route_t
   struct route_t *next;
 } route_t;
 
+bool
+route_present(addr_t target, addr_t *gateway);
+
 void
 batman_init(void);
 

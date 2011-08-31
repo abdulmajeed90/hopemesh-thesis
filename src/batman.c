@@ -8,6 +8,13 @@
 #include "pt-sem.h"
 #include "clock.h"
 
+typedef enum
+{
+  BATMAN_DROP,
+  BATMAN_REBROADCAST,
+  BATMAN_RX
+} batman_bc_status;
+
 static struct pt pt_thread, pt_tx, pt_rx;
 static struct pt_sem mutex;
 static bool send_ogm;
@@ -17,6 +24,39 @@ route_t *
 route_get(void)
 {
   return route_table;
+}
+
+bool
+route_present(addr_t target, addr_t *gateway)
+{
+  route_t *r = route_table;
+  route_t *next = NULL;
+  route_t *best = NULL;
+  *gateway = 0;
+
+  while (r != NULL) {
+    next = r->next;
+
+    if (r->target_addr == target) {
+      if (best == NULL) {
+        best = r;
+      } else {
+        // See RFC 5.4
+        if (r->cnt > best->cnt) {
+          best = r;
+        }
+      }
+    }
+
+    r = next;
+  }
+
+  if (best == NULL) {
+    return false;
+  } else {
+    *gateway = best->gateway_addr;
+    return true;
+  }
 }
 
 static inline void
@@ -164,11 +204,17 @@ ogm_rebroadcast(ogm_t *ogm)
 PT_THREAD(batman_tx(packet_t *packet, addr_t target_addr, uint16_t data_len))
 {
   PT_BEGIN(&pt_tx);
+  static batman_t *header;
+
+  header = (batman_t *) packet_get_batman(packet);
+  if (!route_present(target_addr, &header->gateway_addr)) {
+    PT_END(&pt_tx);
+  }
+
   PT_SEM_WAIT(&pt_tx, &mutex);
 
-  batman_t *route = (batman_t *) packet_get_batman(packet);
-  route->originator_addr = config_get(CONFIG_NODE_ADDR);
-  route->target_addr = target_addr;
+  header->originator_addr = config_get(CONFIG_NODE_ADDR);
+  header->target_addr = target_addr;
 
   PT_WAIT_THREAD(&pt_tx,
       llc_tx(packet, UNICAST, BATMAN_HEADER_SIZE + data_len));
@@ -177,32 +223,63 @@ PT_THREAD(batman_tx(packet_t *packet, addr_t target_addr, uint16_t data_len))
   PT_END(&pt_tx);
 }
 
+inline static batman_bc_status
+batman_rebroadcast(batman_t *header)
+{
+  if (header->target_addr == config_get(CONFIG_NODE_ADDR)) {
+    // packet received targeted at us
+    return BATMAN_RX;
+  }
+
+  if (header->gateway_addr != config_get(CONFIG_NODE_ADDR)) {
+    // our node is not supposed to be the gateway for this packet.
+    // do not rebroadcast
+    return BATMAN_DROP;
+  }
+
+  if (header->originator_addr == config_get(CONFIG_NODE_ADDR)) {
+    // only rebroadcast if originator is a different address than our node address.
+    // if we received such a packet it looped back to us in the network
+    return BATMAN_DROP;
+  }
+
+  return BATMAN_REBROADCAST;
+}
+
 PT_THREAD(batman_rx(packet_t *packet))
 {
   PT_BEGIN(&pt_rx);
   static bool loop;
-  static batman_t *batman_packet;
+  static batman_t *header;
   static llc_t *llc;
 
   loop = true;
   while (loop) {
     PT_WAIT_UNTIL(&pt_rx, llc_rx(packet));
-    batman_packet = (batman_t *) packet_get_batman(packet);
+
+    header = (batman_t *) packet_get_batman(packet);
     llc = (llc_t *) packet_get_llc(packet);
+
     if (llc->type == BROADCAST) {
       ogm_t *ogm_rx = (ogm_t *) packet_get_ogm(packet);
-
       if (ogm_rebroadcast(ogm_rx)) {
         PT_SEM_WAIT(&pt_rx, &mutex);
         PT_WAIT_THREAD(&pt_rx, llc_tx(packet, BROADCAST, OGM_HEADER_SIZE));
         PT_SEM_SIGNAL(&pt_rx, &mutex);
       }
     } else {
-      if (batman_packet->target_addr == config_get(CONFIG_NODE_ADDR)) {
-        // packet received break this thread's main loop
-        loop = false;
-      } else {
-        PT_WAIT_THREAD(&pt_rx, batman_tx(packet, batman_packet->target_addr, llc->len));
+      switch (batman_rebroadcast(header)) {
+        case (BATMAN_RX):
+          loop = false;
+          break;
+        case (BATMAN_REBROADCAST):
+          if (route_present(header->target_addr, &header->gateway_addr)) {
+            PT_WAIT_THREAD(&pt_rx,
+                llc_tx(packet, UNICAST, BATMAN_HEADER_SIZE + llc->len));
+          }
+          break;
+        case (BATMAN_DROP):
+          break;
       }
     }
   }

@@ -30,6 +30,7 @@ typedef struct
 {
   addr_t originator_addr;
   addr_t target_addr;
+  addr_t gateway_addr;
 } batman_t;
 #define BATMAN_HEADER_SIZE (2 * sizeof(addr_t))
 
