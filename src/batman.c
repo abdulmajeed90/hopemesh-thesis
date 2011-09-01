@@ -159,7 +159,7 @@ ogm_rebroadcast(ogm_t *ogm)
   bool examine_packet = false;
 
   // RFC 5.2.1, 5.2.2 (5.2.3 not relevant)
-  examine_packet = (ogm->version == OGM_VERSION);
+  examine_packet = (ogm->version == BATMAN_VERSION);
   examine_packet &= (ogm->sender_addr != config_get(CONFIG_NODE_ADDR));
   examine_packet &= (ogm->ttl > 0);
 
@@ -215,7 +215,10 @@ PT_THREAD(batman_tx(packet_t *packet, addr_t target_addr, uint16_t data_len))
   PT_SEM_WAIT(&pt_tx, &mutex);
 
   header->originator_addr = config_get(CONFIG_NODE_ADDR);
+  header->sender_addr = header->originator_addr;
   header->target_addr = target_addr;
+  header->ttl = config_get(CONFIG_TTL);
+  header->version = BATMAN_VERSION;
 
   PT_WAIT_THREAD(&pt_tx,
       llc_tx(packet, UNICAST, BATMAN_HEADER_SIZE + data_len));
@@ -276,6 +279,7 @@ PT_THREAD(batman_rx(packet_t *packet))
           break;
         case (BATMAN_REBROADCAST):
           if (route_present(header->target_addr, &header->gateway_addr)) {
+            header->sender_addr = config_get(CONFIG_NODE_ADDR);
             PT_WAIT_THREAD(&pt_rx,
                 llc_tx(packet, UNICAST, BATMAN_HEADER_SIZE + llc->len));
           }
@@ -306,7 +310,7 @@ PT_THREAD(batman_thread(void))
   PT_SEM_WAIT(&pt_thread, &mutex);
   ogm_t *ogm_tx = (ogm_t *) packet_get_ogm(&ogm_packet_tx);
 
-  ogm_tx->version = OGM_VERSION;
+  ogm_tx->version = BATMAN_VERSION;
   ogm_tx->flags = 0;
   ogm_tx->ttl = config_get(CONFIG_TTL);
   ogm_tx->seqno = seqno;

@@ -5,7 +5,7 @@
 
 typedef uint16_t addr_t;
 
-#define OGM_VERSION 1
+#define BATMAN_VERSION 1
 
 #define OGM_FLAG_IS_DIRECT 0
 #define OGM_FLAG_UNIDIRECTIONAL 1
@@ -28,11 +28,15 @@ typedef struct
 
 typedef struct
 {
+  uint8_t version :4;
+  uint8_t flags :4;
+  uint8_t ttl;
   addr_t originator_addr;
   addr_t target_addr;
+  addr_t sender_addr;
   addr_t gateway_addr;
 } batman_t;
-#define BATMAN_HEADER_SIZE (3 * sizeof(addr_t))
+#define BATMAN_HEADER_SIZE (2 + 4 * sizeof(addr_t))
 
 typedef struct
 {

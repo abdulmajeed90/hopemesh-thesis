@@ -45,8 +45,8 @@ print_unicast(packet_t *packet)
   const char *msg = (const char *) packet_get_l4(packet);
 
   printf(
-      "uni: gateway=0x%x, originator=0x%x, target=0x%x, msg=%s\n",
-      header->gateway_addr, header->originator_addr, header->target_addr, msg);
+      "uni: sender=0x%x, gateway=0x%x, originator=0x%x, target=0x%x, msg=%s\n",
+      header->sender_addr, header->gateway_addr, header->originator_addr, header->target_addr,  msg);
 }
 
 void
@@ -95,7 +95,7 @@ __wrap_llc_rx(packet_t *packet)
 //      batman_one_second_elapsed();
 //      batman_thread();
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = (1 << OGM_FLAG_UNIDIRECTIONAL) | (1 << OGM_FLAG_IS_DIRECT);
       ogm->ttl = 49;
       ogm->seqno = 0;
@@ -109,7 +109,7 @@ __wrap_llc_rx(packet_t *packet)
       printf("Receiving HELLO OGM from 0x000b\n");
       printf("Expected behavior: replying with direct flag set (bidirectional confirmation)\n");
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 50;
       ogm->seqno = 0;
@@ -123,7 +123,7 @@ __wrap_llc_rx(packet_t *packet)
       printf("Receiving HELLO OGM from 0x000c\n");
       printf("Expected behavior: replying with direct flag set and unidirectional flag set (unidirectional confirmation)\n");
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 50;
       ogm->seqno = 1;
@@ -140,7 +140,7 @@ __wrap_llc_rx(packet_t *packet)
 //      batman_one_second_elapsed();
 //      batman_thread();
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = (1 << OGM_FLAG_IS_DIRECT);
       ogm->ttl = 49;
       ogm->seqno = 1;
@@ -154,7 +154,7 @@ __wrap_llc_rx(packet_t *packet)
       printf("Receiving OGM rebroadcast from 0x000d via 0x000c\n");
       printf("Expected behavior: adding 0xd to routing table, no reply\n");
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 49;
       ogm->seqno = 23;
@@ -168,7 +168,7 @@ __wrap_llc_rx(packet_t *packet)
       printf("Receiving HELLO OGM from 0x000c\n");
       printf("Expected behavior: replying to 0x000c with direct flag set, updating sequence number for 0xc in routing table\n");
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 50;
       ogm->seqno = 1;
@@ -182,7 +182,7 @@ __wrap_llc_rx(packet_t *packet)
       printf("Receiving HELLO OGM from 0x000b with maximum seqno value\n");
       printf("Expected behavior: replying with direct flag set (bidirectional confirmation)\n");
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 50;
       ogm->seqno = UINT16_MAX;
@@ -196,7 +196,7 @@ __wrap_llc_rx(packet_t *packet)
       printf("Receiving HELLO OGM from 0x000b with seqno value overflowed\n");
       printf("Expected behavior: ");
 
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 50;
       ogm->seqno = 0;
@@ -207,7 +207,7 @@ __wrap_llc_rx(packet_t *packet)
       llc->len = OGM_HEADER_SIZE;
       break;
     case 8:
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = (1 << OGM_FLAG_IS_DIRECT);
       ogm->ttl = 49;
       ogm->seqno = 2;
@@ -218,7 +218,7 @@ __wrap_llc_rx(packet_t *packet)
       llc->len = OGM_HEADER_SIZE;
       break;
     case 9:
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = (1 << OGM_FLAG_UNIDIRECTIONAL) | (1 << OGM_FLAG_IS_DIRECT);
       ogm->ttl = 49;
       ogm->seqno = 2;
@@ -229,7 +229,7 @@ __wrap_llc_rx(packet_t *packet)
       llc->len = OGM_HEADER_SIZE;
       break;
     case 10:
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 50;
       ogm->seqno = 3;
@@ -240,7 +240,7 @@ __wrap_llc_rx(packet_t *packet)
       llc->len = OGM_HEADER_SIZE;
       break;
     case 11:
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 49;
       ogm->seqno = 24;
@@ -251,7 +251,7 @@ __wrap_llc_rx(packet_t *packet)
       llc->len = OGM_HEADER_SIZE;
       break;
     case 12:
-      ogm->version = OGM_VERSION;
+      ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 49;
       ogm->seqno = 25;
@@ -265,6 +265,7 @@ __wrap_llc_rx(packet_t *packet)
       header->gateway_addr = 0x000a;
       header->originator_addr = 0xffff;
       header->target_addr = 0x000d;
+      header->sender_addr = 0x0001;
 
       memcpy(msg, TEST_STRING_1, strlen(TEST_STRING_1)+1);
 
@@ -275,6 +276,7 @@ __wrap_llc_rx(packet_t *packet)
       header->gateway_addr = 0x000a;
       header->originator_addr = 0x000d;
       header->target_addr = 0x000c;
+      header->sender_addr = 0x0001;
 
       memcpy(msg, TEST_STRING_2, strlen(TEST_STRING_2)+1);
 
@@ -285,6 +287,7 @@ __wrap_llc_rx(packet_t *packet)
       header->gateway_addr = 0x000a;
       header->originator_addr = 0x000d;
       header->target_addr = 0x000c;
+      header->sender_addr = 0x0001;
 
       memcpy(msg, TEST_STRING_2, strlen(TEST_STRING_2)+1);
 
@@ -295,6 +298,7 @@ __wrap_llc_rx(packet_t *packet)
       header->gateway_addr = 0x000a;
       header->originator_addr = 0x000d;
       header->target_addr = 0x000a;
+      header->sender_addr = 0x0001;
 
       memcpy(msg, TEST_STRING_3, strlen(TEST_STRING_3)+1);
 
@@ -302,13 +306,23 @@ __wrap_llc_rx(packet_t *packet)
       llc->len = BATMAN_HEADER_SIZE + strlen(msg)+1;
       break;
     case 17:
+      header->gateway_addr = 0x000c;
+      header->originator_addr = 0x000d;
+      header->target_addr = 0x000b;
+      header->sender_addr = 0x000d;
+
+      memcpy(msg, TEST_STRING_3, strlen(TEST_STRING_3)+1);
+
+      llc->type = UNICAST;
+      llc->len = BATMAN_HEADER_SIZE + strlen(msg)+1;
+      break;
     case 18:
     default:
       printf("end of tests\n");
       break;
   }
 
-#define CNT_TESTS 16
+#define CNT_TESTS 17
 
   if (cnt <= CNT_TESTS) {
     printf("\nrx:\n");
@@ -355,6 +369,6 @@ main(int argc, char **argv)
     timer_thread();
   }
 
+  printf("clock time: %u secs\n", clock_get_time());
   print_routing_table();
-  printf("%u\n", clock_get_time());
 }
