@@ -35,7 +35,11 @@ batman_rx(packet_t *packet));
 PT_THREAD(
 batman_thread(void));
 
-void batman_one_second_elapsed(void);
+void
+batman_one_second_elapsed(void);
+
+void
+batman_inc_seqno(void);
 
 route_t *
 route_get(void);

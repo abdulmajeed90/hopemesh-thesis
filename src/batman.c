@@ -19,6 +19,7 @@ static struct pt pt_thread, pt_tx, pt_rx;
 static struct pt_sem mutex;
 static bool send_ogm;
 static route_t *route_table;
+static uint16_t seqno = 0;
 
 route_t *
 route_get(void)
@@ -238,7 +239,7 @@ batman_rebroadcast(batman_t *header)
   }
 
   if (header->originator_addr == config_get(CONFIG_NODE_ADDR)) {
-    // only rebroadcast if originator is a different address than our node address.
+    // only resend if originator is a different address than our node address.
     // if we received such a packet it looped back to us in the network
     return BATMAN_DROP;
   }
@@ -257,7 +258,6 @@ PT_THREAD(batman_rx(packet_t *packet))
   while (loop) {
     PT_WAIT_UNTIL(&pt_rx, llc_rx(packet));
 
-    header = (batman_t *) packet_get_batman(packet);
     llc = (llc_t *) packet_get_llc(packet);
 
     if (llc->type == BROADCAST) {
@@ -268,6 +268,8 @@ PT_THREAD(batman_rx(packet_t *packet))
         PT_SEM_SIGNAL(&pt_rx, &mutex);
       }
     } else {
+      header = (batman_t *) packet_get_batman(packet);
+
       switch (batman_rebroadcast(header)) {
         case (BATMAN_RX):
           loop = false;
@@ -287,11 +289,16 @@ PT_THREAD(batman_rx(packet_t *packet))
   PT_END(&pt_rx);
 }
 
+void
+batman_inc_seqno(void)
+{
+  seqno++;
+}
+
 PT_THREAD(batman_thread(void))
 {
   PT_BEGIN(&pt_thread);
   static packet_t ogm_packet_tx;
-  static uint16_t seqno = 0;
 
   PT_WAIT_UNTIL(&pt_thread, send_ogm);
   send_ogm = false;
@@ -306,7 +313,7 @@ PT_THREAD(batman_thread(void))
   ogm_tx->originator_addr = config_get(CONFIG_NODE_ADDR);
   ogm_tx->sender_addr = ogm_tx->originator_addr;
   PT_WAIT_THREAD(&pt_thread, llc_tx(&ogm_packet_tx, BROADCAST, sizeof(ogm_t)));
-  seqno++;
+  batman_inc_seqno();
   PT_SEM_SIGNAL(&pt_thread, &mutex);
 
   PT_END(&pt_thread);
