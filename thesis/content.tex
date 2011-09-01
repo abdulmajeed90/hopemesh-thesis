@@ -623,29 +623,103 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
     \label{fig:tannenbaum_model}
 \end{figure}
 
-Explain each layer and its purposes. \\
+Notes:\\
+- Explain why the tannenbaum model was choosen as the reference model. \\
+- Explain each layer and its purposes. \\
 
 \section{Reference implementation}
-The implementation was heavily inspired by a project available at \cite{stahl}. \\
+Notes:\\
+- The implementation was heavily inspired by a project available at \cite{stahl}. \\
 
 Drawbacks: \\
-Unfortunately the project is only partly finished. Only the PHY and MAC layers are working. \\
-It is based on a sequential execution model using state machines. \\
+- Unfortunately the project is only partly finished. Only the PHY and MAC layers are working. \\
+- It is based on a sequential execution model using state machines. \\
 
 Pros: \\
-Division of each network layer in a separate source file. \\
-Communication between the layers through callbacks. \\
+- Division of each network layer in a separate source file. \\
+- Communication between the layers through callbacks. \\
 
 \section{Layer 1: Physical}
-Refer to \ref{sec:petri} for the driver part and to \ref{sec:rfm12b} for the hardware part.
+Notes: \\
+- Refer to \ref{sec:petri} for the driver part and to \ref{sec:rfm12b} for the hardware part. \\
 
 \section{Layer 2a: MAC Layer}
-Frame format. \\
-A code which often alternates 1 and 0 in order to keep the PLL stable at the RX.
+Notes:\\
+- elaborate on tannenbaum <-> my implementation
+
+\subsection{Frame format}
+Notes:\\
+- describe Frame format. \\
+- A code which often alternates 1 and 0 in order to keep the PLL stable at the RX. \\
+- features collision detection \\
+
+\begin{figure}[H]
+    \centering
+    \import{figures/}{mac_frame.pdf_tex}
+    \caption{MAC frame format}
+\end{figure}
+
+\subsection{Hamming encoding}
+Notes: \\
+- explain hamming encoding \\
 
 \section{Layer 2b: Logical Link Control}
+Notes:\\
+- elaborate on tannenbaum <-> my implementation \\
+- explain CRC mechanism
+
+\begin{figure}[H]
+    \centering
+    \import{figures/}{llc_packet.pdf_tex}
+    \caption{OGM packet format}
+\end{figure}
+
 \section{Layer 3: Batman Routing}
+Notes:\\
+- elaborate on tannenbaum <-> my implementation \\
+- elobarote which packet formats are necessary and why \\
+
+\subsection{OGM packet format}
+Notes:\\
+- explain fields\\
+- explain when ogms are being rebroadcasted\\
+- explain when an entry to the routing table is added\\
+
+\begin{figure}[H]
+    \centering
+    \import{figures/}{ogm_packet.pdf_tex}
+    \caption{OGM packet format}
+\end{figure}
+
+\subsection{Unicast packet format}
+Notes:\\
+- explain fields\\
+- explain when unicasts are being rebroadcasted\\
+
+\begin{figure}[H]
+    \centering
+    \import{figures/}{unicast_packet.pdf_tex}
+    \caption{Unicast packet format}
+\end{figure}
+
+\subsection{Routing}
+Notes:\\
+- explain routing table format\\
+- show how many nodes can be stored in the routing table with the available RAM
+- eloborate when routing entries are added based on OGM messages
+- elaborate when routing entries are deleted based on the purging timeout
+
 \section{Layer 4: Transport}
+Notes:\\
+- explain the transport frame format\\
+- explain why this layer was essentially ignored.\\
+
+\begin{figure}[H]
+    \centering
+    \import{figures/}{transport_frame.pdf_tex}
+    \caption{Transport frame format}
+\end{figure}
+
 \section{Layer 5: Application}
 
 \chapter{Research}
@@ -657,3 +731,8 @@ A code which often alternates 1 and 0 in order to keep the PLL stable at the RX.
 \section{Results}
 
 \chapter{Conclusion}
+\section{Open issues}
+Notes:\\
+- Sequence numbers are ignored in the batman routing algorithm \\
+- The transport layer is incomplete \\
+
