@@ -640,38 +640,90 @@ Pros: \\
 - Communication between the layers through callbacks. \\
 
 \section{Layer 1: Physical}
-Notes: \\
-- Refer to \ref{sec:petri} for the driver part and to \ref{sec:rfm12b} for the hardware part. \\
+The physical layer is implemented using a wireless technology by using the capabilities of the RFM12B low cost ISM band transceiver. This transceiver offers frequency modulation (FSK). Unfortunately it does not offer additional modulations like amplitude modulation (AM) or phase modulation (PSK) so advanced modulation techniques like QPSK or QAM are note possible. 
+
+The transceiver operates in one of the three following frequencies:
+\begin{itemize}
+\item \textbf{433MHz:} This frequency range is called the "ISM-Band Region 1". According to ITU "Region 1" includes Europe so operation on this band is permitted. But this frequency range is also occupied by amateur radio stations which have primary status on these frequencies. ISM based applications only have a secondary status on this band so this operation frequency was avoided by the author.
+\item \textbf{868MHz:} This frequency range is called the "SRD-Band Europe" and does not collide with amateur radio. Furthermore this band is reserved for low powered devices so collisions in near field applications (<1km) are reduced. The author therefore decided to use transceivers for this frequency range.
+\item \textbf{915MHz:} This frequency range is called the "ISM-Band Region 2" and according to ITU can only be used in Americas and Greenland. Operation on this frequency in Europe is not allowed.
+\end{itemize}
+
+The typical output power according to the data sheet is 4dBm which according to formula \ref{eq:power_dbm} equals approx. 2.5mW.
+
+\begin{equation}
+\label{eq:power_dbm}
+P[mW] = 10^{(L_{dBm}/10)}
+\end{equation}
+
+The maximum effective radiated power (ERP) is regulated specifically in each country but commonly on the 868MHz SRD band the maximum allowed ERP must not exceed 25mW ERP.
+
+\begin{equation}
+ERP[mW] = 10^{((g-2.15)/10)} \times P \times 1000
+\label{eq:power_dbm}
+\end{equation}
+
+By using a simple quarter wavelength wire (which approximately resembles a dipole antenna having a gain of 2.15 dBi) the ERP power also equals 2.5mW which has a safe margin to the limit.
+
+Furthermore this transceiver can only operate in half-duplex mode. Special care therefore has to be taken when writing device drivers for this module. The algorithmic solution to this problem was already presented in chapter \ref{sec:petri}.
 
 \section{Layer 2a: MAC Layer}
-Notes:\\
-- elaborate on tannenbaum <-> my implementation
+The MAC layer for the thesis implementation follows the Tannenbaum \cite{tannenbaum} model for dynamic channel allocation with the following key assumptions and exceptions:
 
-\subsection{Frame format}
-Notes:\\
-- describe Frame format. \\
-- A code which often alternates 1 and 0 in order to keep the PLL stable at the RX. \\
-- features collision detection \\
+\begin{itemize}
+\item \textbf{Station Model:} The independent stations are represented by single mesh nodes in the network.
+\item \textbf{Single Channel Assumption:} The single channel is represented by the common frequency on which the mesh nodes transmit and receive data.
+\item \textbf{Collision Assumption:} This assumption unfortunately does not fully apply to the used RFM12B modules. Although collisions can happen the module does not provide any facility to detect frame collisions on the carrier since it operates in half-duplex mode only. Therefore Tannenbaum's requirement to resend collided frames could not implemented.
+\item \textbf{Continuous Time:} The frame transmission can indeed begin at any time so this assumption is fulfilled.
+\item \textbf{Carrier Sense:} Using the RSSI (Radio Signal Strength Indicator) command being provided by the RFM12B module the MAC layer can detect whether the carrier is free or occupied. The requirement not to send any data until the carrier is free was implemented by the author as shown in algorithm \ref{alg:mac}.
+\end{itemize}
+
+\begin{algorithm}[H]
+\caption{Implemented MAC carrier sense protocol}
+\label{alg:mac}
+\begin{algorithmic}
+\STATE wait until rfm12 is locked
+\IF{carrier sense is configured}
+    \STATE wait until carrier is free
+\ENDIF
+\STATE enable transceiver
+\STATE enable interrupts
+\end{algorithmic}
+\end{algorithm}
 
 \begin{figure}[H]
     \centering
     \import{figures/}{mac_frame.pdf_tex}
     \caption{MAC frame format}
+    \label{fig:mac}
 \end{figure}
 
-\subsection{Hamming encoding}
-Notes: \\
-- explain hamming encoding \\
+The actual MAC frame format can be seen in figure \ref{fig:mac}. The frame consists of the following four parts:
+
+\begin{itemize}
+\item \textbf{Preamble:} Two bytes containing the value 0xAA are being sent. The reason for this pattern is the bit representation which consists only of alternating 0 and 1 values. This helps the receiving PLL circuit to lock in to the correct frequency in order to minimize bit errors for the sync pattern recognition.
+\item \textbf{Sync pattern:} The sync pattern 0x2DD4 is programmed into the hardware of the RFM12B module. Only after the module recognizes this pattern it will fill its internal receiver FIFO with further data.
+\item \textbf{Data:} The data carries the actual payload for transmission. Since this is a frame based transmission (no length field is specified) the data must not contain data with 0xAA values. An appropriate code has to be chosen by the upper network layers.
+\item \textbf{Postamble:} The end of the frame is marked by the single byte value 0xAA. This is the reason why the data part must not contain this value.
+\end{itemize}
+
+One can see that the implemented MAC frame format does not include any error checking. The algorithm will simply stream bytes to or from the upper network layers until the postamble byte 0xAA is being detected. Only then the MAC layer assumes that the frame reception or transmission is complete.
 
 \section{Layer 2b: Logical Link Control}
 Notes:\\
 - elaborate on tannenbaum <-> my implementation \\
 - explain CRC mechanism
 
+\subsection{Hamming encoding}
+Notes: \\
+- explain hamming encoding \\
+- explain hamming decoding \\
+
+\subsection{Packet format}
 \begin{figure}[H]
     \centering
     \import{figures/}{llc_packet.pdf_tex}
-    \caption{OGM packet format}
+    \caption{LLC packet format}
 \end{figure}
 
 \section{Layer 3: Batman Routing}
@@ -721,6 +773,8 @@ Notes:\\
 \end{figure}
 
 \section{Layer 5: Application}
+Notes:\\
+Expose the shell and the rx thread as the application part.\\
 
 \chapter{Research}
 \section{Simulations}
@@ -735,4 +789,5 @@ Notes:\\
 Notes:\\
 - Sequence numbers are ignored in the batman routing algorithm \\
 - The transport layer is incomplete \\
+- The MAC multiple access protocol can be much further improved\\
 
