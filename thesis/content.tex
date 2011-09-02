@@ -802,12 +802,21 @@ Data & Classical code & ETS code \\
 \end{table}
 
 \subsubsection{Error detection}
+After and before the hamming decoding process a further error detection algorithm was implemented by the author in order to detect errors during the transmission. As proposed by Tannenbaum a CRC check was used. The algorithm was not implemented by the author itself but rather reused from the existing AVR libc library which provides a hardware optimized CRC-16 routine.
 
 \subsection{Packet format}
+The packet format can be seen in figure \ref{fig:llc_format}. The maximum size of a packet can be 256 bytes including the LLC header. Upper network layers can therefore transmit a maximum of 256 - 2 (Type + Length) - 2 (CRC) = 252 bytes of data payload per packet. The following fields were introduced:
+\begin{itemize}
+\item \textbf{Type:} The type field is 4 bits long and identifies the type of the transmitted packet. This information can be used by upper network layers in order to distinguish different packet types.
+\item \textbf{Length:} This 12 bit field long field includes the total length in bytes of the data payload being transmitted by the upper network layers. The fields "Type", "Length" and "CRC" are \emph{not} included in the length.
+\item \textbf{CRC:} This 16 bit long fields holds the calculated CRC-16 checksum of the length field and the data payload.
+\end{itemize}
+
 \begin{figure}[H]
     \centering
     \import{figures/}{llc_packet.pdf_tex}
     \caption{LLC packet format}
+    \label{fig:llc_format}
 \end{figure}
 
 \section{Layer 3: Batman Routing}
