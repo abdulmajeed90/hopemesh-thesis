@@ -715,19 +715,93 @@ The logical link control layer provides the virtual data path for the upper netw
 
 \begin{itemize}
 \item \textbf{Service interface for the network layer:} In contrast to the stream-oriented interface between the LLC layer and the MAC layer the interface between the LLC and upper network layers is packet-oriented. However in this implementation no additional algorithmic efforts were done in order to split up packets in separate frames. For simplicity each packet is transmitted in one frame.
-\item \textbf{Transmission error handling:} The transmission error handling was implemented using one error correction code (Hamming 8,4) and an error detecting code (CRC-16).
+\item \textbf{Transmission error handling:} The transmission error handling was implemented using an error correction code (Hamming) and an error detecting code (CRC-16).
 \item \textbf{Data flow:} No flow control algorithms were implemented due to its complexity and the different focus in this thesis which is the routing algorithm. Therefore dropped frames (in this case packets) will not be discovered and retransmitted.
 \end{itemize}
 
 \subsection{Error correction and detection}
+Due to the nature of a wireless connection which is a highly unreliable channel an error correcting as well as an error detecting code were introduced:
+
 \begin{enumerate}
-\item \emph{Hamming Code:} This code was used to provide data to the MAC frame. This decision was inherited from the reference implementation \cite{stahl}. The big advantage is that the hamming code produces data which conforms to the requirements set up in the MAC layer by not providing any 0xAA byte values and it servers as an error correcting code.
-\item \emph{Checksum:} After decoding or encoding the hamming byte stream an additional CRC-16 based checksum was implemented for the payload provided by the upper network layers.
+\item \emph{Hamming code:} This error correcting code was used to provide data to the MAC frame. This decision was inherited from the reference implementation \cite{stahl}. The advantage is that the hamming code produces data which conforms to the requirements set up in the MAC layer by not providing any 0xAA byte values.
+\item \emph{CRC-16 checksum:} After decoding or encoding the hamming byte stream an additional CRC-16 based error detecting checksum was implemented for the payload provided by the upper network layers.
 \end{enumerate}
 
-Notes: \\
-- explain hamming encoding \\
-- explain hamming decoding \\
+\subsubsection{Error correction}
+The implemented error correction code is an extended 8,4 hamming code. A 4 bit data nibble is redundantly encoded into an 8 bit code byte which nicely fit into a byte stream required by the MAC layer. The classical hamming code introduces parity bits $p_i$ at the $2^i$th position of the final code word. According to formula \ref{eq:hamming} by having $k=3$ parity bits we can encode an $n=4$ bits long data nibble into an $N = k + n = 4 + 3 = 7$ bits long code word.
+
+\begin{equation}
+n = 2^k - k - 1
+\label{eq:hamming}
+\end{equation}
+where
+\begin{align*}
+n &= \text{data size in bits} \\
+k &= \text{amount of parity bits}
+\end{align*}
+
+Since a 7 bit long code word does not fit nicely into an 8 bit long byte we could either fill the remaining bit with random data or use it as an additional final parity bit $p_f$ which calculates the parity of the previous 7 bits. The following variables are now available for the code word:
+\begin{align*}
+\text{data word} &= d_3, d_2, d_1, d_0 \\
+\text{hamming parity bits} &= p_2, p_1, p_0 \\
+\text{final parity bit} &= p_f
+\end{align*}
+
+The data word has the following format:
+
+\begin{figure}[H]
+\centering
+\import{figures/}{hamming_data_word.pdf_tex}
+\caption{Input data word format}
+\end{figure}
+
+The final code word according to the "classical" hamming algorithm has the following format:
+
+\begin{figure}[H]
+\begin{center}
+\import{figures/}{hamming_code_word.pdf_tex}
+\end{center}
+where
+\begin{align*}
+p_f &= p_0 \oplus d_3 \oplus d_2 \oplus d_1 \oplus p_2 \oplus d_0 \oplus p_1 \oplus p_0 \\
+p_2 &= d_3 \oplus d_2 \oplus d_1 \\
+p_1 &= d_3 \oplus d_2 \oplus d_0 \\
+p_0 &= d_3 \oplus d_1 \oplus d_0
+\end{align*}
+\caption{Classical Hamming 8,4 code word format}
+\end{figure}
+
+One could finish further investigation here and just use the classical 8,4 hamming coding. In comparison the 7,4 hamming code the hamming distance is increased from 3 to 4 and two error bits can be detected and corrected if one data byte is encoded as two separate 4 bit long nibbles resulting as a two byte hamming stream. The author decided to use another hamming encoding discovered in \cite{stahl} which is also used and standardized in the transmission of teletext for television. The European Telecommunication Standard (ETS) specifies the following hamming encoding in the context of the teletext specification \cite{ets}:
+
+\begin{figure}[H]
+\begin{center}
+\import{figures/}{hamming_code_word_teletext.pdf_tex}
+\end{center}
+where
+\begin{align*}
+p_f &= 1 \oplus p_0 \oplus d_3 \oplus d_2 \oplus d_1 \oplus p_2 \oplus d_0 \oplus p_1 \oplus p_0 \\
+p_2 &= 1 \oplus d_2 \oplus d_1 \oplus d_0 \\
+p_1 &= 1 \oplus d_3 \oplus d_1 \oplus d_0 \\
+p_0 &= 1 \oplus d_3 \oplus d_2 \oplus d_0
+\end{align*}
+\caption{ETS specified 8,4 hamming coding word}
+\end{figure}
+
+The major difference between the two codes is when encoding 0xA and 0xF values as shown in table \ref{tab:hamming_diff}. The ETS code ensures that the final code sent via the physical device does not produce continuous streams of 1 or 0 bits. The consequence for radio transmission is better stability for the receiver's PLL which minimizes errors during reception. The author therefore decided to reuse the ETS hamming code for the implementation.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l | l | l}
+Data & Classical code & ETS code \\
+\hline
+\texttt{0000} & \texttt{00000000} & \texttt{00010101} \\
+\texttt{1111} & \texttt{11111111} & \texttt{11101010} \\
+\end{tabular}
+\caption{Difference between the classical and ETS hamming code}
+\label{tab:hamming_diff}
+\end{table}
+
+\subsubsection{Error detection}
 
 \subsection{Packet format}
 \begin{figure}[H]
