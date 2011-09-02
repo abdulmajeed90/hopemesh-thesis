@@ -43,7 +43,7 @@
 \label{fig:mindmap}
 \end{figure}
 
-This thesis has the goal to implement an advanced and refined version of the predecessor implementation (see \cite{korniowski}) for a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HOPERF radio modules. This goal can be split in the following aspects according to the mind map as seen in figure \ref{fig:mindmap}:
+This thesis has the goal to implement an advanced and refined version of the predecessor implementation \cite{korniowski} for a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HOPERF radio modules. This goal can be split in the following aspects according to the mind map as seen in figure \ref{fig:mindmap}:
 \begin{itemize}
 \item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
 \item \textbf{Modules:} The goal is to find the necessary software modules from an abstract architectural point of view.
@@ -207,7 +207,7 @@ This model does not necessarily needs operating system support or frameworks. It
 \end{algorithmic}
 \end{algorithm}
 
-There is one challenge that comes with this type of execution model. That is that only one module can execute at a time due to its sequential nature. If a module i.e. waits for an external resource to provide data it must not block the execution of the main loop until the external resources becomes ready. This would prevent the execution of the other modules. The classic solution to this problem is the introduction of states in modules. Module states can be implemented as classical Finite State Machines (\cite{booth}).
+There is one challenge that comes with this type of execution model. That is that only one module can execute at a time due to its sequential nature. If a module i.e. waits for an external resource to provide data it must not block the execution of the main loop until the external resources becomes ready. This would prevent the execution of the other modules. The classic solution to this problem is the introduction of states in modules. Module states can be implemented as classical Finite State Machines \cite{booth}.
 
 If we take the example from above about waiting for external resources a finite state machine for modules can be modeled as shown in figure \ref{fig:statemachine}.
 
@@ -241,7 +241,7 @@ This implementation emulates a concurrent execution of modules. The context swit
 
 \begin{lstlisting}[
 	label=lst:korniowski_main,
-	caption=main loop routine (see \cite{korniowski})]
+	caption=main loop routine \cite{korniowski}]
 382 while(0x01)
 383 {
 384         if(uartInterrupt == ON) // got a character from RS232
@@ -448,7 +448,7 @@ test(void)
 }
 \end{lstlisting}
 
-The expanded version after the preprocessor stage of the implementation looks much more like a state machine based implementation from the sequential execution model. It uses a clever trick called loop unrolling (\cite{abrash}) which breaks ups the while statement using the switch statement. This technique is also known as Duff's device as described in \cite{duff}. Unfortunately this implementation has one drawback. One cannot (obviously) use switch statements in protothreads. A slightly more efficient implementation using GCC labels circumvents this. Since the context switch is managed by the concurrent modules themselves the behavior can be classified as \emph{cooperative} multitasking.
+The expanded version after the preprocessor stage of the implementation looks much more like a state machine based implementation from the sequential execution model. It uses a clever trick called loop unrolling \cite{abrash} which breaks ups the while statement using the switch statement. This technique is also known as Duff's device as described in \cite{duff}. Unfortunately this implementation has one drawback. One cannot (obviously) use switch statements in protothreads. A slightly more efficient implementation using GCC labels circumvents this. Since the context switch is managed by the concurrent modules themselves the behavior can be classified as \emph{cooperative} multitasking.
 
 Due to the lightweight nature of protothreads and the possibility to express algorithms in a linear thread-like fashion this framework was chosen by the author for the implementation.
 
@@ -458,7 +458,7 @@ The predecessor thesis \cite{korniowski} used the UART interface in order to com
 \begin{lstlisting}[
 	float,
 	label=lst:korniowski_uart,
-	caption=Sender route for the UART module (see \cite{korniowski})]
+	caption=Sender route for the UART module \cite{korniowski}]
 void rsSend(uint8_t data)
 {
   while( !(UCSRA & (1<<UDRE)));
@@ -473,7 +473,7 @@ Listing \ref{lst:korniowski_uart} shows that the algorithm examines the UCSRA (U
 \item Migration to a concurrent execution model using protothreads.
 \end{itemize}
 
-The Atmega162 micro-processor offers the following ISRs for receiving and sending data via the UART (\cite{atmega162datasheet}):
+The Atmega162 micro-processor offers the following ISRs for receiving and sending data via the UART \cite{atmega162datasheet}:
 
 \begin{itemize}
 \item \textbf{SIG\_USART\_RECV}: Is being invoked, when the UDR register contains a new byte received from the UART.
@@ -482,7 +482,7 @@ The Atmega162 micro-processor offers the following ISRs for receiving and sendin
 
 So we have the possibility to send or receive data asynchronously from the main loop in the context of a concurrent execution model by using ISRs. Filling the UDR or reading the UDR in the main loop (and thus blocking it) is actually not necessary at all. The main loop can communicate with the ISRs through a receiving and transmitting queue buffer where it writes data to the transmitting queue and reads data from the receiving queue.
 
-Using this sort of communication is known as the "producer-consumer problem". It can be implemented using a FIFO buffer. The Linux kernel (see \cite{linux_device_drivers} chapter 5.7.1) as well as (embedded) DSP micro-controllers (see \cite{ti_dsp}) use a very elegant FIFO-algorithm by providing a lock-free buffer being called "circular buffer" or "ring buffer".
+Using this sort of communication is known as the "producer-consumer problem". It can be implemented using a FIFO buffer. The Linux kernel (\cite{linux_device_drivers} chapter 5.7.1) as well as (embedded) DSP micro-controllers \cite{ti_dsp} use a very elegant FIFO-algorithm by providing a lock-free buffer being called "circular buffer" or "ring buffer".
 
 \begin{figure}[H]
 \centering
@@ -544,7 +544,7 @@ The predecessor implementation used an identical (physically) blocking implement
 
 \begin{lstlisting}[
     label=lst:rfm12b_predecessor_tx,
-    caption=Sender routine for the RFM12B hardware module (see \cite{korniowski})
+    caption=Sender routine for the RFM12B hardware module \cite{korniowski}
 ]
 void rfTx(uint8_t data)
 {
@@ -553,11 +553,11 @@ void rfTx(uint8_t data)
 }
 \end{lstlisting}
 
-This implementation physically blocks the main loop the same way as the UART algorithm shown in listing \ref{lst:korniowski_uart}. In this case the algorithm does not wait for the status of an internal register to send data but rather waits for the external nIRQ pin from the RFM12B hardware module to go low. The official "RF12B programming guide" (see \cite{rf12b_programming_guide}) also proposes a physically blocking algorithm.
+This implementation physically blocks the main loop the same way as the UART algorithm shown in listing \ref{lst:korniowski_uart}. In this case the algorithm does not wait for the status of an internal register to send data but rather waits for the external nIRQ pin from the RFM12B hardware module to go low. The official "RF12B programming guide" \cite{rf12b_programming_guide} also proposes a physically blocking algorithm.
 
 The author wanted to improve the algorithm in a similar fashion as the UART algorithm. The nIRQ pin of the RFM12B was connected to the INT0 pin of the ATMega162 micro-processor allowing to execute the SIG\_INTERRUPT0 interrupt service routine asynchronously. But it turned out that the implementation could not be reused at all. The RFM12B radio hardware imposes the following algorithmic challenges for the driver implementation:
 \begin{itemize}
-\item \textbf{Single interrupt request for multiple events:} The RFM12 radio module uses only one nIRQ pin in order to generate an interrupt for the following events (see \cite{sis4221_datasheet}):
+\item \textbf{Single interrupt request for multiple events:} The RFM12 radio module uses only one nIRQ pin in order to generate an interrupt for the following events \cite{sis4221_datasheet}:
 \begin{itemize}
 \item The TX register is ready to receive the next byte (RGIT)
 \item The RX FIFO has received the preprogrammed amount of bits (FFIT)
@@ -619,13 +619,14 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
 \begin{figure}[H]
     \centering
     \import{figures/}{layers.pdf_tex}
-    \caption{Tannenbaum hybrid reference model (see \cite{tannenbaum})}
+    \caption{Tannenbaum hybrid reference model \cite{tannenbaum}}
     \label{fig:tannenbaum_model}
 \end{figure}
 
 Notes:\\
 - Explain why the tannenbaum model was choosen as the reference model. \\
 - Explain each layer and its purposes. \\
+- Explain the division of the data link layer into the two sublayers MAC and LLC. \\
 
 \section{Reference implementation}
 Notes:\\
@@ -710,11 +711,20 @@ The actual MAC frame format can be seen in figure \ref{fig:mac}. The frame consi
 One can see that the implemented MAC frame format does not include any error checking. The algorithm will simply stream bytes to or from the upper network layers until the postamble byte 0xAA is being detected. Only then the MAC layer assumes that the frame reception or transmission is complete.
 
 \section{Layer 2b: Logical Link Control}
-Notes:\\
-- elaborate on tannenbaum <-> my implementation \\
-- explain CRC mechanism
+The logical link control layer provides the virtual data path for the upper network layers. The implementation in this thesis follows Tannenbaum's \cite{tannenbaum} category of an unacknowledged connectionless service. According to Tannenbaum's data link layer design principles the following functions were implemented in the LLC layer:
 
-\subsection{Hamming encoding}
+\begin{itemize}
+\item \textbf{Service interface for the network layer:} In contrast to the stream-oriented interface between the LLC layer and the MAC layer the interface between the LLC and upper network layers is packet-oriented. However in this implementation no additional algorithmic efforts were done in order to split up packets in separate frames. For simplicity each packet is transmitted in one frame.
+\item \textbf{Transmission error handling:} The transmission error handling was implemented using one error correction code (Hamming 8,4) and an error detecting code (CRC-16).
+\item \textbf{Data flow:} No flow control algorithms were implemented due to its complexity and the different focus in this thesis which is the routing algorithm. Therefore dropped frames (in this case packets) will not be discovered and retransmitted.
+\end{itemize}
+
+\subsection{Error correction and detection}
+\begin{enumerate}
+\item \emph{Hamming Code:} This code was used to provide data to the MAC frame. This decision was inherited from the reference implementation \cite{stahl}. The big advantage is that the hamming code produces data which conforms to the requirements set up in the MAC layer by not providing any 0xAA byte values and it servers as an error correcting code.
+\item \emph{Checksum:} After decoding or encoding the hamming byte stream an additional CRC-16 based checksum was implemented for the payload provided by the upper network layers.
+\end{enumerate}
+
 Notes: \\
 - explain hamming encoding \\
 - explain hamming decoding \\
@@ -790,4 +800,5 @@ Notes:\\
 - Sequence numbers are ignored in the batman routing algorithm \\
 - The transport layer is incomplete \\
 - The MAC multiple access protocol can be much further improved\\
+- The LLC layer does not split packets into frames and does not provide any means of flow control\\
 
