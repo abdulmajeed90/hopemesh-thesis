@@ -1,0 +1,84 @@
+%% Creator: Inkscape inkscape 0.48.1, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'ogm_rx_activity_diagram.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+
+\begingroup
+  \makeatletter
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}
+    \renewcommand\color[2][]{}%
+  }
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}
+    \renewcommand\transparent[1]{}%
+  }
+  \providecommand\rotatebox[2]{#2}
+  \ifx\svgwidth\undefined
+    \setlength{\unitlength}{483.23198242pt}
+  \else
+    \setlength{\unitlength}{\svgwidth}
+  \fi
+  \global\let\svgwidth\undefined
+  \makeatother
+  \begin{picture}(1,0.88608037)%
+    \put(0,0){\includegraphics[width=\unitlength]{ogm_rx_activity_diagram.pdf}}%
+    \put(0.28854938,0.85222877){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Check}}}%
+    \put(0.28854938,0.82739597){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{packet}}}%
+    \put(0.28854938,0.55362938){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Check rebroad-}}}%
+    \put(0.28854938,0.52879659){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{casted packet}}}%
+    \put(0.3022152,0.78389842){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[version matches] and}}}%
+    \put(0.3022152,0.75078803){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[sender <> own address] and}}}%
+    \put(0.3022152,0.71767764){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[TTL > 0]}}}%
+    \put(0.14899677,0.6241242){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[originator =}}}%
+    \put(0.28854938,0.33841184){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Save sender in}}}%
+    \put(0.28854938,0.31357905){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{route table}}}%
+    \put(0.03042675,0.41681725){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{["is direct" flag set] and}}}%
+    \put(0.03733204,0.800454){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[OGM received]}}}%
+    \put(0.48638393,0.3390013){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Drop}}}%
+    \put(0.48638393,0.3141685){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{packet}}}%
+    \put(0.52839878,0.67816745){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{["unidirectional" flag not set]}}}%
+    \put(0.82659328,0.50396403){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Save originator}}}%
+    \put(0.82659328,0.47913124){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{in route table}}}%
+    \put(0.83198138,0.57635281){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[route to sender}}}%
+    \put(0.83466998,0.55400329){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{is bidirectional]}}}%
+    \put(0.61137567,0.5039638){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Set "unidirect-}}}%
+    \put(0.61137567,0.479131){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{ional" flag}}}%
+    \put(0.69332387,0.26060259){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Set sender =}}}%
+    \put(0.69332387,0.23576979){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{own address}}}%
+    \put(0.90854142,0.32268457){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Set "is}}}%
+    \put(0.90854142,0.29785177){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{direct" flag}}}%
+    \put(0.70589839,0.37956806){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[sender = originator]}}}%
+    \put(0.00558903,0.39198446){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{[route is not bidirectional]}}}%
+    \put(0.14899677,0.5992914){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{own address]}}}%
+    \put(0.15590973,0.22715719){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Sender is now}}}%
+    \put(0.15591331,0.2025564){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{automatically}}}%
+    \put(0.16004852,0.1774916){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{marked as}}}%
+    \put(0.16005211,0.15289081){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{bidirectional}}}%
+    \put(0.69312304,0.15750648){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Reduce}}}%
+    \put(0.69312304,0.13267369){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{TTL}}}%
+    \put(0.69312304,0.04989771){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Resend}}}%
+    \put(0.69312304,0.02506491){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{Packet}}}%
+  \end{picture}%
+\endgroup

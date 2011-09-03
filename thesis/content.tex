@@ -48,7 +48,7 @@ This thesis has the goal to implement an advanced and refined version of the pre
 \item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
 \item \textbf{Modules:} The goal is to find the necessary software modules from an abstract architectural point of view.
 \item \textbf{Algorithms:} The goal is to explore and elaborate on concrete algorithms and data structures for the implementation of the software modules.
-\item \textbf{Network:} The goal is to implement a network stack which not only provides a mesh routing based on the B.A.T.M.A.N. algorithm but also provides lower network layers.
+\item \textbf{Network:} The goal is to implement a network stack which not only provides a mesh routing based on the B.A.T.M.A.N. algorithm but also provides a real network stack.
 \item \textbf{Simulation :} The goal is to provide the basis for a simulation environment for the provided algorithms that can execute on regular PCs.
 \end{itemize}
 
@@ -72,7 +72,7 @@ The predecessor implementation uses an Atmel Atmega16 RISC microprocessor. The a
 The author set up the following requirements for the new hardware architecture:
 
 \begin{itemize}
-\item \textbf{GCC tool chain:} The author wanted to use an open source development environment. The existing GCC toolchain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
+\item \textbf{GCC tool chain:} The author wanted to use an open source development environment. The existing GCC tool chain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
 \item \textbf{USB connectivity:} Instead of using the rather old and nowadays even mostly not available RS-232 connection the author wanted to migrate to an USB based connection type in order to use a regular PC as a terminal.
 \item \textbf{RAM:} In order to store many routing entries additional RAM is necessary as the predecessor thesis already pointed out. An address size of 16 bit theoretically allows addressing 65,536 nodes. If we wanted to store just every single address in a routing table we already need more than 130kB of RAM if only the target address had to be stored. Realistically the author wanted to store at least 1000 nodes in a routing table.
 
@@ -124,7 +124,7 @@ Address & Gateway & 2 \\
 \caption{2nd revision PCB layout}
 \end{figure}
 
-In order to able to set up future mesh nodes a reproducable hardware design had to designed. The goal was to be able to produce many mesh nodes and to be able to equip a whole laboratory. One possibility is to manually wire each mesh node. Due to the complexity of the schematic this solution was not acceptable. The author decided to design a printed circuit board (PCB) in order to be able to produce new mesh nodes quickly. The following design requirements were established by the author:
+In order to able to set up future mesh nodes a reproducible hardware design had to designed. The goal was to be able to produce many mesh nodes and to be able to equip a whole laboratory. One possibility is to manually wire each mesh node. Due to the complexity of the schematic this solution was not acceptable. The author decided to design a printed circuit board (PCB) in order to be able to produce new mesh nodes quickly. The following design requirements were established by the author:
 
 \begin{itemize}
 \item \textbf{One sided PCB: } The PCB was aimed to be manufactured in an uncomplicated environment. Two-sided PCBs allow minimizing the physical size of the device but for research this is not an important requirement. On the other hand two-sided PCBs require additional effort. Through-holes have to be manufactured and eventually the upper side of the PCB has to be laminated in order to prevent shorts.
@@ -805,9 +805,13 @@ Data & Classical code & ETS code \\
 After and before the hamming decoding process a further error detection algorithm was implemented by the author in order to detect errors during the transmission. As proposed by Tannenbaum a CRC check was used. The algorithm was not implemented by the author itself but rather reused from the existing AVR libc library which provides a hardware optimized CRC-16 routine.
 
 \subsection{Packet format}
-The packet format can be seen in figure \ref{fig:llc_format}. The maximum size of a packet can be 256 bytes including the LLC header. Upper network layers can therefore transmit a maximum of 256 - 2 (Type + Length) - 2 (CRC) = 252 bytes of data payload per packet. The following fields were introduced:
+The packet format for the LLC layer can be seen in figure \ref{fig:llc_format}. The maximum size of a packet can be 256 bytes including the LLC header. Upper network layers can therefore transmit a maximum of 256 - 2 (Type + Length) - 2 (CRC) = 252 bytes of data payload per packet. The following fields were introduced:
 \begin{itemize}
-\item \textbf{Type:} The type field is 4 bits long and identifies the type of the transmitted packet. This information can be used by upper network layers in order to distinguish different packet types.
+\item \textbf{Type:} The type field is 4 bits long and identifies the type of the transmitted packet. This information can be used by upper network layers in order to distinguish different packet types. The following packet types where implemented by the author:
+\begin{enumerate}
+\item \emph{Broadcast:} This type identifies the current packet as a broadcast packet. It is targeted to all nodes in the network.
+\item \emph{Unicast:} This type identifies the current packet as an unicast packet. It is targeted to a concrete node in the network. It is the responsibility of the higher network layers to resolve the actual target node.
+\end{enumerate}
 \item \textbf{Length:} This 12 bit field long field includes the total length in bytes of the data payload being transmitted by the upper network layers. The fields "Type", "Length" and "CRC" are \emph{not} included in the length.
 \item \textbf{CRC:} This 16 bit long fields holds the calculated CRC-16 checksum of the length field and the data payload.
 \end{itemize}
@@ -820,54 +824,137 @@ The packet format can be seen in figure \ref{fig:llc_format}. The maximum size o
 \end{figure}
 
 \section{Layer 3: Batman Routing}
-Notes:\\
-- elaborate on tannenbaum <-> my implementation \\
-- elobarote which packet formats are necessary and why \\
+According to Tannenbaum the network layer is mainly responsible for transparently routing packets from a source to a destination inside the network. The following requirements for this network layer were implemented by the author:
 
-\subsection{OGM packet format}
-Notes:\\
-- explain fields\\
-- explain when ogms are being rebroadcasted\\
-- explain when an entry to the routing table is added\\
+\begin{enumerate}
+\item \textbf{Topology information:} The network layer knows about the network topology by using the B.A.T.M.A.N. routing algorithm.
+\item \textbf{Technology independence:} The network layer completely hides the routing technologies and algorithms from the upper network layers. The only information which has to be provided from the upper network layers is the destination address.
+\item \textbf{Uniform addressing:} The upper network layers have to provide an uniform address of the destination by using a 16 bit long address value. Using 16 bits a maximum of 65,536 destinations can be addressed.
+\end{enumerate}
+
+The routing layer was implemented as a connectionless service which can be qualified as a datagram subnet. Each packet contains the full source and destination address and each router (mesh node) does not hold any state informations about connections. Therefore quality of service (QOS) based transmissions are rather not possible.
+
+The predecessor thesis used a basic B.A.T.M.A.N. approach. For the new implementation the author wanted to implement the following enhanced features:
+
+\begin{itemize}
+\item \textbf{RFC conformance:} The real B.A.T.M.A.N. draft RFC \cite{batmanrfc} was used as a template for implementing the routing algorithm.
+\item \textbf{TTL introduction:} A TTL (Time-To-Live) mechanism was introduced in order to prevent infinite message looping inside the network.
+\item \textbf{Bidirectional link check:} A bidirectional link-check was introduced. This check ensures that only bidirectional routes are being propagated through the network.
+\end{itemize}
+
+\subsection{Route propagation}
+The biggest challenge of Mesh based networks is their dynamic nature. In contrast to static networks the topology changes constantly. As the predecessor thesis already showed the B.A.T.M.A.N. algorithm is very promising since it has one big advantage over many existing mesh routing protocols. That is that not the whole network topology information has to be stored on each mesh node but only the next visible gateway for each known destination.
+
+The B.A.T.M.A.N. RFC \cite{batmanrfc} proposes that each mesh node broadcasts OGM (originator) packets through the network in order to keep the route information up-to-date. The RFC only proposes \emph{what} has to be done by each mesh node when an OGM message is being received or has to be transmitted but not \emph{how} the implementation has to look like. Therefore the author had to investigate an appropriate algorithm and packet structures in order to fulfill the RFC's requirements.
+
+The author defined the following classifications for a mesh node in the network which will be reused in the definitions below. Each classification is expressed as an uniform address consisting of an unique 16-bit unsigned integer value:
+
+\begin{itemize}
+\item \textbf{Originator:} Identifies the origin mesh node who created the current packet.
+\item \textbf{Sender:} Identifies the mesh node who sent the current packet.
+\item \textbf{Target:} (Applies to unicast packets only) Identifies the final target mesh node for this packet.
+\item \textbf{Gateway:} (Applies to unicast packets only) Identifies the next hop (gateway) mesh node for this packet.
+\label{list:nodeclasses}
+\end{itemize}
+
+The implemented OGM packet format can be seen in figure \ref{fig:ogm}. The following fields are being transmitted along with each OGM packet:
+
+\begin{itemize}
+\item \textbf{Version:} This 4-bit long field specifies the protocol version. Future developments can then distinguish between different OGM packet types.
+\item \textbf{Flags:} This 4-bit long field can carry up to four status bits for this packet. Currently the following status bits are implemented:
+    \begin{enumerate}
+    \item \emph{Is Direct:} This flag is set by a receiving mesh node and indicates that the sending mesh node is a direct neighbor.
+    \item \emph{Unidirectional:} This flag indicates that there is an unidirectional connection between the sender and the originator.
+    \end{enumerate}
+\item \textbf{TTL:} The Time-To-Live value is decreased before each retransmission. If the value reaches zero the packet is dropped.
+\item \textbf{Sequence Number:} Each sent OGM has an unique sequence number assigned which is increased with every transmission.
+\item \textbf{Originator and sender address:} See definition in classifier list above.
+\end{itemize}
 
 \begin{figure}[H]
     \centering
     \import{figures/}{ogm_packet.pdf_tex}
     \caption{OGM packet format}
+    \label{fig:ogm}
 \end{figure}
 
-\subsection{Unicast packet format}
-Notes:\\
-- explain fields\\
-- explain when unicasts are being rebroadcasted\\
+Each mesh node always sends an OGM packet after a configurable interval. In this implementation an OGM message is sent every second. When a neighbor mesh node receives an OGM packet it decides whether to save the originator in the routing table. Furthermore the receiving mesh node decides whether to resend the received OGM packet in order to spread the information about the originator in the network. The author developed the corresponding algorithm which can be seen in figure \ref{fig:ogm_rx}.
+
+\begin{figure}[H]
+    \centering
+    \sffamily
+    \import{figures/}{ogm_rx_activity_diagram.pdf_tex}
+    \rmfamily
+    \caption{OGM packet reception algorithm (UML 2.0 activity diagram)}
+    \label{fig:ogm_rx}
+\end{figure}
+
+Upon the reception of an OGM packet the algorithm first performs a few basic checks. The version header must match, the sender must be different from the node address and the TTL must be greater than 0. Afterwards the algorithm checks whether the received OGM is a self-originated rebroadcasted packet or a foreign OGM. If the OGM is self-originated the OGM flags are used to check whether the rebroadcasted packet was sent by a direct neighbor. Otherwise the packet is dropped. If the packet is a foreign OGM and not unidirectional the algorithm checks whether a bidirectional route to the sender exists. If it does the routing information about the originator is updated in the routing table. Finally the foreign OGM is resent.
+
+Unfortunately additional sequence number and window checks where not implemented. The author leaves this algorithmic improvement for further implementations.
+
+\subsection{Unicast messages}
+Unicast messages carry the actual data payload which has to be routed from an originator to a target. The fields for unicast messages can be seen in figure \ref{fig:unicast_packet}. All of the shown fields already were described above. The type field is currently unused.
 
 \begin{figure}[H]
     \centering
     \import{figures/}{unicast_packet.pdf_tex}
     \caption{Unicast packet format}
+    \label{fig:unicast_packet}
 \end{figure}
 
-\subsection{Routing}
-Notes:\\
-- explain routing table format\\
-- show how many nodes can be stored in the routing table with the available RAM
-- eloborate when routing entries are added based on OGM messages
-- elaborate when routing entries are deleted based on the purging timeout
+The routing list being built using received OGM packets is now consulted whenever a foreign unicast message was received or when upper network layers want to send new unicast messages. The general algorithm for receiving unicast messages is show in figure \ref{fig:unicast_alg}.
+
+\begin{figure}[H]
+    \centering
+    \sffamily
+    \import{figures/}{unicast_rx_activity_diagram.pdf_tex}
+    \rmfamily
+    \caption{Unicast packet reception algorithm (UML 2.0 activity diagram)}
+    \label{fig:unicast_alg}
+\end{figure}
+
+The algorithm for sending new unicast packets is the same as in \ref{fig:unicast_alg} except it starts immediately at the activity "Find best gateway".
+
+\subsection{Route determination}
+The algorithm for finding the best gateway in its current implementation is very basic. The metric for choosing the gateway is based on the count of received OGM messages. The routing consists of the following fields:
+
+\begin{itemize}
+\item \textbf{Target address:} The target address for whom the current routing entry is valid.
+\item \textbf{Gateway address:} The address of a possible gateway for the target.
+\item \textbf{Sequence number:} The last received sequence number of the target via the gateway.
+\item \textbf{Count:} The total count of received sequence numbers.
+\item \textbf{Time:} The time of the last update for this routing entry.
+\end{itemize}
+
+The routing table with the above described fields is constantly updated upon the reception of new OGM packets. Every second the routing table is examined for entries which can be purged. The purge timeout is configurable and is set up for 10 seconds in the current implementation. Route entries older than 10 seconds will be permanently deleted from the routing table. This algorithm ensures that no outdated routing entries are persisted in the routing table. Whenever a mesh gateway node is not reachable anymore, no OGM packets will be received from it. The time field for targets using this gateway will not be updated and after 10 seconds these entries will be deleted. This allows to adapt the routing information dynamically with a changing network and conforms to the requirements stated in the RFC \cite{batmanrfc}.
 
 \section{Layer 4: Transport}
-Notes:\\
-- explain the transport frame format\\
-- explain why this layer was essentially ignored.\\
+The transport layer according to Tannenbaum \cite{tannenbaum} is the central aspect of the whole network layer stack. Due to a different focus on this thesis the requirements for this layer were inherited from the lower layers. According to Tannenbaum the transport layer has to ensure:
+
+\begin{itemize}
+\item \textbf{Reliability:} In order to send simple text messages the author decided that the error correction and detection codes used in the network layer are sufficient for prototype purposes.
+\item \textbf{Transport service:} The transport is implemented as a connectionless stateless service. Therefore upper network layers are not provided with further abstracted APIs.
+\item \textbf{Efficiency:} The author implemented a very easy service interface for the upper network layers which allows to send and receive strings without further modification.
+\end{itemize}
+
+The author chose the frame format as seen in figure \ref{fig:transport_frame}. It simply consists of a nul-terminated data stream. This allows to implement string based applications in the applications and pass those strings without further modification to the transport layer.
 
 \begin{figure}[H]
     \centering
     \import{figures/}{transport_frame.pdf_tex}
     \caption{Transport frame format}
+    \label{fig:transport_frame}
 \end{figure}
 
 \section{Layer 5: Application}
-Notes:\\
-Expose the shell and the rx thread as the application part.\\
+
+Since the implemented transport layer offers a nul terminated interface. The user space applications consuming the lower network layers currently are:
+
+\begin{itemize}
+\item \textbf{Shell:} The shell is responsible for sending strings over the network whenever the user prompts a "send" command.
+\item \textbf{Receiver thread:} A dedicated receiver thread will print received strings to the UART interface whenever the transport layer receives new payload.
+\end{itemize}
 
 \chapter{Research}
 \section{Simulations}
@@ -884,4 +971,5 @@ Notes:\\
 - The transport layer is incomplete \\
 - The MAC multiple access protocol can be much further improved\\
 - The LLC layer does not split packets into frames and does not provide any means of flow control\\
+- Sequence numbers are currently ignored for the routing metrics
 
