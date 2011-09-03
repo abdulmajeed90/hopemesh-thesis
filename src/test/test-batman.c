@@ -45,8 +45,8 @@ print_unicast(packet_t *packet)
   const char *msg = (const char *) packet_get_l4(packet);
 
   printf(
-      "uni: sender=0x%x, gateway=0x%x, originator=0x%x, target=0x%x, msg=%s\n",
-      header->sender_addr, header->gateway_addr, header->originator_addr, header->target_addr,  msg);
+      "uni: sender=0x%x, gateway=0x%x, originator=0x%x, target=0x%x, ttl=%d, msg=%s\n",
+      header->sender_addr, header->gateway_addr, header->originator_addr, header->target_addr, header->ttl, msg);
 }
 
 void
@@ -266,6 +266,7 @@ __wrap_llc_rx(packet_t *packet)
       header->originator_addr = 0xffff;
       header->target_addr = 0x000d;
       header->sender_addr = 0x0001;
+      header->ttl = 50;
 
       memcpy(msg, TEST_STRING_1, strlen(TEST_STRING_1)+1);
 
@@ -277,6 +278,7 @@ __wrap_llc_rx(packet_t *packet)
       header->originator_addr = 0x000d;
       header->target_addr = 0x000c;
       header->sender_addr = 0x0001;
+      header->ttl = 50;
 
       memcpy(msg, TEST_STRING_2, strlen(TEST_STRING_2)+1);
 
@@ -288,6 +290,7 @@ __wrap_llc_rx(packet_t *packet)
       header->originator_addr = 0x000d;
       header->target_addr = 0x000c;
       header->sender_addr = 0x0001;
+      header->ttl = 50;
 
       memcpy(msg, TEST_STRING_2, strlen(TEST_STRING_2)+1);
 
@@ -299,6 +302,7 @@ __wrap_llc_rx(packet_t *packet)
       header->originator_addr = 0x000d;
       header->target_addr = 0x000a;
       header->sender_addr = 0x0001;
+      header->ttl = 0;
 
       memcpy(msg, TEST_STRING_3, strlen(TEST_STRING_3)+1);
 
@@ -310,6 +314,7 @@ __wrap_llc_rx(packet_t *packet)
       header->originator_addr = 0x000d;
       header->target_addr = 0x000b;
       header->sender_addr = 0x000d;
+      header->ttl = 50;
 
       memcpy(msg, TEST_STRING_3, strlen(TEST_STRING_3)+1);
 

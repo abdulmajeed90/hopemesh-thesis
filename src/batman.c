@@ -13,7 +13,8 @@ typedef enum
   BATMAN_DROP,
   BATMAN_REBROADCAST,
   BATMAN_RX
-} batman_bc_status;
+}
+batman_bc_status;
 
 static struct pt pt_thread, pt_tx, pt_rx;
 static struct pt_sem mutex;
@@ -235,6 +236,10 @@ batman_rebroadcast(batman_t *header)
     return BATMAN_RX;
   }
 
+  if (header->ttl == 0) {
+    return BATMAN_DROP;
+  }
+
   if (header->gateway_addr != config_get(CONFIG_NODE_ADDR)) {
     // our node is not supposed to be the gateway for this packet.
     // do not rebroadcast
@@ -246,6 +251,15 @@ batman_rebroadcast(batman_t *header)
     // if we received such a packet it looped back to us in the network
     return BATMAN_DROP;
   }
+
+  if (route_present(header->target_addr, &header->gateway_addr)) {
+    // only rebroadcast if we have a gateway for this target
+    header->sender_addr = config_get(CONFIG_NODE_ADDR);
+  } else {
+    return BATMAN_DROP;
+  }
+
+  header->ttl--;
 
   return BATMAN_REBROADCAST;
 }
@@ -278,11 +292,8 @@ PT_THREAD(batman_rx(packet_t *packet))
           loop = false;
           break;
         case (BATMAN_REBROADCAST):
-          if (route_present(header->target_addr, &header->gateway_addr)) {
-            header->sender_addr = config_get(CONFIG_NODE_ADDR);
-            PT_WAIT_THREAD(&pt_rx,
-                llc_tx(packet, UNICAST, BATMAN_HEADER_SIZE + llc->len));
-          }
+          PT_WAIT_THREAD(&pt_rx,
+              llc_tx(packet, UNICAST, BATMAN_HEADER_SIZE + llc->len));
           break;
         case (BATMAN_DROP):
           break;
