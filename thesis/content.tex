@@ -1,4 +1,4 @@
-\chapter{Introduction}
+\chapter{Introduction}% {{{1
 
 \begin{figure}[H]
 \begin{tikzpicture}
@@ -45,18 +45,18 @@
 
 This thesis has the goal to implement an advanced and refined version of the predecessor implementation \cite{korniowski} for a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HOPERF radio modules. This goal can be split in the following aspects according to the mind map as seen in figure \ref{fig:mindmap}:
 \begin{itemize}
-\item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
-\item \textbf{Modules:} The goal is to find the necessary software modules from an abstract architectural point of view.
-\item \textbf{Algorithms:} The goal is to explore and elaborate on concrete algorithms and data structures for the implementation of the software modules.
-\item \textbf{Network:} The goal is to implement a network stack which not only provides a mesh routing based on the B.A.T.M.A.N. algorithm but also provides a real network stack.
-\item \textbf{Simulation :} The goal is to provide the basis for a simulation environment for the provided algorithms that can execute on regular PCs.
+    \item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
+    \item \textbf{Modules:} The goal is to find the necessary software modules from an abstract architectural point of view.
+    \item \textbf{Algorithms:} The goal is to explore and elaborate on concrete algorithms and data structures for the implementation of the software modules.
+    \item \textbf{Network:} The goal is to implement a network stack which not only provides a mesh routing based on the B.A.T.M.A.N. algorithm but also provides a real network stack.
+    \item \textbf{Simulation :} The goal is to provide the basis for a simulation environment for the provided algorithms that can execute on regular PCs.
 \end{itemize}
 
 The author wants to prove that an implementation of a robust and scalable mesh network using embedded devices despite its hardware constraints is quite possible. He wants to explore algorithms and software architectures usually hidden behind the curtain of operating systems.
 The desired end result is not only to have a working mesh network prototype but also an algorithmic framework for further development. Therefore the author also wanted to provide a framework which allows to try and research future algorithms on a regular PC.
 Finally the author wanted to provide a reproducible hardware design in order to able to equip a complete laboratory of mesh nodes for further research and investigation.
 
-\section{Thesis overview}
+\section{Thesis overview}% {{{2
 The thesis is structured in the same order as the above mentioned goals. The first part analyzes the existing prototype hardware. An enhanced version is proposed by providing an alternative CPU and the connection of external RAM. Level shifters are introduced for the connection of the RFM12B radio module and the existing UART connection is being enhanced by an USB interface. Finally connectors for an external keyboard and an external LCD module are introduced.
 
 The second part elaborates on the envisioned software architecture. It identifies the necessary software modules which have to be implemented in order to provide a robust design. It defines modules for the human interaction and for the internal state control. The network stack module and the RFM12B driver module are identified for the mesh network access.
@@ -65,39 +65,40 @@ The third part explores the algorithmic foundations and data structures which ar
 The fourth part is solely dedicated to the network stack. The implemented network layers and packet structures are described as well the used transmission encoding (Hamming).
 
 The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
-\chapter{Hardware Design}
-\section{Introduction}
+
+\chapter{Hardware Design}% {{{1
+\section{Introduction}% {{{2
 The predecessor implementation uses an Atmel Atmega16 RISC microprocessor. The author decided to analyze whether this CPU is still adequate for the new implementation. The decision about a microprocessor to be used in an embedded application depends very much on the requirements. Not only that many vendors are available on the market but also each vendor has a very rich product portfolio of different microprocessors to choose from.
 
 The author set up the following requirements for the new hardware architecture:
 
 \begin{itemize}
-\item \textbf{GCC tool chain:} The author wanted to use an open source development environment. The existing GCC tool chain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
-\item \textbf{USB connectivity:} Instead of using the rather old and nowadays even mostly not available RS-232 connection the author wanted to migrate to an USB based connection type in order to use a regular PC as a terminal.
-\item \textbf{RAM:} In order to store many routing entries additional RAM is necessary as the predecessor thesis already pointed out. An address size of 16 bit theoretically allows addressing 65,536 nodes. If we wanted to store just every single address in a routing table we already need more than 130kB of RAM if only the target address had to be stored. Realistically the author wanted to store at least 1000 nodes in a routing table.
+    \item \textbf{GCC tool chain:} The author wanted to use an open source development environment. The existing GCC tool chain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
+    \item \textbf{USB connectivity:} Instead of using the rather old and nowadays even mostly not available RS-232 connection the author wanted to migrate to an USB based connection type in order to use a regular PC as a terminal.
+    \item \textbf{RAM:} In order to store many routing entries additional RAM is necessary as the predecessor thesis already pointed out. An address size of 16 bit theoretically allows addressing 65,536 nodes. If we wanted to store just every single address in a routing table we already need more than 130kB of RAM if only the target address had to be stored. Realistically the author wanted to store at least 1000 nodes in a routing table.
 
 \begin{tabular}{lll}
 Type & Name & Size (Byte) \\
 Address & Gateway & 2 \\
 \end{tabular}
 
-\item \textbf{}
+    \item \textbf{}
 \end{itemize}
 
-\section{Hardware Modules}
-\subsection{RAM}
+\section{Hardware Modules}% {{{2
+\subsection{RAM}% {{{3
 \begin{itemize}
-\item Harvard architecture
-\item RAM bus
-\item Latch
+    \item Harvard architecture
+    \item RAM bus
+    \item Latch
 \end{itemize}
-\subsection{USB Serial Device}
-\subsection{RFM12B Radio}
+\subsection{USB Serial Device}% {{{3
+\subsection{RFM12B Radio}% {{{3
 \label{sec:rfm12b}
 
-\subsection{Keyboard}
+\subsection{Keyboard}% {{{3
 
-\section{Schematic}
+\section{Schematic}% {{{2
 \includepdf[
     landscape,
     addtolist={
@@ -118,7 +119,7 @@ Address & Gateway & 2 \\
     }
 ]{figures/hopemesh-sch-levelshifter.pdf}
 
-\section{Printed Circuit Board}
+\section{Printed Circuit Board}% {{{2
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/2nd_rev_pcb_layout.png}
 \caption{2nd revision PCB layout}
@@ -127,15 +128,15 @@ Address & Gateway & 2 \\
 In order to able to set up future mesh nodes a reproducible hardware design had to designed. The goal was to be able to produce many mesh nodes and to be able to equip a whole laboratory. One possibility is to manually wire each mesh node. Due to the complexity of the schematic this solution was not acceptable. The author decided to design a printed circuit board (PCB) in order to be able to produce new mesh nodes quickly. The following design requirements were established by the author:
 
 \begin{itemize}
-\item \textbf{One sided PCB: } The PCB was aimed to be manufactured in an uncomplicated environment. Two-sided PCBs allow minimizing the physical size of the device but for research this is not an important requirement. On the other hand two-sided PCBs require additional effort. Through-holes have to be manufactured and eventually the upper side of the PCB has to be laminated in order to prevent shorts.
-\item \textbf{Non-SMD parts: } The author explicitly avoided SMD parts. The goal was to be able to solder the parts manually with commonly available electronic parts.
+    \item \textbf{One sided PCB: } The PCB was aimed to be manufactured in an uncomplicated environment. Two-sided PCBs allow minimizing the physical size of the device but for research this is not an important requirement. On the other hand two-sided PCBs require additional effort. Through-holes have to be manufactured and eventually the upper side of the PCB has to be laminated in order to prevent shorts.
+    \item \textbf{Non-SMD parts: } The author explicitly avoided SMD parts. The goal was to be able to solder the parts manually with commonly available electronic parts.
 \end{itemize}
 
 The actual design of the PCB (Printed Circuit Board) was performed in three iterative phases:
 \begin{itemize}
-\item \textbf{Manually wired prototype :} In order to have a proof of concept a first working prototype was constructed by the author manually. This board was not used for the final realization but was used in order to test the external RAM as well as the UART-USB connection.
-\item \textbf{1st revision PCB :} A first revision of the PCB was designed and manufactured. Despite a function node a few design improvements were identified. The trace count and surface mounting the existing resistors were identified as a further improvement.
-\item \textbf{2nd revision PCB :} The final revision of the PCB was designed in smaller dimensions and the design flaws from the first revision were corrected.
+    \item \textbf{Manually wired prototype :} In order to have a proof of concept a first working prototype was constructed by the author manually. This board was not used for the final realization but was used in order to test the external RAM as well as the UART-USB connection.
+    \item \textbf{1st revision PCB :} A first revision of the PCB was designed and manufactured. Despite a function node a few design improvements were identified. The trace count and surface mounting the existing resistors were identified as a further improvement.
+    \item \textbf{2nd revision PCB :} The final revision of the PCB was designed in smaller dimensions and the design flaws from the first revision were corrected.
 \end{itemize}
 
 \begin{figure}[H]
@@ -153,24 +154,24 @@ The final version of the PCB was carefully designed to have a logical and effect
 \end{figure}
 
 \begin{itemize}
-\item \textbf{USB: } The relevant parts and connectors for the USB connection are being placed here. In order to have a comfortable connection to the cable the USB connector was placed in the left upper corner.
-\item \textbf{Power supply: } Right next to the USB zone the PSU parts are placed.
-\item \textbf{RFM12B: } The radio modules as well as the level shifters were placed next to each other.
-\item \textbf{ISP: } The In-System-Programmer connector was placed next to the CPU in order to reduce scattering effects.
-\item \textbf{CPU, Latch \& SRAM: } These chips were placed next to each other in order to reduce the bus trace lengths as much as possible.
+    \item \textbf{USB: } The relevant parts and connectors for the USB connection are being placed here. In order to have a comfortable connection to the cable the USB connector was placed in the left upper corner.
+    \item \textbf{Power supply: } Right next to the USB zone the PSU parts are placed.
+    \item \textbf{RFM12B: } The radio modules as well as the level shifters were placed next to each other.
+    \item \textbf{ISP: } The In-System-Programmer connector was placed next to the CPU in order to reduce scattering effects.
+    \item \textbf{CPU, Latch \& SRAM: } These chips were placed next to each other in order to reduce the bus trace lengths as much as possible.
 \end{itemize}
 
-\chapter{Software Modules}
-\section{UART}
-\section{SPI}
-\section{Watchdog}
-\section{Timer}
-\section{Shell}
-\section{Network Stack}
-\section{RFM12 Driver}
+\chapter{Software Modules}% {{{1
+\section{UART}% {{{2
+\section{SPI}% {{{2
+\section{Watchdog}% {{{2
+\section{Timer}% {{{2
+\section{Shell}% {{{2
+\section{Network Stack}% {{{2
+\section{RFM12 Driver}% {{{2
 
-\chapter{Software Algorithms}
-\section{Module orchestration}
+\chapter{Software Algorithms}% {{{1
+\section{Module orchestration}% {{{2
 Designing a software system that executes on embedded micro-controllers implies a lot of challenges when many software modules are involved and complexity grows. The conceptually defined modules must be somehow implemented. If the micro-controller lacks an operating system then there is no possibility of using provided abstractions and APIs for module orchestration and execution. Another challenge are limited hardware resources which prevent the deployment of many existing operating system kernels. Basically there are two types of execution models which can be implemented in micro-controllers:
 
 \begin{enumerate}
@@ -181,17 +182,17 @@ Designing a software system that executes on embedded micro-controllers implies 
     \caption{Sequential execution model}
 \end{figure}
 
-\item \textbf{Sequential execution model:} This type sequentially executes all modules inside an infinite main loop starting from the first module until the last one. Once the last module ends the execution starts again from the first module.
+    \item \textbf{Sequential execution model:} This type sequentially executes all modules inside an infinite main loop starting from the first module until the last one. Once the last module ends the execution starts again from the first module.
 
 \begin{figure}[H]
 \centering
 \import{figures/}{concurrent_execution.pdf_tex}
 \caption{Concurrent execution model}
 \end{figure}
-\item \textbf{Concurrent execution model:} This type executes modules concurrently. Instead of having an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules.
+    \item \textbf{Concurrent execution model:} This type executes modules concurrently. Instead of having an infinite main loop that iterates sequentially over all modules the main function only initializes and launches concurrent modules.
 \end{enumerate}
 
-\subsection{Sequential execution}
+\subsection{Sequential execution}% {{{3
 This model does not necessarily needs operating system support or frameworks. It can be simply implemented as a sequence of function calls inside an infinite loop as shown in algorithm \ref{alg:sequential execution}.
 
 \begin{algorithm}[H]
@@ -271,17 +272,17 @@ This implementation emulates a concurrent execution of modules. The context swit
 A couple of problems arise from the existing implementation. First of all listing \ref{lst:korniowski_main} reveals the following modules:
 
 \begin{itemize}
-\item UART Module
-\item Datagram Receiver Module
-\item Hello Message Sender Module
-\item Datagram Sender Module
+    \item UART Module
+    \item Datagram Receiver Module
+    \item Hello Message Sender Module
+    \item Datagram Sender Module
 \end{itemize}
 
 Which module is being executed depends on the state of the main module being represented by the main function. The state of the main module on the other hand depends directly from the state of the submodules. The main module therefore acts more like a controller of the submodules and takes away the responsibility of the submodule's state management. Furthermore the main function is very long and complex (271 lines of code). Therefore the following goals were defined by the author:
 
 \begin{itemize}
-\item Clear separation of responsibilities between the main loop and the concurrently running modules.
-\item Simplification of the main loop implementation.
+    \item Clear separation of responsibilities between the main loop and the concurrently running modules.
+    \item Simplification of the main loop implementation.
 \end{itemize}
 
 Listing \ref{lst:urbaniak_main} shows the new implementation of the main loop. The new implementation makes it very clear which modules are being executed sequentially. Furthermore the main function does not act as a controller but rather leaves the state management in the module's responsibility.
@@ -306,22 +307,22 @@ The next question was how to implement the actual concurrently running modules. 
 
 This equation shows that for instance a program having 10 locations and only 3 boolean variables already has 80 different states. Although this equation might not apply exactly to state machine based implementations it underlines the practical experience of big state-machine based implementations. The alternative to state-machine based applications are thread or process based implementations using the concurrent execution model as shown below.
 
-\subsection{Concurrent execution}
+\subsection{Concurrent execution}% {{{3
 This model requires support from an existing operating system. An existing framework or API provides the necessary abstraction to create new concurrent modules. Each module runs in isolation and can have its own main loop or terminate immediately. In terms of operating systems two abstractions are widely used for concurrently running software modules:
 
 \begin{itemize}
-\item \textbf{Processes}: Processes are usually considered as separately concurrently running programs. Usually each process owns its own memory context and communication with other processes happens through abstractions like pipes or shared memory.
-\item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data or the heap.
+    \item \textbf{Processes}: Processes are usually considered as separately concurrently running programs. Usually each process owns its own memory context and communication with other processes happens through abstractions like pipes or shared memory.
+    \item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data or the heap.
 \end{itemize}
 
 Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of embedded micro-controllers these concepts also are implemented in many different embedded operating systems:
 
 \begin{enumerate}
-\item FreeRTOS (http://www.freertos.org)
-\item TinyOS (http://www.tinyos.net)
-\item Atomthreads (http://http://atomthreads.com)
-\item Nut/OS (http://www.ethernut.de/en/firmware/nutos.html)
-\item BeRTOS (http://www.bertos.org)
+    \item FreeRTOS (http://www.freertos.org)
+    \item TinyOS (http://www.tinyos.net)
+    \item Atomthreads (http://http://atomthreads.com)
+    \item Nut/OS (http://www.ethernut.de/en/firmware/nutos.html)
+    \item BeRTOS (http://www.bertos.org)
 \end{enumerate}
 
 The above solutions have chosen different names for threads or processes (some call them "tasks") but essentially they all share the same concept of the concurrent execution model and will be referred to as concurrent modules from now on. Algorithm \ref{alg:threads} shows the pseudo-code that initializes concurrent modules. One can see that in contrast to the sequential execution model the main loop actually does nothing.
@@ -345,16 +346,16 @@ The above solutions have chosen different names for threads or processes (some c
 But how does a context switch happen between concurrent modules? Two methodologies exist:
 
 \begin{itemize}
-\item \textbf{Cooperative}: The concurrent modules by themselves return the control to a scheduler which then delegates the control to a different module. Which concurrent module gets control is often based on priorities which are controlled by the scheduler.
-\item \textbf{Preemptive}: Here the concurrent modules do not have control about how and when they get interrupted. It can happen anytime during the execution. Again the context switch between concurrent modules is often handled using priorities in the scheduler.
+    \item \textbf{Cooperative}: The concurrent modules by themselves return the control to a scheduler which then delegates the control to a different module. Which concurrent module gets control is often based on priorities which are controlled by the scheduler.
+    \item \textbf{Preemptive}: Here the concurrent modules do not have control about how and when they get interrupted. It can happen anytime during the execution. Again the context switch between concurrent modules is often handled using priorities in the scheduler.
 \end{itemize}
 
 Nearly all existing solutions have one feature in common. That is that every thread has its own separate stack memory space. This is necessary in order to be able to run the same block of code (for instance a function) in multiple thread instances. On the other hand threads are being executed in the same memory context so sharing data between threads is possible by using the heap or static memory. All of the above mentioned frameworks provide common abstractions which are needed in thread based implementations:
 
 \begin{itemize}
-\item Semaphores
-\item Mutexes
-\item Yielding
+    \item Semaphores
+    \item Mutexes
+    \item Yielding
 \end{itemize}
 
 In contrast to state machine based or sequential based concurrency thread based implementation can be expressed in very linear algorithms using the above mentioned abstractions. Take for instance the state-machine based algorithm \ref{alg:statemachine}. This could be translated into a linear thread-based algorithm as shown in \ref{alg:thread}.
@@ -385,12 +386,12 @@ Although usually a concurrent execution model must be provided in form of an API
 
 The ISR interrupts the main program at any time when an external resource triggers an event and executes the service routine. The scheduler in this case is the CPU itself. There is one caveat with ISRs. When one ISR is being executed no other ISR can be triggered. Therefore it is being considered best practice not to perform intense and long running operations in ISRs.
 
-\subsection{Conclusion}
+\subsection{Conclusion}% {{{3
 For the implementation of this thesis the following conclusions were drawn:
 
 \begin{itemize}
-\item Existing solutions supporting the concurrent execution model were considered too heavy-weight for this type of application. Although 32KB of RAM are available the purpose is the support of route storage and network support.
-\item A sequential execution model was favored instead of the concurrent execution model. On the other hand thread-like linear algorithms are definitely favored instead of state machine based implementations which could lead to a state explosion.
+    \item Existing solutions supporting the concurrent execution model were considered too heavy-weight for this type of application. Although 32KB of RAM are available the purpose is the support of route storage and network support.
+    \item A sequential execution model was favored instead of the concurrent execution model. On the other hand thread-like linear algorithms are definitely favored instead of state machine based implementations which could lead to a state explosion.
 \end{itemize}
 
 One framework exists which implements the sequential execution model but providing a linear thread-like API being called Protothreads as described in \cite{dunkels}. It is implemented using C macros and expands to switch statements (or to goto statements if the GCC compiler is being used). Instead of consuming a complete stack per thread the protothread implementation uses only two bytes per (proto)thread. Protothreads actually are stackless and variables initialized on the stack of a protothread function will stay initialized only during the very first call of the protothread.
@@ -452,7 +453,7 @@ The expanded version after the preprocessor stage of the implementation looks mu
 
 Due to the lightweight nature of protothreads and the possibility to express algorithms in a linear thread-like fashion this framework was chosen by the author for the implementation.
 
-\section{Ring Buffers}
+\section{Ring Buffers}% {{{2
 The predecessor thesis \cite{korniowski} used the UART interface in order to communicate with the user and to inform about incoming packets, changes to routes, etc.. As already analyzed in the previous chapter a state machine based sequential concurrent model was used to implement the UART module. There exists one problem with the current implementation.
 
 \begin{lstlisting}[
@@ -469,15 +470,15 @@ void rsSend(uint8_t data)
 Listing \ref{lst:korniowski_uart} shows that the algorithm examines the UCSRA (USART Control and Status Register A) and blocks infinitely until the UDRE (USART Data Register Empty) bit becomes zero. The execution of all other concurrent modules and the main loop will be blocked until the UART becomes ready to accept data. In this time period no data can be received from the radio. The above mentioned implementation uses the same function for sending strings via the UART interface. For sending the string "hello" via the UART with a speed of 19.2kbps the main loop will be physically blocked for 2.5 milliseconds. In order to improve the implementation the author wanted to accomplish the following goals:
 
 \begin{itemize}
-\item Refactoring to a non-blocking operation.
-\item Migration to a concurrent execution model using protothreads.
+    \item Refactoring to a non-blocking operation.
+    \item Migration to a concurrent execution model using protothreads.
 \end{itemize}
 
 The Atmega162 micro-processor offers the following ISRs for receiving and sending data via the UART \cite{atmega162datasheet}:
 
 \begin{itemize}
-\item \textbf{SIG\_USART\_RECV}: Is being invoked, when the UDR register contains a new byte received from the UART.
-\item \textbf{SIG\_USART\_DATA}: Is being invoked, when the UDR register is ready to be filled with a byte to be transmitted via the UART.
+    \item \textbf{SIG\_USART\_RECV}: Is being invoked, when the UDR register contains a new byte received from the UART.
+    \item \textbf{SIG\_USART\_DATA}: Is being invoked, when the UDR register is ready to be filled with a byte to be transmitted via the UART.
 \end{itemize}
 
 So we have the possibility to send or receive data asynchronously from the main loop in the context of a concurrent execution model by using ISRs. Filling the UDR or reading the UDR in the main loop (and thus blocking it) is actually not necessary at all. The main loop can communicate with the ISRs through a receiving and transmitting queue buffer where it writes data to the transmitting queue and reads data from the receiving queue.
@@ -494,10 +495,10 @@ Using this sort of communication is known as the "producer-consumer problem". It
 Figure \ref{fig:ringbuffer} shows the basic principle of the algorithm. A circular buffer is defined by the following four pointers:
 
 \begin{itemize}
-\item \textbf{Start:} This pointer defines the beginning of the buffer in memory. This pointer is static.
-\item \textbf{End:} This pointer defines the end of the buffer in memory. It can also be expressed as the maximum length of the buffer. This pointer is static.
-\item \textbf{Head:} The head pointer is being changed dynamically by the producer. Whenever the producer wants to write data in the buffer the head pointer is increased and the corresponding memory filled. If the head points to the same address as the tail pointer the buffer is full or empty.
-\item \textbf{Tail:} The tail pointer is being changed dynamically by the consumer. Whenever the consumer wants to read data from the buffer the tail pointer is increased and the corresponding memory cleared. If the tail points to the same address as the head pointer the buffer is full or empty.
+    \item \textbf{Start:} This pointer defines the beginning of the buffer in memory. This pointer is static.
+    \item \textbf{End:} This pointer defines the end of the buffer in memory. It can also be expressed as the maximum length of the buffer. This pointer is static.
+    \item \textbf{Head:} The head pointer is being changed dynamically by the producer. Whenever the producer wants to write data in the buffer the head pointer is increased and the corresponding memory filled. If the head points to the same address as the tail pointer the buffer is full or empty.
+    \item \textbf{Tail:} The tail pointer is being changed dynamically by the consumer. Whenever the consumer wants to read data from the buffer the tail pointer is increased and the corresponding memory cleared. If the tail points to the same address as the head pointer the buffer is full or empty.
 \end{itemize}
 
 In order to distinguish whether the buffer is full or empty an additional size variable was implemented. The biggest advantage of the presented algorithm is the possibility to write and read data in a lock-free fashion. A consumer thread does not need to wait for a mutual exclusion on the buffer since the consumer thread is the only instance manipulating the tail pointer. The same applies for the producer being the only instance manipulating the head pointer.
@@ -505,8 +506,8 @@ In order to distinguish whether the buffer is full or empty an additional size v
 The complete listing of the ring-buffer implementation can be seen in appendix \ref{chapter:appendix_a} in the file \texttt{src/ringbuf.c}. There are two functions provided:
 
 \begin{itemize}
-\item \textbf{ringbuf\_add:} This function is being called by the producer. The function immediately returns \texttt{true} if a byte could be written to the the buffer or \texttt{false} if the buffer is full.
-\item \textbf{ringbuf\_remove:} This function is being called by the consumer. The function immediately returns \texttt{true} if a byte could read from the buffer or \texttt{false} if the buffer is empty.
+    \item \textbf{ringbuf\_add:} This function is being called by the producer. The function immediately returns \texttt{true} if a byte could be written to the the buffer or \texttt{false} if the buffer is full.
+    \item \textbf{ringbuf\_remove:} This function is being called by the consumer. The function immediately returns \texttt{true} if a byte could read from the buffer or \texttt{false} if the buffer is empty.
 \end{itemize}
 
 The important nature of the above mentioned functions is that they are non-blocking because they return immediately. These functions could therefore be called from protothreads. A producer protothread running in the context of the main loop can write data like presented in listing \ref{lst:producer_ringbuf}. The consumer of this data is the SIG\_USART\_DATA ISR as presented in listing \ref{lst:consumer_ringbuf}.
@@ -538,8 +539,9 @@ ISR(SIG_USART_DATA)
 
 Instead of \emph{physically} blocking the algorithm expressed in listing \ref{lst:producer_ringbuf} only \emph{logically} blocks the protothread. If the buffer is full a context-switch back to the main loop is performed. The main loop sequentially executes all other concurrent modules and returns to the protothread which then again tries to add data into the ring buffer.
 
-\section{Half-Duplex Radio Access (Petri Net)}
+\section{Half-Duplex Radio Access}% {{{2
 \label{sec:petri}
+\subsection{Problem definition} %{{{3
 The predecessor implementation used an identical (physically) blocking implementation in order to send or receive data via the RFM12B hardware module. Listing \ref{lst:rfm12b_predecessor_tx} shows the algorithm used for sending data.
 
 \begin{lstlisting}[
@@ -556,30 +558,32 @@ void rfTx(uint8_t data)
 This implementation physically blocks the main loop the same way as the UART algorithm shown in listing \ref{lst:korniowski_uart}. In this case the algorithm does not wait for the status of an internal register to send data but rather waits for the external nIRQ pin from the RFM12B hardware module to go low. The official "RF12B programming guide" \cite{rf12b_programming_guide} also proposes a physically blocking algorithm.
 
 The author wanted to improve the algorithm in a similar fashion as the UART algorithm. The nIRQ pin of the RFM12B was connected to the INT0 pin of the ATMega162 micro-processor allowing to execute the SIG\_INTERRUPT0 interrupt service routine asynchronously. But it turned out that the implementation could not be reused at all. The RFM12B radio hardware imposes the following algorithmic challenges for the driver implementation:
+
 \begin{itemize}
-\item \textbf{Single interrupt request for multiple events:} The RFM12 radio module uses only one nIRQ pin in order to generate an interrupt for the following events \cite{sis4221_datasheet}:
+    \item \textbf{Single interrupt request for multiple events:} The RFM12 radio module uses only one nIRQ pin in order to generate an interrupt for the following events \cite{sis4221_datasheet}:
 \begin{itemize}
-\item The TX register is ready to receive the next byte (RGIT)
-\item The RX FIFO has received the preprogrammed amount of bits (FFIT)
+    \item The TX register is ready to receive the next byte (RGIT)
+    \item The RX FIFO has received the preprogrammed amount of bits (FFIT)
 \end{itemize}
 The state management has to be implemented in software otherwise the current state of operation (sending or receiving) is undefined.
-\item \textbf{Half-Duplex operation:} The RFM12 radio module only allows either to receive or to send data at a time but not simultaneously.
+    \item \textbf{Half-Duplex operation:} The RFM12 radio module only allows either to receive or to send data at a time but not simultaneously.
 \end{itemize}
 
 The author abstracted the operation of the RFM12B driver algorithm as a (proto)thread. Interestingly enough the thread has a state modeled as a state machine depending whether it receives or sends data. The following states are valid:
 
 \begin{itemize}
-\item \textbf{RX:} This is the receiving state. The thread (logically) blocks until a complete packet has been received. Whether a packet is complete or not depends on the upper network stack layers.
-\item \textbf{TX:} This is the sending state. The thread (logically) blocks until a complete packet has been sent. Again the upper network stack layers decide whether the transmission is complete or not.
+    \item \textbf{RX:} This is the receiving state. The thread (logically) blocks until a complete packet has been received. Whether a packet is complete or not depends on the upper network stack layers.
+    \item \textbf{TX:} This is the sending state. The thread (logically) blocks until a complete packet has been sent. Again the upper network stack layers decide whether the transmission is complete or not.
 \end{itemize}
 
 The abstract algorithm is shown in \ref{alg:rfm12b_thread}. The question is who sets the actual state of the radio driver. Receiving data is \emph{non-deterministic}. A packet can arrive at any time and thus the invocation of the SIG\_INTERRUPT0 interrupt service routine. Therefore the algorithm sets the RX state as the \emph{default} state for the radio thread.
 
 Sending data on the other hand is \emph{deterministic}. When a user hits the Enter key via the UART module a packet can be constructed. A 3rd party thread has to request the control over the radio module and occupy it until the packet has been fully transmitted. The author realized that this is a concurrency problem between two threads and a single resource:
+
 \begin{itemize}
-\item \textbf{Sender Thread:} The sender thread wants to acquire the control over the radio module until the transmission of a packet is complete.
-\item \textbf{Radio Thread:} The radio thread also wants to acquire the control over the radio module until the packet reception is complete.
-\item \textbf{Single resource:} The external resource in this case is the radio module. Only the receiving radio driver thread or the transmitting sender thread can own the radio hardware resource at a time.
+    \item \textbf{Sender Thread:} The sender thread wants to acquire the control over the radio module until the transmission of a packet is complete.
+    \item \textbf{Radio Thread:} The radio thread also wants to acquire the control over the radio module until the packet reception is complete.
+    \item \textbf{Single resource:} The external resource in this case is the radio module. Only the receiving radio driver thread or the transmitting sender thread can own the radio hardware resource at a time.
 \end{itemize}
 
 \begin{algorithm}[H]
@@ -598,23 +602,98 @@ Sending data on the other hand is \emph{deterministic}. When a user hits the Ent
 \end{algorithmic}
 \end{algorithm}
 
-In classical multi-threaded algorithms this problem can be solved using mutual exclusion. Modeling such an algorithm can be done using petri nets as shown in figure \ref{fig:petri_mutex}.
+\subsection{Petri net model}% {{{3
+Until now the challenge was to research an appropriate implementation algorithm for the (quasi-) parallel execution of modules. Now the author has a new challenge to solve that a single resource had to be shared between two concurrently executing modules. The author wants to find a way to model and simulate an algorithm before actually implementing it. The purpose of the model is to validate the correct behavior of the complete algorithm. The most common models for parallel processing are:
+
+\begin{itemize}
+    \item \textbf{Process calculus}
+    \item \textbf{Actor model}
+    \item \textbf{Petri nets}
+\end{itemize} 
+
+The author chose the petri net model as this allowed for a visual modelling of the concurrent algorithm. Many different formal definitions for petri nets exists. According to Peterson \cite{peterson} a petri net is composed of a set of:
+
+\begin{itemize}
+    \item A set of Places $P = \{p_1, p_2, \dots p_n\}$.
+    \item A set of Transitions $T = \{t_1, t_2, \dots t_m\}$.
+    \item An input function $I$ who maps from a transition $t_j$ to a collection of input places $I(t_j) = \{p_0, p_1, \dots, p_i\}$.
+    \item An output function $O$ who maps from a transition $t_j$ to a collection of output places $O(t_j) = \{p_0, p_1, \dots, p_o\}$.
+\end{itemize}
+
+Using the set theory the petri net structure can be expressed as a graph $G$ containing vertices $V$ and connecting arcs $A$. A vertex can either be a place $p_n$ or a transition $t_m$. An arch can connect a tuple of two vertices with the restriction that the source and destination are different types of vertices. Thus arcs cannot connect two places nor two transitions. These rules can be expressed mathematically as follows:
+
+\begin{align*}
+G &= (V, A) \\
+V &= \{v_1, v_2, \dots v_n\} \\
+A &= \{a_1, a_2, \dots a_n\} \\
+V &= P \cup T \\
+\emptyset &=  P \cap T \\
+\\
+a_i &= (v_j, v_k) & \text{where } v_j \in P \text{ and } v_k \in T \\
+    &             & \text{or } v_j \in T \text{ and } v_k \in P
+\end{align*}
+
+The petri net graph itself has the following properties:
+
+\begin{itemize}
+    \item \textbf{Bipartite:} The graph consists of vertices (places or transitions) and arcs connecting them.
+    \item \textbf{Directed:} Directed arcs connect places and transitions.
+    \item \textbf{Multigraph:} Multiple arcs from one node of the graph to another are allowed.
+\end{itemize}
+
+Until now only the static properties of a petri net were defined. The dynamic behavior of a petri net can be modelled using marking. A marked petri net contains one or more tokens which can only reside inside places (not transitions). Peterson \cite{peterson} expresses the marking of a petri net as a vector $\mu = {\mu_1, \mu_2, \dots, \mu_n}$ which stores the number of tokens for each place $p_i$ in a petri net. The marking of a petri net is not constant through the life-cycle but rather changes over time. The change of a marking will be expressed as a token movement from a place "A" $p_a$ to a place "B" $p_b$.
+
+This abstraction allows to animate the change of petri net marking by moving tokens from one place to another. The following rules are valid for the petri nets presented in this thesis. They were mostly taken from Peterson \cite{peterson} and a few rules were added by the author:
+
+\begin{itemize}
+    \item A token always travels "through" a transition and stops "in" a place.
+    \item In a "limited" place only up to $n$ tokens can reside concurrently.
+    \item If a place containing a token is connected as an input to a transition it is called an "enabled transition".
+    \item All places connected as an output to an enabled transition will receive a token.
+    \item A token having no input places is always enabled. It can emit any number of tokens at any time.
+    \item An enabled transition having no output places can always receive a token which disappears.
+    \item An "immediate" token has to be disabled immediately if enabled.
+\end{itemize}
+
+The author used the following symbols in this thesis:
+\begin{figure}[H]
+\centering
+\import{figures/}{petri_symbols.pdf_tex}
+\caption{Petri net symbols}
+\label{fig:petrisymbols}
+\end{figure}
+
+But how can this abstraction be used to model concurrency? The key aspect is that a marking of a petri net at a discrete point of time simply expresses the current state of the complete system. The location of a token (the place it currently resides in) defines the system state. A concurrently running system includes multiple states, one for each concurrently running module as was shown in the previous chapter. Thus a concurrent system includes multiple locations in which tokens can reside.
+
+Regarding the initial problem we can as an example define two concurrently running modules which have to share a common resource. The following states can be defined:
+
+\begin{itemize}
+    \item \textbf{Module 1 state:} The location of this token abstracts the current state of the first module.
+    \item \textbf{Module 2 state:} The location of this token abstracts the current state of the second module.
+    \item \textbf{Lock state:} The two modules both have critical section of code which must run mutually exclusive because they share a common resource. A lock (mutex) has to be introduced. The final token location represents the state of the mutex lock.
+\end{itemize}
+
+The common petri net model for mutual exclusion as proposed by Peterson \cite{peterson} can be seen in figure \ref{fig:petri-mutex}. It shows . It was used by the author as the basis for the development of its own algorithm.
 
 \begin{figure}[H]
 \centering
 \import{figures/}{mutex.pdf_tex}
-\caption{Mutual exclusion model using a petri net}
-\label{fig:petri_mutex}
+\caption{Mutual exclusion Peterson petri net model}
+\label{fig:petri-mutex}
 \end{figure}
+
+\subsection{RFM12 petri net model} % {{{3
+\label{sub:rfm12_petri_net_model}
 
 \begin{figure}[H]
 \centering
 \import{figures/}{rfm12_petri.pdf_tex}
 \caption{Half duplex algorithm modeled as a petri net}
+\label{fig:petri-rfm12}
 \end{figure}
 
-\chapter{Network Stack}
-\section{Reference model}
+\chapter{Network Stack}% {{{1
+\section{Reference model}% {{{2
 
 \begin{figure}[H]
     \centering
@@ -623,12 +702,14 @@ In classical multi-threaded algorithms this problem can be solved using mutual e
     \label{fig:tannenbaum_model}
 \end{figure}
 
+The implementation in this thesis follows Tannenbaum's hybrid network model \cite{tannenbaum}.
+
 Notes:\\
 - Explain why the tannenbaum model was choosen as the reference model. \\
 - Explain each layer and its purposes. \\
 - Explain the division of the data link layer into the two sublayers MAC and LLC. \\
 
-\section{Reference implementation}
+\section{Reference implementation}% {{{2
 Notes:\\
 - The implementation was heavily inspired by a project available at \cite{stahl}. \\
 
@@ -640,14 +721,14 @@ Pros: \\
 - Division of each network layer in a separate source file. \\
 - Communication between the layers through callbacks. \\
 
-\section{Layer 1: Physical}
+\section{Layer 1: Physical}% {{{2
 The physical layer is implemented using a wireless technology by using the capabilities of the RFM12B low cost ISM band transceiver. This transceiver offers frequency modulation (FSK). Unfortunately it does not offer additional modulations like amplitude modulation (AM) or phase modulation (PSK) so advanced modulation techniques like QPSK or QAM are note possible. 
 
 The transceiver operates in one of the three following frequencies:
 \begin{itemize}
-\item \textbf{433MHz:} This frequency range is called the "ISM-Band Region 1". According to ITU "Region 1" includes Europe so operation on this band is permitted. But this frequency range is also occupied by amateur radio stations which have primary status on these frequencies. ISM based applications only have a secondary status on this band so this operation frequency was avoided by the author.
-\item \textbf{868MHz:} This frequency range is called the "SRD-Band Europe" and does not collide with amateur radio. Furthermore this band is reserved for low powered devices so collisions in near field applications (<1km) are reduced. The author therefore decided to use transceivers for this frequency range.
-\item \textbf{915MHz:} This frequency range is called the "ISM-Band Region 2" and according to ITU can only be used in Americas and Greenland. Operation on this frequency in Europe is not allowed.
+    \item \textbf{433MHz:} This frequency range is called the "ISM-Band Region 1". According to ITU "Region 1" includes Europe so operation on this band is permitted. But this frequency range is also occupied by amateur radio stations which have primary status on these frequencies. ISM based applications only have a secondary status on this band so this operation frequency was avoided by the author.
+    \item \textbf{868MHz:} This frequency range is called the "SRD-Band Europe" and does not collide with amateur radio. Furthermore this band is reserved for low powered devices so collisions in near field applications (<1km) are reduced. The author therefore decided to use transceivers for this frequency range.
+    \item \textbf{915MHz:} This frequency range is called the "ISM-Band Region 2" and according to ITU can only be used in Americas and Greenland. Operation on this frequency in Europe is not allowed.
 \end{itemize}
 
 The typical output power according to the data sheet is 4dBm which according to formula \ref{eq:power_dbm} equals approx. 2.5mW.
@@ -668,15 +749,15 @@ By using a simple quarter wavelength wire (which approximately resembles a dipol
 
 Furthermore this transceiver can only operate in half-duplex mode. Special care therefore has to be taken when writing device drivers for this module. The algorithmic solution to this problem was already presented in chapter \ref{sec:petri}.
 
-\section{Layer 2a: MAC Layer}
+\section{Layer 2a: MAC Layer}% {{{2
 The MAC layer for the thesis implementation follows the Tannenbaum \cite{tannenbaum} model for dynamic channel allocation with the following key assumptions and exceptions:
 
 \begin{itemize}
-\item \textbf{Station Model:} The independent stations are represented by single mesh nodes in the network.
-\item \textbf{Single Channel Assumption:} The single channel is represented by the common frequency on which the mesh nodes transmit and receive data.
-\item \textbf{Collision Assumption:} This assumption unfortunately does not fully apply to the used RFM12B modules. Although collisions can happen the module does not provide any facility to detect frame collisions on the carrier since it operates in half-duplex mode only. Therefore Tannenbaum's requirement to resend collided frames could not implemented.
-\item \textbf{Continuous Time:} The frame transmission can indeed begin at any time so this assumption is fulfilled.
-\item \textbf{Carrier Sense:} Using the RSSI (Radio Signal Strength Indicator) command being provided by the RFM12B module the MAC layer can detect whether the carrier is free or occupied. The requirement not to send any data until the carrier is free was implemented by the author as shown in algorithm \ref{alg:mac}.
+    \item \textbf{Station Model:} The independent stations are represented by single mesh nodes in the network.
+    \item \textbf{Single Channel Assumption:} The single channel is represented by the common frequency on which the mesh nodes transmit and receive data.
+    \item \textbf{Collision Assumption:} This assumption unfortunately does not fully apply to the used RFM12B modules. Although collisions can happen the module does not provide any facility to detect frame collisions on the carrier since it operates in half-duplex mode only. Therefore Tannenbaum's requirement to resend collided frames could not implemented.
+    \item \textbf{Continuous Time:} The frame transmission can indeed begin at any time so this assumption is fulfilled.
+    \item \textbf{Carrier Sense:} Using the RSSI (Radio Signal Strength Indicator) command being provided by the RFM12B module the MAC layer can detect whether the carrier is free or occupied. The requirement not to send any data until the carrier is free was implemented by the author as shown in algorithm \ref{alg:mac}.
 \end{itemize}
 
 \begin{algorithm}[H]
@@ -702,29 +783,29 @@ The MAC layer for the thesis implementation follows the Tannenbaum \cite{tannenb
 The actual MAC frame format can be seen in figure \ref{fig:mac}. The frame consists of the following four parts:
 
 \begin{itemize}
-\item \textbf{Preamble:} Two bytes containing the value 0xAA are being sent. The reason for this pattern is the bit representation which consists only of alternating 0 and 1 values. This helps the receiving PLL circuit to lock in to the correct frequency in order to minimize bit errors for the sync pattern recognition.
-\item \textbf{Sync pattern:} The sync pattern 0x2DD4 is programmed into the hardware of the RFM12B module. Only after the module recognizes this pattern it will fill its internal receiver FIFO with further data.
-\item \textbf{Data:} The data carries the actual payload for transmission. Since this is a frame based transmission (no length field is specified) the data must not contain data with 0xAA values. An appropriate code has to be chosen by the upper network layers.
-\item \textbf{Postamble:} The end of the frame is marked by the single byte value 0xAA. This is the reason why the data part must not contain this value.
+    \item \textbf{Preamble:} Two bytes containing the value 0xAA are being sent. The reason for this pattern is the bit representation which consists only of alternating 0 and 1 values. This helps the receiving PLL circuit to lock in to the correct frequency in order to minimize bit errors for the sync pattern recognition.
+    \item \textbf{Sync pattern:} The sync pattern 0x2DD4 is programmed into the hardware of the RFM12B module. Only after the module recognizes this pattern it will fill its internal receiver FIFO with further data.
+    \item \textbf{Data:} The data carries the actual payload for transmission. Since this is a frame based transmission (no length field is specified) the data must not contain data with 0xAA values. An appropriate code has to be chosen by the upper network layers.
+    \item \textbf{Postamble:} The end of the frame is marked by the single byte value 0xAA. This is the reason why the data part must not contain this value.
 \end{itemize}
 
 One can see that the implemented MAC frame format does not include any error checking. The algorithm will simply stream bytes to or from the upper network layers until the postamble byte 0xAA is being detected. Only then the MAC layer assumes that the frame reception or transmission is complete.
 
-\section{Layer 2b: Logical Link Control}
+\section{Layer 2b: Logical Link Control}% {{{2
 The logical link control layer provides the virtual data path for the upper network layers. The implementation in this thesis follows Tannenbaum's \cite{tannenbaum} category of an unacknowledged connectionless service. According to Tannenbaum's data link layer design principles the following functions were implemented in the LLC layer:
 
 \begin{itemize}
-\item \textbf{Service interface for the network layer:} In contrast to the stream-oriented interface between the LLC layer and the MAC layer the interface between the LLC and upper network layers is packet-oriented. However in this implementation no additional algorithmic efforts were done in order to split up packets in separate frames. For simplicity each packet is transmitted in one frame.
-\item \textbf{Transmission error handling:} The transmission error handling was implemented using an error correction code (Hamming) and an error detecting code (CRC-16).
-\item \textbf{Data flow:} No flow control algorithms were implemented due to its complexity and the different focus in this thesis which is the routing algorithm. Therefore dropped frames (in this case packets) will not be discovered and retransmitted.
+    \item \textbf{Service interface for the network layer:} In contrast to the stream-oriented interface between the LLC layer and the MAC layer the interface between the LLC and upper network layers is packet-oriented. However in this implementation no additional algorithmic efforts were done in order to split up packets in separate frames. For simplicity each packet is transmitted in one frame.
+    \item \textbf{Transmission error handling:} The transmission error handling was implemented using an error correction code (Hamming) and an error detecting code (CRC-16).
+    \item \textbf{Data flow:} No flow control algorithms were implemented due to its complexity and the different focus in this thesis which is the routing algorithm. Therefore dropped frames (in this case packets) will not be discovered and retransmitted.
 \end{itemize}
 
-\subsection{Error correction and detection}
+\subsection{Error correction and detection}% {{{3
 Due to the nature of a wireless connection which is a highly unreliable channel an error correcting as well as an error detecting code were introduced:
 
 \begin{enumerate}
-\item \emph{Hamming code:} This error correcting code was used to provide data to the MAC frame. This decision was inherited from the reference implementation \cite{stahl}. The advantage is that the hamming code produces data which conforms to the requirements set up in the MAC layer by not providing any 0xAA byte values.
-\item \emph{CRC-16 checksum:} After decoding or encoding the hamming byte stream an additional CRC-16 based error detecting checksum was implemented for the payload provided by the upper network layers.
+    \item \emph{Hamming code:} This error correcting code was used to provide data to the MAC frame. This decision was inherited from the reference implementation \cite{stahl}. The advantage is that the hamming code produces data which conforms to the requirements set up in the MAC layer by not providing any 0xAA byte values.
+    \item \emph{CRC-16 checksum:} After decoding or encoding the hamming byte stream an additional CRC-16 based error detecting checksum was implemented for the payload provided by the upper network layers.
 \end{enumerate}
 
 \subsubsection{Error correction}
@@ -804,16 +885,16 @@ Data & Classical code & ETS code \\
 \subsubsection{Error detection}
 After and before the hamming decoding process a further error detection algorithm was implemented by the author in order to detect errors during the transmission. As proposed by Tannenbaum a CRC check was used. The algorithm was not implemented by the author itself but rather reused from the existing AVR libc library which provides a hardware optimized CRC-16 routine.
 
-\subsection{Packet format}
+\subsection{Packet format}% {{{3
 The packet format for the LLC layer can be seen in figure \ref{fig:llc_format}. The maximum size of a packet can be 256 bytes including the LLC header. Upper network layers can therefore transmit a maximum of 256 - 2 (Type + Length) - 2 (CRC) = 252 bytes of data payload per packet. The following fields were introduced:
 \begin{itemize}
-\item \textbf{Type:} The type field is 4 bits long and identifies the type of the transmitted packet. This information can be used by upper network layers in order to distinguish different packet types. The following packet types where implemented by the author:
+    \item \textbf{Type:} The type field is 4 bits long and identifies the type of the transmitted packet. This information can be used by upper network layers in order to distinguish different packet types. The following packet types where implemented by the author:
 \begin{enumerate}
-\item \emph{Broadcast:} This type identifies the current packet as a broadcast packet. It is targeted to all nodes in the network.
-\item \emph{Unicast:} This type identifies the current packet as an unicast packet. It is targeted to a concrete node in the network. It is the responsibility of the higher network layers to resolve the actual target node.
+    \item \emph{Broadcast:} This type identifies the current packet as a broadcast packet. It is targeted to all nodes in the network.
+    \item \emph{Unicast:} This type identifies the current packet as an unicast packet. It is targeted to a concrete node in the network. It is the responsibility of the higher network layers to resolve the actual target node.
 \end{enumerate}
-\item \textbf{Length:} This 12 bit field long field includes the total length in bytes of the data payload being transmitted by the upper network layers. The fields "Type", "Length" and "CRC" are \emph{not} included in the length.
-\item \textbf{CRC:} This 16 bit long fields holds the calculated CRC-16 checksum of the length field and the data payload.
+    \item \textbf{Length:} This 12 bit field long field includes the total length in bytes of the data payload being transmitted by the upper network layers. The fields "Type", "Length" and "CRC" are \emph{not} included in the length.
+    \item \textbf{CRC:} This 16 bit long fields holds the calculated CRC-16 checksum of the length field and the data payload.
 \end{itemize}
 
 \begin{figure}[H]
@@ -823,13 +904,13 @@ The packet format for the LLC layer can be seen in figure \ref{fig:llc_format}. 
     \label{fig:llc_format}
 \end{figure}
 
-\section{Layer 3: Batman Routing}
+\section{Layer 3: Batman Routing}% {{{2
 According to Tannenbaum the network layer is mainly responsible for transparently routing packets from a source to a destination inside the network. The following requirements for this network layer were implemented by the author:
 
 \begin{enumerate}
-\item \textbf{Topology information:} The network layer knows about the network topology by using the B.A.T.M.A.N. routing algorithm.
-\item \textbf{Technology independence:} The network layer completely hides the routing technologies and algorithms from the upper network layers. The only information which has to be provided from the upper network layers is the destination address.
-\item \textbf{Uniform addressing:} The upper network layers have to provide an uniform address of the destination by using a 16 bit long address value. Using 16 bits a maximum of 65,536 destinations can be addressed.
+    \item \textbf{Topology information:} The network layer knows about the network topology by using the B.A.T.M.A.N. routing algorithm.
+    \item \textbf{Technology independence:} The network layer completely hides the routing technologies and algorithms from the upper network layers. The only information which has to be provided from the upper network layers is the destination address.
+    \item \textbf{Uniform addressing:} The upper network layers have to provide an uniform address of the destination by using a 16 bit long address value. Using 16 bits a maximum of 65,536 destinations can be addressed.
 \end{enumerate}
 
 The routing layer was implemented as a connectionless service which can be qualified as a datagram subnet. Each packet contains the full source and destination address and each router (mesh node) does not hold any state informations about connections. Therefore quality of service (QOS) based transmissions are rather not possible.
@@ -837,12 +918,12 @@ The routing layer was implemented as a connectionless service which can be quali
 The predecessor thesis used a basic B.A.T.M.A.N. approach. For the new implementation the author wanted to implement the following enhanced features:
 
 \begin{itemize}
-\item \textbf{RFC conformance:} The real B.A.T.M.A.N. draft RFC \cite{batmanrfc} was used as a template for implementing the routing algorithm.
-\item \textbf{TTL introduction:} A TTL (Time-To-Live) mechanism was introduced in order to prevent infinite message looping inside the network.
-\item \textbf{Bidirectional link check:} A bidirectional link-check was introduced. This check ensures that only bidirectional routes are being propagated through the network.
+    \item \textbf{RFC conformance:} The real B.A.T.M.A.N. draft RFC \cite{batmanrfc} was used as a template for implementing the routing algorithm.
+    \item \textbf{TTL introduction:} A TTL (Time-To-Live) mechanism was introduced in order to prevent infinite message looping inside the network.
+    \item \textbf{Bidirectional link check:} A bidirectional link-check was introduced. This check ensures that only bidirectional routes are being propagated through the network.
 \end{itemize}
 
-\subsection{Route propagation}
+\subsection{Route propagation}% {{{3
 The biggest challenge of Mesh based networks is their dynamic nature. In contrast to static networks the topology changes constantly. As the predecessor thesis already showed the B.A.T.M.A.N. algorithm is very promising since it has one big advantage over many existing mesh routing protocols. That is that not the whole network topology information has to be stored on each mesh node but only the next visible gateway for each known destination.
 
 The B.A.T.M.A.N. RFC \cite{batmanrfc} proposes that each mesh node broadcasts OGM (originator) packets through the network in order to keep the route information up-to-date. The RFC only proposes \emph{what} has to be done by each mesh node when an OGM message is being received or has to be transmitted but not \emph{how} the implementation has to look like. Therefore the author had to investigate an appropriate algorithm and packet structures in order to fulfill the RFC's requirements.
@@ -850,25 +931,25 @@ The B.A.T.M.A.N. RFC \cite{batmanrfc} proposes that each mesh node broadcasts OG
 The author defined the following classifications for a mesh node in the network which will be reused in the definitions below. Each classification is expressed as an uniform address consisting of an unique 16-bit unsigned integer value:
 
 \begin{itemize}
-\item \textbf{Originator:} Identifies the origin mesh node who created the current packet.
-\item \textbf{Sender:} Identifies the mesh node who sent the current packet.
-\item \textbf{Target:} (Applies to unicast packets only) Identifies the final target mesh node for this packet.
-\item \textbf{Gateway:} (Applies to unicast packets only) Identifies the next hop (gateway) mesh node for this packet.
+    \item \textbf{Originator:} Identifies the origin mesh node who created the current packet.
+    \item \textbf{Sender:} Identifies the mesh node who sent the current packet.
+    \item \textbf{Target:} (Applies to unicast packets only) Identifies the final target mesh node for this packet.
+    \item \textbf{Gateway:} (Applies to unicast packets only) Identifies the next hop (gateway) mesh node for this packet.
 \label{list:nodeclasses}
 \end{itemize}
 
 The implemented OGM packet format can be seen in figure \ref{fig:ogm}. The following fields are being transmitted along with each OGM packet:
 
 \begin{itemize}
-\item \textbf{Version:} This 4-bit long field specifies the protocol version. Future developments can then distinguish between different OGM packet types.
-\item \textbf{Flags:} This 4-bit long field can carry up to four status bits for this packet. Currently the following status bits are implemented:
+    \item \textbf{Version:} This 4-bit long field specifies the protocol version. Future developments can then distinguish between different OGM packet types.
+    \item \textbf{Flags:} This 4-bit long field can carry up to four status bits for this packet. Currently the following status bits are implemented:
     \begin{enumerate}
-    \item \emph{Is Direct:} This flag is set by a receiving mesh node and indicates that the sending mesh node is a direct neighbor.
-    \item \emph{Unidirectional:} This flag indicates that there is an unidirectional connection between the sender and the originator.
+        \item \emph{Is Direct:} This flag is set by a receiving mesh node and indicates that the sending mesh node is a direct neighbor.
+        \item \emph{Unidirectional:} This flag indicates that there is an unidirectional connection between the sender and the originator.
     \end{enumerate}
-\item \textbf{TTL:} The Time-To-Live value is decreased before each retransmission. If the value reaches zero the packet is dropped.
-\item \textbf{Sequence Number:} Each sent OGM has an unique sequence number assigned which is increased with every transmission.
-\item \textbf{Originator and sender address:} See definition in classifier list above.
+    \item \textbf{TTL:} The Time-To-Live value is decreased before each retransmission. If the value reaches zero the packet is dropped.
+    \item \textbf{Sequence Number:} Each sent OGM has an unique sequence number assigned which is increased with every transmission.
+    \item \textbf{Originator and sender address:} See definition in classifier list above.
 \end{itemize}
 
 \begin{figure}[H]
@@ -893,7 +974,7 @@ Upon the reception of an OGM packet the algorithm first performs a few basic che
 
 Unfortunately additional sequence number and window checks where not implemented. The author leaves this algorithmic improvement for further implementations.
 
-\subsection{Unicast messages}
+\subsection{Unicast messages}% {{{3
 Unicast messages carry the actual data payload which has to be routed from an originator to a target. The fields for unicast messages can be seen in figure \ref{fig:unicast_packet}. All of the shown fields already were described above. The type field is currently unused.
 
 \begin{figure}[H]
@@ -916,26 +997,26 @@ The routing list being built using received OGM packets is now consulted wheneve
 
 The algorithm for sending new unicast packets is the same as in \ref{fig:unicast_alg} except it starts immediately at the activity "Find best gateway".
 
-\subsection{Route determination}
+\subsection{Route determination}% {{{3
 The algorithm for finding the best gateway in its current implementation is very basic. The metric for choosing the gateway is based on the count of received OGM messages. The routing consists of the following fields:
 
 \begin{itemize}
-\item \textbf{Target address:} The target address for whom the current routing entry is valid.
-\item \textbf{Gateway address:} The address of a possible gateway for the target.
-\item \textbf{Sequence number:} The last received sequence number of the target via the gateway.
-\item \textbf{Count:} The total count of received sequence numbers.
-\item \textbf{Time:} The time of the last update for this routing entry.
+    \item \textbf{Target address:} The target address for whom the current routing entry is valid.
+    \item \textbf{Gateway address:} The address of a possible gateway for the target.
+    \item \textbf{Sequence number:} The last received sequence number of the target via the gateway.
+    \item \textbf{Count:} The total count of received sequence numbers.
+    \item \textbf{Time:} The time of the last update for this routing entry.
 \end{itemize}
 
 The routing table with the above described fields is constantly updated upon the reception of new OGM packets. Every second the routing table is examined for entries which can be purged. The purge timeout is configurable and is set up for 10 seconds in the current implementation. Route entries older than 10 seconds will be permanently deleted from the routing table. This algorithm ensures that no outdated routing entries are persisted in the routing table. Whenever a mesh gateway node is not reachable anymore, no OGM packets will be received from it. The time field for targets using this gateway will not be updated and after 10 seconds these entries will be deleted. This allows to adapt the routing information dynamically with a changing network and conforms to the requirements stated in the RFC \cite{batmanrfc}.
 
-\section{Layer 4: Transport}
+\section{Layer 4: Transport}% {{{2
 The transport layer according to Tannenbaum \cite{tannenbaum} is the central aspect of the whole network layer stack. Due to a different focus on this thesis the requirements for this layer were inherited from the lower layers. According to Tannenbaum the transport layer has to ensure:
 
 \begin{itemize}
-\item \textbf{Reliability:} In order to send simple text messages the author decided that the error correction and detection codes used in the network layer are sufficient for prototype purposes.
-\item \textbf{Transport service:} The transport is implemented as a connectionless stateless service. Therefore upper network layers are not provided with further abstracted APIs.
-\item \textbf{Efficiency:} The author implemented a very easy service interface for the upper network layers which allows to send and receive strings without further modification.
+    \item \textbf{Reliability:} In order to send simple text messages the author decided that the error correction and detection codes used in the network layer are sufficient for prototype purposes.
+    \item \textbf{Transport service:} The transport is implemented as a connectionless stateless service. Therefore upper network layers are not provided with further abstracted APIs.
+    \item \textbf{Efficiency:} The author implemented a very easy service interface for the upper network layers which allows to send and receive strings without further modification.
 \end{itemize}
 
 The author chose the frame format as seen in figure \ref{fig:transport_frame}. It simply consists of a nul-terminated data stream. This allows to implement string based applications in the applications and pass those strings without further modification to the transport layer.
@@ -947,25 +1028,25 @@ The author chose the frame format as seen in figure \ref{fig:transport_frame}. I
     \label{fig:transport_frame}
 \end{figure}
 
-\section{Layer 5: Application}
+\section{Layer 5: Application}% {{{2
 
 Since the implemented transport layer offers a nul terminated interface. The user space applications consuming the lower network layers currently are:
 
 \begin{itemize}
-\item \textbf{Shell:} The shell is responsible for sending strings over the network whenever the user prompts a "send" command.
-\item \textbf{Receiver thread:} A dedicated receiver thread will print received strings to the UART interface whenever the transport layer receives new payload.
+    \item \textbf{Shell:} The shell is responsible for sending strings over the network whenever the user prompts a "send" command.
+    \item \textbf{Receiver thread:} A dedicated receiver thread will print received strings to the UART interface whenever the transport layer receives new payload.
 \end{itemize}
 
-\chapter{Research}
-\section{Simulations}
-\subsection{Shell}
-\subsection{Routing}
-\subsection{Radio Transmission}
-\section{Mesh evaluation}
-\section{Results}
+\chapter{Research}% {{{1
+\section{Simulations}% {{{2
+\subsection{Shell}% {{{3
+\subsection{Routing}% {{{3
+\subsection{Radio Transmission}% {{{3
+\section{Mesh evaluation}% {{{2
+\section{Results}% {{{2
 
-\chapter{Conclusion}
-\section{Open issues}
+\chapter{Conclusion}% {{{1
+\section{Open issues}% {{{2
 Notes:\\
 - Sequence numbers are ignored in the batman routing algorithm \\
 - The transport layer is incomplete \\

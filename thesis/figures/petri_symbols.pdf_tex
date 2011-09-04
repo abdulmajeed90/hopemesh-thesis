@@ -1,0 +1,56 @@
+%% Creator: Inkscape inkscape 0.48.1, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'petri_symbols.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+
+\begingroup
+  \makeatletter
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}
+    \renewcommand\color[2][]{}%
+  }
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}
+    \renewcommand\transparent[1]{}%
+  }
+  \providecommand\rotatebox[2]{#2}
+  \ifx\svgwidth\undefined
+    \setlength{\unitlength}{256.35861816pt}
+  \else
+    \setlength{\unitlength}{\svgwidth}
+  \fi
+  \global\let\svgwidth\undefined
+  \makeatother
+  \begin{picture}(1,0.42203848)%
+    \put(0,0){\includegraphics[width=\unitlength]{petri_symbols.pdf}}%
+    \put(0.11042031,0.37433031){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{A place $p_i$}}}%
+    \put(0.11098829,0.19098775){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{A transition $t_i$}}}%
+    \put(0.11098829,0.06196909){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{An enabled transition}}}%
+    \put(0.11098829,0.00043688){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{A token}}}%
+    \put(0.11042033,0.28220967){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{A limited place $p_i$. Stores up to $n$ tokens.}}}%
+    \put(0.04592318,0.25502274){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$n$}}}}%
+    \put(0.00544856,0.13208307){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.10942797,0.12569202){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{An immediate transition $t_i$}}}%
+  \end{picture}%
+\endgroup

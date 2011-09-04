@@ -44,8 +44,10 @@
   \makeatother
   \begin{picture}(1,1.03642357)%
     \put(0,0){\includegraphics[width=\unitlength]{mutex.pdf}}%
-    \put(0.673844,0.9791158){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 2}}}%
-    \put(0.20198097,0.9791158){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 1}}}%
-    \put(-0.29491441,0.44237161){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Critical Section}}}%
+    \put(0.67384407,0.9791158){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 2}}}%
+    \put(0.20198095,0.9791158){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Module 1}}}%
+    \put(0.61761575,0.0589829){\color[rgb]{0,0,0}\rotatebox{90}{\makebox(0,0)[lb]{\smash{Mutex}}}}%
+    \put(-0.00445911,0.49084962){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Critical}}}%
+    \put(-0.00445911,0.4023753){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Section}}}%
   \end{picture}%
 \endgroup

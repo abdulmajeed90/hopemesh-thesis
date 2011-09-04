@@ -36,23 +36,33 @@
   }
   \providecommand\rotatebox[2]{#2}
   \ifx\svgwidth\undefined
-    \setlength{\unitlength}{269.07519531pt}
+    \setlength{\unitlength}{280.71679688pt}
   \else
     \setlength{\unitlength}{\svgwidth}
   \fi
   \global\let\svgwidth\undefined
   \makeatother
-  \begin{picture}(1,0.70017602)%
+  \begin{picture}(1,0.68945788)%
     \put(0,0){\includegraphics[width=\unitlength]{rfm12_petri.pdf}}%
-    \put(0.90296846,0.3312977){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{nIRQ}}}%
-    \put(0.07507194,0.66895798){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{rfm12\_lock}}}%
-    \put(0.01780875,0.32857729){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex}}}%
-    \put(0.63107317,0.52257511){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
-    \put(0.34862425,0.40364925){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
-    \put(0.41496721,0.01549606){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
-    \put(0.63107317,0.13420784){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
-    \put(0.90704393,0.47635456){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{TX}}}%
-    \put(0.90799173,0.14865733){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{RX}}}%
-    \put(0.5164056,0.66960911){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{ISR}}}%
+    \put(0.90699246,0.30310408){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{nIRQ}}}%
+    \put(0.11826465,0.65953448){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{rfm12\_lock}}}%
+    \put(0.64637293,0.48644901){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.37563744,0.37245514){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.43922909,0.000399){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.64637293,0.11418773){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.91089891,0.44214529){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{TX}}}%
+    \put(0.91180758,0.12803799){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{RX}}}%
+    \put(0.53646074,0.62738536){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{ISR}}}%
+    \put(0.65845147,0.44935827){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.44471295,0.3496136){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.44400042,0.24986895){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.44527716,0.05058478){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.65773897,0.15012429){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.00241751,0.31327805){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{SIGNAL(}}}%
+    \put(-0.00127673,0.27053034){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex)}}}%
+    \put(0.03732069,0.53984091){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{WAIT(}}}%
+    \put(0.03362644,0.4970932){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex)}}}%
+    \put(0.23017643,0.50279293){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.70040123,0.27480512){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
   \end{picture}%
 \endgroup
