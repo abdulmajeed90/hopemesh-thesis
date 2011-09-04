@@ -576,15 +576,7 @@ The author abstracted the operation of the RFM12B driver algorithm as a (proto)t
     \item \textbf{TX:} This is the sending state. The thread (logically) blocks until a complete packet has been sent. Again the upper network stack layers decide whether the transmission is complete or not.
 \end{itemize}
 
-The abstract algorithm is shown in \ref{alg:rfm12b_thread}. The question is who sets the actual state of the radio driver. Receiving data is \emph{non-deterministic}. A packet can arrive at any time and thus the invocation of the SIG\_INTERRUPT0 interrupt service routine. Therefore the algorithm sets the RX state as the \emph{default} state for the radio thread.
-
-Sending data on the other hand is \emph{deterministic}. When a user hits the Enter key via the UART module a packet can be constructed. A 3rd party thread has to request the control over the radio module and occupy it until the packet has been fully transmitted. The author realized that this is a concurrency problem between two threads and a single resource:
-
-\begin{itemize}
-    \item \textbf{Sender Thread:} The sender thread wants to acquire the control over the radio module until the transmission of a packet is complete.
-    \item \textbf{Radio Thread:} The radio thread also wants to acquire the control over the radio module until the packet reception is complete.
-    \item \textbf{Single resource:} The external resource in this case is the radio module. Only the receiving radio driver thread or the transmitting sender thread can own the radio hardware resource at a time.
-\end{itemize}
+The abstract algorithm is shown in \ref{alg:rfm12b_thread}. Receiving data is \emph{non-deterministic}. A packet can arrive at any time and thus the invocation of the SIG\_INTERRUPT0 interrupt service routine. Therefore the algorithm sets the RX state as the \emph{default} state for the radio thread. After receiving the whole packet the driver has to signal the receiver thread that it can process the packet.
 
 \begin{algorithm}[H]
 \caption{RFM12B driver thread algorithm}
@@ -593,17 +585,30 @@ Sending data on the other hand is \emph{deterministic}. When a user hits the Ent
 \WHILE{$true$}
     \IF{state is RX}
         \STATE receive data
+        \STATE signal completion to receiver thread
     \ELSIF{state is TX}
         \STATE send data
-    \ENDIF 
+        \STATE signal completion to sender thread
+    \ENDIF
 
     \STATE set state to RX
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
 
+Sending data on the other hand is \emph{deterministic}. When a user hits the Enter key via the UART module a packet can be constructed. A sender thread has to inform the radio driver thread to change its state to TX and wait until the packet has been fully transmitted. The author realized that this is a concurrency problem between three threads and a single resource:
+
+\begin{itemize}
+    \item \textbf{Sender Thread:} The sender thread running inside the main loop wants to acquire the control over the radio module until the transmission of a packet is complete.
+    \item \textbf{Radio Thread (ISR):} The radio thread being executed in the ISR also wants to acquire the control over the radio module until the packet reception is complete if it is in the RX state or until the packet transmission is complete if it is in the TX state.
+    \item \textbf{Receiver Thread:} The receiver thread running inside the main loop wants to acquire the control over the radio module until the reception of a packet is complete.
+    \item \textbf{Single resource:} The external resource in this case is the radio module. Only one thread at a time can own the radio hardware resource.
+\end{itemize}
+
+The question is who controls the state of the radio thread and who and when acquires and releases the lock on the single resource (the radio module). The author decided that this is rather a complicated algorithm which needs further research and investigation. The solution to this problem will be presented in the next two chapters.
+
 \subsection{Petri net model}% {{{3
-Until now the challenge was to research an appropriate implementation algorithm for the (quasi-) parallel execution of modules. Now the author has a new challenge to solve that a single resource had to be shared between two concurrently executing modules. The author wants to find a way to model and simulate an algorithm before actually implementing it. The purpose of the model is to validate the correct behavior of the complete algorithm. The most common models for parallel processing are:
+Until now the challenge was to research an appropriate implementation algorithm for the (quasi-) parallel execution of modules. Now the author has a new challenge to solve that a single resource had to be shared between many concurrently executing modules. The author wanted to find a way to model and simulate an algorithm before actually implementing it. The purpose of the model is to validate the correct behavior of the complete algorithm. The most common models for parallel processing are:
 
 \begin{itemize}
     \item \textbf{Process calculus}
@@ -670,10 +675,10 @@ Regarding the initial problem we can as an example define two concurrently runni
 \begin{itemize}
     \item \textbf{Module 1 state:} The location of this token abstracts the current state of the first module.
     \item \textbf{Module 2 state:} The location of this token abstracts the current state of the second module.
-    \item \textbf{Lock state:} The two modules both have critical section of code which must run mutually exclusive because they share a common resource. A lock (mutex) has to be introduced. The final token location represents the state of the mutex lock.
+    \item \textbf{Lock state:} The two modules both have critical section of code which must run mutually exclusive because they share a common resource. A lock (mutex) has to be introduced. The mutex token location represents the state of the mutex lock.
 \end{itemize}
 
-The common petri net model for mutual exclusion as proposed by Peterson \cite{peterson} can be seen in figure \ref{fig:petri-mutex}. It shows . It was used by the author as the basis for the development of its own algorithm.
+The common petri net model for mutual exclusion as proposed by Peterson \cite{peterson} can be seen in figure \ref{fig:petri-mutex}. It was used by the author as the basis for the development of its own algorithm.
 
 \begin{figure}[H]
 \centering
@@ -682,14 +687,32 @@ The common petri net model for mutual exclusion as proposed by Peterson \cite{pe
 \label{fig:petri-mutex}
 \end{figure}
 
-\subsection{RFM12 petri net model} % {{{3
+\subsection{RFM12 driver petri net model} % {{{3
 \label{sub:rfm12_petri_net_model}
-
 \begin{figure}[H]
 \centering
 \import{figures/}{rfm12_petri.pdf_tex}
 \caption{Half duplex algorithm modeled as a petri net}
 \label{fig:petri-rfm12}
+\end{figure}
+
+The final algorithm for the RFM12 driver is shown in figure \ref{fig:petri-rfm12}. It shows the three above mentioned threads (sender, receiver and radio ISR) in the initial state. All transitions in the radio thread are immediate transitions. This is because the interrupt service routine itself cannot be interrupted which is a constraint defined by the hardware of the used CPU. A context switch to other threads therefore can only then happen when there are no enabled transitions in the ISR.
+
+\subsubsection{Data reception} % {{{4
+Whenever the radio module detects a valid sync pattern it will fill data into its FIFO buffer. When the reception of one byte is complete the radio hardware pulls the nIRQ pin low triggering the ISR. The model shown in \ref{fig:petri-rfm12} shows this behavior as an always infinitely enabled transition labeled as "nIRQ" which can fire at any non-deterministic time.
+
+\begin{figure}[H]
+\centering
+\import{figures/}{rfm12_petri_rx1.pdf_tex}
+\caption{nIRQ triggers reception}
+\label{fig:petri-rx1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\import{figures/}{rfm12_petri_rx2.pdf_tex}
+\caption{Next byte reception}
+\label{fig:petri-rx2}
 \end{figure}
 
 \chapter{Network Stack}% {{{1

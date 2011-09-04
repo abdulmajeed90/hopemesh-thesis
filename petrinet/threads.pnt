@@ -1,116 +1,104 @@
 petrinet 0
-x 576 565
+x 223 360
 SIGNAL(MUTEX)
-x 540 330
-WAITING(tx_monitor)
-x 741 540
+x 420 444
 STATE(RX)
-x 995 413
+x 674 317
 SIGNAL(nIRQ)
-x 592 690
-SIGNAL(rx_monitor)
-x 450 129
-rfm12_tx()
-x 518 205
+x 187 63
+rfm12_lock()
+x 106 150
 WAITING(mutex)
-x 593 437
-SIGNAL(tx_monitor)
-x 741 330
+x 420 234
 STATE(TX)
-x 270 321
-WAITING(rx_monitor)
-x 467 60
------ Sender Thread ----
-x 264 210
------ Receiver Thread ----
-x 875 210
------ Interrupt Service Routine -----
-x 930 464
+x 609 368
 k=1
-x 480 240
-k=1
-x 864 510
+x 548 415
 rx_packet
-x 865 369
+x 544 258
 tx_packet
-x 1102 458
+x 781 362
 nIRQ goes low
-x 758 405
-END
-x 948 304
-NEXT
-x 804 690
-END
-x 947 575
-NEXT
-x 270 300
-rfm12rx()
-x 270 191
-XXXXXXXXXXXXXXXXXXXXXXX
-x 270 230
-XXXXXXXXXXXXXXXXXXXXXXX
-x 464 45
-XXXXXXXXXXXXXXXXXXXXXXX
-x 462 77
-XXXXXXXXXXXXXXXXXXXXXXX
-x 870 191
-XXXXXXXXXXXXXXXXXXXXXXX
-x 870 229
-XXXXXXXXXXXXXXXXXXXXXXX
-x 797 459
+x 423 326
+END(TX)
+x 630 202
+NEXT(TX)
+x 422 582
+END(RX)
+x 626 483
+NEXT(RX)
+x 476 363
 imm
-x 948 552
+x 627 456
 imm
-x 805 668
+x 476 568
 imm
-x 945 325
+x 624 229
 imm
-x 798 415
+x 477 319
 imm
-s 0 596 539  1
-s 1 594 666  0
-s 2 450 220  0
-s 3 796 324  0
-s 4 595 413  0
-s 5 450 352  0
-s 6 944 438  0
-s 7 796 552  0
-s 8 270 347  1
-t 0 804 667 0
-t 1 270 411 0
-t 2 450 284 0
-t 3 797 414 0
-t 4 450 414 0
-t 5 450 150 0
-t 6 796 458 0
-t 7 945 551 0
-t 8 944 324 0
-t 9 1103 437 0
-e 990 624 s 6 t 0
-e 865 339 t 8 s 3
-e 944 381 s 6 t 8
-e 450 252 s 2 t 2
-e 886 416 s 6 t 3
-e 696 413 t 3 s 4
-e 866 303 s 3 t 8
-e 477 474 t 4 s 0
-e 450 318 t 2 s 5
-e 861 527 s 7 t 7
-e 699 666 t 0 s 1
-e 665 293 t 2 s 3
-e 390 472 s 0 t 2
-e 351 581 s 1 t 1
-e 782 608 s 7 t 0
-e 703 570 t 0 s 0
-e 450 185 t 5 s 2
-e 1023 437 t 9 s 6
-e 864 577 t 7 s 7
-e 796 369 s 3 t 3
-e 685 475 s 0 t 6
-e 279 376 t 1 s 8
-e 261 375 s 8 t 1
-e 878 456 s 6 t 6
-e 796 505 t 6 s 7
-e 944 494 s 6 t 7
-e 450 383 s 5 t 4
-e 522 413 s 4 t 4
+x 290 193
+WAITING(TX)
+x 297 241
+1
+x 204 168
+1
+x 641 357
+1
+x 251 474
+WAITING(RX)
+x 83 556
+Processing
+x 336 584
+1
+s 0 306 349  1
+s 1 186 151  0
+s 2 475 228  0
+s 3 623 342  0
+s 4 475 456  0
+s 5 314 567  0
+s 6 283 221  0
+s 7 348 271  0
+s 8 200 501  1
+s 9 132 532  0
+t 0 476 566 0
+t 1 186 220 0
+t 2 476 318 0
+t 3 186 85 0
+t 4 475 362 0
+t 5 624 455 0
+t 6 623 228 0
+t 7 782 341 0
+t 8 201 567 0
+t 9 283 271 0
+t 10 150 462 0
+e 662 529 s 3 t 0
+e 544 243 t 6 s 2
+e 623 285 s 3 t 6
+e 623 398 s 3 t 5
+e 226 300 s 0 t 1
+e 458 508 s 4 t 0
+e 347 488 t 0 s 0
+e 186 118 t 3 s 1
+e 702 341 t 7 s 3
+e 552 479 t 5 s 4
+e 475 273 s 2 t 2
+e 398 370 s 0 t 4
+e 395 566 t 0 s 5
+e 283 246 s 6 t 9
+e 216 534 s 8 t 8
+e 156 562 t 8 s 9
+e 122 496 s 9 t 10
+e 186 472 t 10 s 8
+e 383 305 t 2 s 0
+e 475 409 t 4 s 4
+e 557 360 s 3 t 4
+e 418 284 t 2 s 7
+e 315 271 s 7 t 9
+e 257 567 s 5 t 8
+e 234 220 t 1 s 6
+e 186 185 s 1 t 1
+e 564 319 s 3 t 2
+e 545 207 s 2 t 6
+e 543 430 s 4 t 5
+e 315 167 t 1 s 2

@@ -36,33 +36,38 @@
   }
   \providecommand\rotatebox[2]{#2}
   \ifx\svgwidth\undefined
-    \setlength{\unitlength}{280.71679688pt}
+    \setlength{\unitlength}{349.47519531pt}
   \else
     \setlength{\unitlength}{\svgwidth}
   \fi
   \global\let\svgwidth\undefined
   \makeatother
-  \begin{picture}(1,0.68945788)%
+  \begin{picture}(1,0.74626267)%
     \put(0,0){\includegraphics[width=\unitlength]{rfm12_petri.pdf}}%
-    \put(0.90699246,0.30310408){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{nIRQ}}}%
-    \put(0.11826465,0.65953448){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{rfm12\_lock}}}%
-    \put(0.64637293,0.48644901){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
-    \put(0.37563744,0.37245514){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
-    \put(0.43922909,0.000399){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
-    \put(0.64637293,0.11418773){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
-    \put(0.91089891,0.44214529){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{TX}}}%
-    \put(0.91180758,0.12803799){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{RX}}}%
-    \put(0.53646074,0.62738536){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{ISR}}}%
-    \put(0.65845147,0.44935827){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
-    \put(0.44471295,0.3496136){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
-    \put(0.44400042,0.24986895){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
-    \put(0.44527716,0.05058478){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
-    \put(0.65773897,0.15012429){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
-    \put(0.00241751,0.31327805){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{SIGNAL(}}}%
-    \put(-0.00127673,0.27053034){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex)}}}%
-    \put(0.03732069,0.53984091){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{WAIT(}}}%
-    \put(0.03362644,0.4970932){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex)}}}%
-    \put(0.23017643,0.50279293){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
-    \put(0.70040123,0.27480512){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.92529151,0.29170675){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{nIRQ}}}%
+    \put(0.06282921,0.64668482){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{rfm12\_lock}}}%
+    \put(0.71594817,0.43897902){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.5833243,0.357593){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.5833243,0.11723263){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.71594817,0.1399593){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.72565029,0.40918581){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.55396428,0.32906564){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.55339193,0.24894551){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.55441746,0.08887007){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.72507793,0.16882537){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.14667997,0.267847){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{signal(mutex)}}}%
+    \put(0.01311932,0.56085787){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{wait(}}}%
+    \put(0.01015191,0.52652067){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex)}}}%
+    \put(0.15272256,0.52078178){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.75934652,0.26897558){\color[rgb]{1,1,1}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.26717994,0.45210735){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.28029818,0.4749988){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{wait(tx)}}}%
+    \put(0.49175843,0.40337594){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{TX}}}%
+    \put(0.49291914,0.16303156){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{RX}}}%
+    \put(0.39193846,0.06180783){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.09384967,0.21061833){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{wait(rx)}}}%
+    \put(0.12109543,0.71013681){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Sender thread}}}%
+    \put(0.10933229,0.0121073){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Receiver thread}}}%
+    \put(0.54275929,0.48417056){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Radio thread (ISR)}}}%
   \end{picture}%
 \endgroup
