@@ -696,10 +696,18 @@ The common petri net model for mutual exclusion as proposed by Peterson \cite{pe
 \label{fig:petri-rfm12}
 \end{figure}
 
-The final algorithm for the RFM12 driver is shown in figure \ref{fig:petri-rfm12}. It shows the three above mentioned threads (sender, receiver and radio ISR) in the initial state. All transitions in the radio thread are immediate transitions. This is because the interrupt service routine itself cannot be interrupted which is a constraint defined by the hardware of the used CPU. A context switch to other threads therefore can only then happen when there are no enabled transitions in the ISR.
+The final algorithm for the RFM12 driver is shown in figure \ref{fig:petri-rfm12}. It shows the three above mentioned threads (sender, receiver and radio ISR) in the initial states:
+
+\begin{itemize}
+    \item \textbf{Sender thread:} The sender thread includes an always enabled transition which emits a token whenever the user prompts to send a message. When this happens it waits until it can acquire the control over the radio module in order to send a complete packet.
+    \item \textbf{Receiver thread:} The receiver thread by default always logically blocks in a waiting state until a packet reception is complete.
+    \item \textbf{Radio thread:} The radio thread is in the RX (or idle) state by default. All transitions in the radio thread are immediate transitions. This is because the interrupt service routine itself cannot be interrupted which is a constraint defined by the hardware of the used CPU. A context switch to other threads therefore can only then happen when there are no enabled transitions in the ISR.
+\end{itemize}
+
+The next two chapters explain the two major use cases "Data reception" and "Data transmission" by describing how the petri net model (and thus the algorithm) behaves. The petri net behavior is used to validate the correctness of the algorithm:
 
 \subsubsection{Data reception} % {{{4
-Whenever the radio module detects a valid sync pattern it will fill data into its FIFO buffer. When the reception of one byte is complete the radio hardware pulls the nIRQ pin low triggering the ISR. The model shown in \ref{fig:petri-rfm12} shows this behavior as an always infinitely enabled transition labeled as "nIRQ" which can fire at any non-deterministic time.
+Whenever the radio module detects a valid sync pattern it will fill data into its FIFO buffer. When the reception of one byte is complete the radio hardware pulls the nIRQ pin low triggering the ISR. The model shown in figure \ref{fig:petri-rx1} shows this behavior as an infinitely enabled transition labeled as "nIRQ" which can fire at any non-deterministic time. The following figure \ref{fig:petri-rx1} and the corresponding events describe the behavior when a new byte is received by the radio.
 
 \begin{figure}[H]
 \centering
@@ -708,6 +716,14 @@ Whenever the radio module detects a valid sync pattern it will fill data into it
 \label{fig:petri-rx1}
 \end{figure}
 
+\begin{enumerate}
+    \item The nIRQ transition fires the ISR. An interrupt occurs caused by the radio module.
+    \item The radio thread being in the RX state by default tries to acquire the lock (mutex) on the radio and succeeds. Since the mutex is free the interrupt source \emph{must} be caused by the reception of a byte.
+    \item The radio thread can begin its critical section by taking the received byte and delegating it to the upper network layers. The radio thread stays in the RX state and blocks the radio by not releasing the mutex.
+\end{enumerate}
+
+Since the radio module has acquired the lock on the radio a sender thread will have to wait until the mutex will be released. All following nIRQ interrupt sources therefore also \emph{must} be caused by a reception of a next byte which is shown in figure \ref{fig:petri-rx2}.
+
 \begin{figure}[H]
 \centering
 \import{figures/}{rfm12_petri_rx2.pdf_tex}
@@ -715,6 +731,80 @@ Whenever the radio module detects a valid sync pattern it will fill data into it
 \label{fig:petri-rx2}
 \end{figure}
 
+\begin{enumerate}
+    \item The nIRQ transition fires the ISR. An interrupt occurs caused by the radio module.
+    \item The radio thread is in the RX state and already acquired the lock (mutex) on the radio. It is ready to receive the next byte and delegates it to the upper network layers.
+    \item The upper network layers did not indicate that the reception is complete so the radio thread stays in the RX state.
+\end{enumerate}
+
+Still no sender thread will be able to acquire the mutex lock. The above described reception of bytes happen until the upper network layers detect the end of a frame or packet which is described in figure \ref{fig:petri-rx3}.
+
+\begin{figure}[H]
+\centering
+\import{figures/}{rfm12_petri_rx3.pdf_tex}
+\caption{Final byte reception}
+\label{fig:petri-rx3}
+\end{figure}
+
+\begin{enumerate}
+    \item The nIRQ transition fires the ISR. An interrupt occurs caused by the radio module.
+    \item The upper network layers decide that the reception is complete. The mutex on the radio can be released.
+    \item After releasing the mutex the receiver thread is signalled by the radio thread that the reception of a packet is complete. The signal itself is emitted by upper network layers who need to wait for the receiver thread to process the incoming packet.
+
+    Note that this is a limited place (currently with the limit of one token). The maximum number of token corresponds to the maximum number of packets which have to be buffered by the network stack. If the receiver thread is too slow to process incoming packets all further incoming packets will be dropped.
+
+    \item The receiver thread now changes its state. From a waiting state it switches to a processing state where it processes the received packet and i.e. displays it on the console.
+    \item The receiver thread finally switches back to a waiting state in order for the next packet to arrive.
+\end{enumerate}
+
+\subsubsection{Data transmission} % {{{4
+\label{sub:data_transmission}
+
+The data transmission in contrast to data reception is triggered by the sender thread. Thus figure \ref{fig:petri-tx1} shows an infinitely enabled transition in the sender thread which triggers a token (a packet to be sent) whenever the prompts a new send command. The following figure \ref{fig:petr-tx1} describe the behavior when a new packet is sent by the sender thread.
+
+\begin{figure}[H]
+\centering
+\import{figures/}{rfm12_petri_tx1.pdf_tex}
+\caption{Sender thread triggers transmission}
+\label{fig:petri-tx1}
+\end{figure}
+
+\begin{enumerate}
+    \item The sender thread tries to send a new packet by changing its state to a mutex waiting state. It waits for the mutex to become free in order to acquire the lock on the radio module.
+    \item If the radio module becomes free the mutex can be acquired. The radio module transmitter hardware and the radio module transmitter FIFO is enabled.
+    \item Because the sender thread took over control it resets the radio driver thread to the new state TX. Afterwards the sender thread puts itself into a waiting state until the packet transmission is complete.
+\end{enumerate}
+
+The sender thread is in a different state now. It waits for the transmission of the complete packet. The transmission of the first (or next) byte is triggered now by the radio module itself. Whenever the transmission FIFO of the radio is ready the radio module hardware triggers nIRQ and the ISR fires as shown in figure \ref{fig:petri-tx2}.
+
+\begin{figure}[H]
+\centering
+\import{figures/}{rfm12_petri_tx2.pdf_tex}
+\caption{Next byte transmission}
+\label{fig:petri-tx2}
+\end{figure}
+
+\begin{enumerate}
+    \item The nIRQ transition fires the ISR. An interrupt occurs caused by the radio module.
+    \item Since the radio module is in the TX state it is ready to transmit the next byte. The upper network layers return the next byte to the radio driver.
+    \item The upper network layers do not indicate that the transmission is complete so the radio thread stays in the TX state.
+\end{enumerate}
+
+The end of the transmission (final byte) is shown in figure \ref{fig:petri-tx3}.
+
+\begin{figure}[H]
+\centering
+\import{figures/}{rfm12_petri_tx3.pdf_tex}
+\caption{Final byte transmission}
+\label{fig:petri-tx3}
+\end{figure}
+
+\begin{enumerate}
+    \item The nIRQ transition fires the ISR. An interrupt occurs caused by the radio module.
+    \item The upper network layers return the next byte and indicate that this is the last byte to be transmitted.
+    \item The radio thread releases the mutex and signals the sender thread the transmission of the last byte.
+    \item The sender thread leaves the waiting state and finishes the transmission of the packet. Whenever the user prompts a new send command a new packet can be transmitted.
+\end{enumerate}
 \chapter{Network Stack}% {{{1
 \section{Reference model}% {{{2
 

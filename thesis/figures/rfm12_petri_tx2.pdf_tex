@@ -1,0 +1,73 @@
+%% Creator: Inkscape inkscape 0.48.1, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'rfm12_petri_tx2.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+
+\begingroup
+  \makeatletter
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}
+    \renewcommand\color[2][]{}%
+  }
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}
+    \renewcommand\transparent[1]{}%
+  }
+  \providecommand\rotatebox[2]{#2}
+  \ifx\svgwidth\undefined
+    \setlength{\unitlength}{350.8107666pt}
+  \else
+    \setlength{\unitlength}{\svgwidth}
+  \fi
+  \global\let\svgwidth\undefined
+  \makeatother
+  \begin{picture}(1,0.74722861)%
+    \put(0,0){\includegraphics[width=\unitlength]{rfm12_petri_tx2.pdf}}%
+    \put(0.92557587,0.29440322){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{nIRQ}}}%
+    \put(0.06639706,0.64802986){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{rfm12\_lock}}}%
+    \put(0.71702953,0.44111481){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.58491057,0.36003864){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.58491057,0.12059334){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{end}}}%
+    \put(0.71702953,0.14323349){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{next}}}%
+    \put(0.72669471,0.41143503){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.55566233,0.33161989){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.55509215,0.25180478){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.55611378,0.09233876){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.72612453,0.17198966){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{imm}}}}%
+    \put(0.14992859,0.27063431){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{signal(mutex)}}}%
+    \put(0.01687641,0.56252966){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{wait(}}}%
+    \put(0.0139203,0.52832318){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{mutex)}}}%
+    \put(0.15594817,0.52260614){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.76026266,0.27175859){\color[rgb]{1,1,1}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.2830381,0.47699746){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{wait(tx)}}}%
+    \put(0.4936933,0.40564727){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{TX}}}%
+    \put(0.12444145,0.71124028){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Sender thread}}}%
+    \put(0.54449999,0.48613431){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Radio thread (ISR)}}}%
+    \put(0.80873994,0.30864503){\color[rgb]{1,0,0}\makebox(0,0)[lb]{\smash{1.}}}%
+    \put(0.7523996,0.35425366){\color[rgb]{1,0,0}\makebox(0,0)[lb]{\smash{2.}}}%
+    \put(0.27051449,0.4542198){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\tiny{$1$}}}}%
+    \put(0.66131004,0.37739321){\color[rgb]{1,0,0}\makebox(0,0)[lb]{\smash{3.}}}%
+    \put(0.64835867,0.44547093){\color[rgb]{1,0,0}\makebox(0,0)[lb]{\smash{2.}}}%
+  \end{picture}%
+\endgroup
