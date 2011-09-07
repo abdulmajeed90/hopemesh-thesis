@@ -503,7 +503,7 @@ Figure \ref{fig:ringbuffer} shows the basic principle of the algorithm. A circul
 
 In order to distinguish whether the buffer is full or empty an additional size variable was implemented. The biggest advantage of the presented algorithm is the possibility to write and read data in a lock-free fashion. A consumer thread does not need to wait for a mutual exclusion on the buffer since the consumer thread is the only instance manipulating the tail pointer. The same applies for the producer being the only instance manipulating the head pointer.
 
-The complete listing of the ring-buffer implementation can be seen in appendix \ref{chapter:appendix_a} in the file \texttt{src/ringbuf.c}. There are two functions provided:
+The complete listing of the ring-buffer implementation can be seen in appendix \ref{cha:appendix_a} in the file \texttt{src/ringbuf.c}. There are two functions provided:
 
 \begin{itemize}
     \item \textbf{ringbuf\_add:} This function is being called by the producer. The function immediately returns \texttt{true} if a byte could be written to the the buffer or \texttt{false} if the buffer is full.
@@ -805,9 +805,12 @@ The end of the transmission (final byte) is shown in figure \ref{fig:petri-tx3}.
     \item The radio thread releases the mutex and signals the sender thread the transmission of the last byte.
     \item The sender thread leaves the waiting state and finishes the transmission of the packet. Whenever the user prompts a new send command a new packet can be transmitted.
 \end{enumerate}
-\chapter{Network Stack}% {{{1
-\section{Reference model}% {{{2
 
+\subsection{Conclusion} % {{{4
+As described above the two major use cases for data transmission and data reception could be successfully modelled using petri nets. The author used the above model for the concrete implementation. A java based simulation program is attached in appendix \ref{cha:appendix_a}.
+
+\chapter{Network Stack}% {{{1
+\section{Reference model and implementation}% {{{2
 \begin{figure}[H]
     \centering
     \import{figures/}{layers.pdf_tex}
@@ -815,24 +818,9 @@ The end of the transmission (final byte) is shown in figure \ref{fig:petri-tx3}.
     \label{fig:tannenbaum_model}
 \end{figure}
 
-The implementation in this thesis follows Tannenbaum's hybrid network model \cite{tannenbaum}.
+The author used Tannenbaum's hybrid network model \cite{tannenbaum} in order to research and implement the network stack. The advantage over the classic OSI model is Tannenbaum's pragmatic approach to the network stack having less layers than its OSI pendant. This also fits the constraints imposed by the embedded architecture used in this thesis implementation. The next chapters will refer to each Tannenbaum network layer and describe the concrete implementation done by the author.
 
-Notes:\\
-- Explain why the tannenbaum model was choosen as the reference model. \\
-- Explain each layer and its purposes. \\
-- Explain the division of the data link layer into the two sublayers MAC and LLC. \\
-
-\section{Reference implementation}% {{{2
-Notes:\\
-- The implementation was heavily inspired by a project available at \cite{stahl}. \\
-
-Drawbacks: \\
-- Unfortunately the project is only partly finished. Only the PHY and MAC layers are working. \\
-- It is based on a sequential execution model using state machines. \\
-
-Pros: \\
-- Division of each network layer in a separate source file. \\
-- Communication between the layers through callbacks. \\
+The concrete implementation was heavily inspired by a project available at \cite{stahl}. Unfortunately this project is unfinished (only the PHY and MAC layers are working). Furthermore the author used its own algorithms (especially for the PHY radio driver layer) and data structures in many places.
 
 \section{Layer 1: Physical}% {{{2
 The physical layer is implemented using a wireless technology by using the capabilities of the RFM12B low cost ISM band transceiver. This transceiver offers frequency modulation (FSK). Unfortunately it does not offer additional modulations like amplitude modulation (AM) or phase modulation (PSK) so advanced modulation techniques like QPSK or QAM are note possible. 
