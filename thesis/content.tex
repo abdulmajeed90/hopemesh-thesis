@@ -62,7 +62,7 @@ The thesis is structured in the same order as the above mentioned goals. The fir
 The second part elaborates on the envisioned software architecture. It identifies the necessary software modules which have to be implemented in order to provide a robust design. It defines modules for the human interaction and for the internal state control. The network stack module and the RFM12B driver module are identified for the mesh network access.
 
 The third part explores the algorithmic foundations and data structures which are being used for the implementation. Different concurrency models are being analyzed and a threading framework for the software modules is proposed. An algorithm for the seamless integration of the UART module is being proposed and finally the complex concurrency behavior of the RFM12B driver module analyzed.
-The fourth part is solely dedicated to the network stack. The implemented network layers and packet structures are described as well the used transmission encoding (Hamming).
+The fourth part is solely dedicated to the network stack. The implemented network layers and packet structures are described as well the used transmission encoding.
 
 The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
 
@@ -161,16 +161,48 @@ The final version of the PCB was carefully designed to have a logical and effect
     \item \textbf{CPU, Latch \& SRAM: } These chips were placed next to each other in order to reduce the bus trace lengths as much as possible.
 \end{itemize}
 
-\chapter{Software Modules}% {{{1
-\section{UART}% {{{2
-\section{SPI}% {{{2
-\section{Watchdog}% {{{2
-\section{Timer}% {{{2
-\section{Shell}% {{{2
-\section{Network Stack}% {{{2
-\section{RFM12 Driver}% {{{2
+\chapter{Software modules and algorithms}% {{{1
+\section{Module architecture} % {{{2
+\label{sec:module_architecture}
 
-\chapter{Software Algorithms}% {{{1
+\begin{figure}[H]
+\centering
+\import{figures/}{modules_component_diagram.pdf_tex}
+\caption{Software modules (UML 2.0 component diagram)}
+\label{fig:modules}
+\end{figure}
+
+The author chose a top-down design approach for the software part of the thesis implementation. This approach consists the following steps:
+
+\begin{enumerate}
+    \item Design a general architecture and identify the necessary software parts (modules) which need to be connected together.
+    \item Research the necessary abstractions how the plumbing and inner interoperability actually should work.
+    \item Research the necessary algorithms for the final implementation.
+\end{enumerate}
+
+The following chapters reflect the above described approach. Figure \ref{fig:modules} shows the general module architecture of the thesis implementation. First the following module stereotypes were identified for the complete software stack:
+
+\begin{itemize}
+    \item \textbf{Userspace modules:} Act like regular "programs". They interact with the user, retrieve user input and generate user output.
+    \item \textbf{Driver modules:} Provide the necessary abstractions and APIs to external or CPU internal hardware.
+    \item \textbf{Daemon modules:} These modules are similar to userspace modules but run in the background only. They do not interact with the user.
+    \item \textbf{Library modules:} Implement APIs and provide those to userspace or daemon modules.
+\end{itemize}
+
+Afterwards the following concrete modules were identified and implemented by the author:
+
+\begin{enumerate}
+    \item \textbf{UART \emph{<<driver>>}:} This driver module is responsible for the UART interface. It implements an optimized UART access using ring buffers.
+    \item \textbf{SPI \emph{<<driver>>}:} This driver provides the API to access the serial peripheral interface.
+    \item \textbf{RFM12 \emph{<<driver>>}:} Implements the API to access the RFM12 hardware module. It uses the SPI driver module.
+    \item \textbf{Timer \emph{<<driver>>}:} This driver provides the API and callbacks for timer services.
+    \item \textbf{Network \emph{<<library>>}:} This libray module provides the complete network stack API to userspace modules.
+    \item \textbf{Watchdog \emph{<<daemon>>}:} This daemon updates the watchdog timer of the CPU. Furthermore it provides an API in order to reset the CPU manually and add an error stack information stored in the EEPROM.
+    \item \textbf{Clock \emph{<<daemon>>}:} This daemon is responsible to measure the current time. It uses the timer driver module.
+    \item \textbf{Shell \emph{<<userspace>>}:} This userspace module is responsible for receiving commands from the serial UART driver, executing commands and printing the result back.
+    \item \textbf{Receiver \emph{<<userspace>>}:} This userspace module prints out received messages using the UART driver module.
+\end{enumerate}
+
 \section{Module orchestration}% {{{2
 Designing a software system that executes on embedded micro-controllers implies a lot of challenges when many software modules are involved and complexity grows. The conceptually defined modules must be somehow implemented. If the micro-controller lacks an operating system then there is no possibility of using provided abstractions and APIs for module orchestration and execution. Another challenge are limited hardware resources which prevent the deployment of many existing operating system kernels. Basically there are two types of execution models which can be implemented in micro-controllers:
 
