@@ -67,38 +67,50 @@ The fourth part is solely dedicated to the network stack. The implemented networ
 The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
 
 \chapter{Hardware Design}% {{{1
-\section{Introduction}% {{{2
-The predecessor implementation uses an Atmel Atmega16 RISC microprocessor. The author decided to analyze whether this CPU is still adequate for the new implementation. The decision about a microprocessor to be used in an embedded application depends very much on the requirements. Not only that many vendors are available on the market but also each vendor has a very rich product portfolio of different microprocessors to choose from.
-
-The author set up the following requirements for the new hardware architecture:
-
-\begin{itemize}
-    \item \textbf{GCC tool chain:} The author wanted to use an open source development environment. The existing GCC tool chain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
-    \item \textbf{USB connectivity:} Instead of using the rather old and nowadays even mostly not available RS-232 connection the author wanted to migrate to an USB based connection type in order to use a regular PC as a terminal.
-    \item \textbf{RAM:} In order to store many routing entries additional RAM is necessary as the predecessor thesis already pointed out. An address size of 16 bit theoretically allows addressing 65,536 nodes. If we wanted to store just every single address in a routing table we already need more than 130kB of RAM if only the target address had to be stored. Realistically the author wanted to store at least 1000 nodes in a routing table.
-
-\begin{tabular}{lll}
-Type & Name & Size (Byte) \\
-Address & Gateway & 2 \\
-\end{tabular}
-
-    \item \textbf{}
-\end{itemize}
-
 \section{Hardware Modules}% {{{2
-\subsection{RAM}% {{{3
-\begin{itemize}
-    \item Harvard architecture
-    \item RAM bus
-    \item Latch
-\end{itemize}
-\subsection{USB Serial Device}% {{{3
-\subsection{RFM12B Radio}% {{{3
-\label{sec:rfm12b}
+\subsection{CPU} % {{{3
+\label{sub:cpu}
+The predecessor implementation uses an Atmel Atmega16 RISC microprocessor implementing the harvard architecture. The author decided to analyze whether this CPU is still adequate for the new implementation. The author set up the following requirements for the new hardware architecture:
 
-\subsection{Keyboard}% {{{3
+\begin{itemize}
+    \item \textbf{GCC tool chain:} The author wanted to use an open source development environment using the C language. The existing GCC tool chain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
+    \item \textbf{Extensibility:} The author wanted to use a CPU which has the possibility to be extended with external hardware. Especially the author wanted to use a CPU which allowed to be extended with external RAM.
+\end{itemize}
+
+The result was a different CPU being used in this thesis, namely the Atmega162 and not the Atmega16 as in the predecessor thesis. The Atmega162 does not have ADC capabilities but is rather specialized on digital periphery. It has an external memory interface called XMEM which allows the connection of an external SRAM module. Furthermore it has more digital I/O pins available than the Atmega16.
+
+\subsection{RAM}% {{{3
+The CPU was connected with an external 62256 SRAM \cite{62256-datasheet} chip using a register latch. It offers 32k external RAM. The configured RAM configuration is shown in figure \ref{fig:ram}. Since the CPU implements the harvard architecture no program space is available in the RAM.
+
+\begin{figure}[H]
+\centering
+\import{figures/}{ram.pdf_tex}
+\caption{RAM configuration}
+\label{fig:ram}
+\end{figure}
+
+The following memory data sections were configured:
+
+\begin{itemize}
+    \item \textbf{Register Memory space (256 Bytes):} This memory space is constant. It contains internal registers.
+    \item \textbf{Stack in internal SRAM (1,024 Bytes):} This memory space is solely used for the stack. In the predecessor thesis \cite{korniowski} this memory space also held static data and the heap.
+    \item \textbf{Data section in external SRAM (1,544 Bytes):} This newly available memory space is used for static data. This data section was measured by listing the symbols of the final binary using the "avr-nm" program and differs depending on the usage of static variables in the program.
+    \item \textbf{Heap section in external SRAM (31,223 Bytes):} This newly available memory space is used for the heap. It depends on the size of the data section.
+\end{itemize}
+
+One can see that the external RAM configuration was desperately needed. The new thesis implementation uses more than 1K of static variable space which already exceeds the available native CPU memory. With the usage of external RAM a total of nearly 32K heap RAM is available not including static variables. Furthermore the complete (and efficient) internal RAM is used solely for the runtime stack.
+
+One entry in the network routing table (see chapter \ref{sec:route}) needs of a total 11 bytes. With the current RAM configuration therefore a maximum number of 2,838 nodes can be addressed if no other data is stored on the heap.
 
 \section{Schematic}% {{{2
+The predecessor thesis \cite{korniowski} connected the RFM12B radio module directly to the CPU. The consequence is an operating voltage of 5V for the radio module which is out of specification. The maximum operating voltage for the radio module is 3.3V. Therefore the author connected the radio module using level shifters \cite{schutte}.
+
+Furthermore the nowadays nearly deprecated RS-232 connection was replaced with an USB connection. The USB driver was migrated from the AVR-CDC \cite{avrcdc} project. It uses an AVR Attiny2323 processor in order to simulate a low-speed USB stack. The CDC protocol has native support in Linux (using a kernel version >2.6.31) but a Windows driver is available on the project site \cite{avrcdc}.
+
+Finally the author placed PS/2 keyboard and HD4780 LCD connectors for future enhancements.
+
+The complete schematic of the HopeMesh hardware is shown on the next two following pages.
+
 \includepdf[
     landscape,
     addtolist={
@@ -154,7 +166,7 @@ The final version of the PCB was carefully designed to have a logical and effect
 \end{figure}
 
 \begin{itemize}
-    \item \textbf{USB: } The relevant parts and connectors for the USB connection are being placed here. In order to have a comfortable connection to the cable the USB connector was placed in the left upper corner.
+    \item \textbf{USB: } The USB parts and connectors are being placed in this zone. In order to have a comfortable connection to the cable the USB connector was placed in the left upper corner.
     \item \textbf{Power supply: } Right next to the USB zone the PSU parts are placed.
     \item \textbf{RFM12B: } The radio modules as well as the level shifters were placed next to each other.
     \item \textbf{ISP: } The In-System-Programmer connector was placed next to the CPU in order to reduce scattering effects.
@@ -1131,14 +1143,16 @@ The routing list being built using received OGM packets is now consulted wheneve
 The algorithm for sending new unicast packets is the same as in \ref{fig:unicast_alg} except it starts immediately at the activity "Find best gateway".
 
 \subsection{Route determination}% {{{3
-The algorithm for finding the best gateway in its current implementation is very basic. The metric for choosing the gateway is based on the count of received OGM messages. The routing consists of the following fields:
+\label{sec:route}
+The algorithm for finding the best gateway in its current implementation is very basic. The metric for choosing the gateway is based on the count of received OGM messages. The routing table consists of the following fields:
 
 \begin{itemize}
-    \item \textbf{Target address:} The target address for whom the current routing entry is valid.
-    \item \textbf{Gateway address:} The address of a possible gateway for the target.
-    \item \textbf{Sequence number:} The last received sequence number of the target via the gateway.
-    \item \textbf{Count:} The total count of received sequence numbers.
-    \item \textbf{Time:} The time of the last update for this routing entry.
+    \item \textbf{Target address (2 bytes):} The target address for whom the current routing entry is valid.
+    \item \textbf{Gateway address (2 bytes):} The address of a possible gateway for the target.
+    \item \textbf{Sequence number (2 bytes):} The last received sequence number of the target via the gateway.
+    \item \textbf{Count (2 bytes):} The total count of received sequence numbers.
+    \item \textbf{Time (2 bytes):} The time of the last update for this routing entry.
+    \item \textbf{Next pointer (1 byte):} This pointer points to the next routing entry. If NULL this entry is the last routing entry.
 \end{itemize}
 
 The routing table with the above described fields is constantly updated upon the reception of new OGM packets. Every second the routing table is examined for entries which can be purged. The purge timeout is configurable and is set up for 10 seconds in the current implementation. Route entries older than 10 seconds will be permanently deleted from the routing table. This algorithm ensures that no outdated routing entries are persisted in the routing table. Whenever a mesh gateway node is not reachable anymore, no OGM packets will be received from it. The time field for targets using this gateway will not be updated and after 10 seconds these entries will be deleted. This allows to adapt the routing information dynamically with a changing network and conforms to the requirements stated in the RFC \cite{batmanrfc}.
