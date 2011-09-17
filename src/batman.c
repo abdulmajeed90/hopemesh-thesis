@@ -113,7 +113,7 @@ route_is_bidirectional(ogm_t *ogm)
   return false;
 }
 
-static inline void
+void
 route_save_or_update(addr_t target_addr, addr_t gateway_addr, uint16_t seqno)
 {
   route_t *r = route_table;

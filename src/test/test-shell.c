@@ -37,6 +37,8 @@ main(int argc, char **argv)
   shell_init();
   sei();
 
+  route_save_or_update (0xaaaa, 0xaaaa, 16);
+
   do {
     // CALL_ISR(SIG_OVERFLOW0);
     CALL_ISR(SIG_INTERRUPT0);

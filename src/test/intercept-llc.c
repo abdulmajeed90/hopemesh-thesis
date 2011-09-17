@@ -13,8 +13,8 @@ __wrap_llc_rx(packet_t *packet)
   if (packet_arrived) {
     llc_t *llc = (llc_t *) packet_get_llc(packet);
 
-    for (uint16_t i = 0; i < llc->len; i++) {
-      uint8_t data = packet->data[i + LLC_OFFSET];
+    for (uint16_t i = 0; i < llc->len + LLC_OFFSET; i++) {
+      uint8_t data = packet->data[i];
       _spi_printf("llc_rx>0x%02x  |", data);
     }
   }

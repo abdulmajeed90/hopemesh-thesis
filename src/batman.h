@@ -24,6 +24,9 @@ bool
 route_present(addr_t target, addr_t *gateway);
 
 void
+route_save_or_update(addr_t target_addr, addr_t gateway_addr, uint16_t seqno);
+
+void
 batman_init(void);
 
 PT_THREAD(

@@ -77,7 +77,7 @@ The predecessor implementation uses an Atmel Atmega16 RISC microprocessor implem
     \item \textbf{Extensibility:} The author wanted to use a CPU which has the possibility to be extended with external hardware. Especially the author wanted to use a CPU which allowed to be extended with external RAM.
 \end{itemize}
 
-The result was a different CPU being used in this thesis, namely the Atmega162 and not the Atmega16 as in the predecessor thesis. The Atmega162 does not have ADC capabilities but is rather specialized on digital periphery. It has an external memory interface called XMEM which allows the connection of an external SRAM module. Furthermore it has more digital I/O pins available than the Atmega16.
+The result was a different CPU being used in this thesis, namely the Atmega162 and not the Atmega16 as in the predecessor thesis. The Atmega162 does not have ADC capabilities but is rather specialized on digital peripheral hardware. It has an external memory interface called XMEM which allows the connection of an external SRAM module. Furthermore it has more digital I/O pins available than the Atmega16.
 
 \subsection{RAM}% {{{3
 The CPU was connected with an external 62256 SRAM \cite{62256-datasheet} chip using a register latch. It offers 32k external RAM. The configured RAM configuration is shown in figure \ref{fig:ram}. Since the CPU implements the harvard architecture no program space is available in the RAM.
@@ -1186,9 +1186,114 @@ Since the implemented transport layer offers a nul terminated interface. The use
 
 \chapter{Research}% {{{1
 \section{Simulations}% {{{2
+The author had only two real working mesh nodes available in order to test the physical implementation of the previously described software stack. Unfortunately the debugging and simulation capabilities of the embedded hardware environment are very limited. Essentially the only possibility to debug algorithms on the target hardware is either to buy additional hardware debugging facilities (like JTAG debuggers) or using simple debug print statements via the UART.
+
+The first option imposes additional costs on the project and the second option is not sophisticated enough in case an algorithm bug blocks the complete CPU. Therefore the author decided to use a PC based approach for simulation scenarios. Two approaches are possible for a PC based simulation:
+
+\begin{itemize}
+    \item \textbf{CPU emulation:} A real CPU emulator could be used which executes native AVR binary code on a PC. The whole emulation environment comes with a high complexity but is the most accurate environment and allows CPU cycle based scenarios where the exact behavior of the target hardware is emulated.
+    \item \textbf{Mocking:} Instead of emulating the real CPU of the target hardware the target code is compiled into x86 binary programs. The real hardware behavior obviously cannot be emulated but must rather be mocked.
+\end{itemize}
+
+Since an AVR and x86 hardware architecture is fundamentally different the following assumptions must apply:
+
+\begin{itemize}
+    \item \textbf{Compiler:} The same compiler (in this case GNU GCC) is used.
+    \item \textbf{Types:} The real bit sizes of the used data types in algorithms must be equal on both systems. Therefore standard C89/C90 data types (int, long, etc.) must not be used. Instead C99 based data types must be used which ensure specified bit widths (int8\_t, int16\_t, etc.). Fortunately these data types are also available in the avr-libc implementation.
+\end{itemize}
+
+If the above mentioned assumptions apply at least algorithmic behavior can be simulated using mocking. Therefore the author implemented its own framework where the following hardware parts were mocked:
+
+\begin{itemize}
+    \item \textbf{CRC16 implementation (\texttt{test/mock-crc16.c}):} The AVR hardware optimized CRC-16 algorithm from the libc library was replaced with a general non-optimized implementation which compiles on the x86 architecture.
+    \item \textbf{Interrupt handling (\texttt{test/mock-interrupt.c}):} The \texttt{cli()} and \texttt{sei()} methods for enabling disabling interrupts were mocked.
+    \item \textbf{IO registers (\texttt{test/mock-io.c}):} The internal IO register was stored as a simple integer array.
+    \item \textbf{SPI access (\texttt{test/mock-spi.c}):} The SPI module implementation \texttt{spi.c} was mocked by writing/reading SPI data to/from a ringbuffer.
+    \item \textbf{Watchdog (\texttt{test/mock-watchdog.c}):} The watchdog was mapped to \texttt{exit()} functions.
+    \item \textbf{Interrupt vectors (\texttt{test/avr/io.h}):} Needed interrupt vectors (\texttt{SIG\_INTERRUPT0, SIG\_OVERFLOW0, SIG\_USART0\_RECV, SIG\_USART0\_DATA}) were mocked by callbacks which can be implemented in testing programs.
+    \item \textbf{EEPROM access (\texttt{test/avr/eeprom.h}):} Access to the eeprom was implemented using simple memory access.
+    \item \textbf{Program space (Flash) access (\texttt{test/avr/eeprom.h}):} Access to the flash program memory space was implemented using simple memory access.
+\end{itemize}
+
 \subsection{Shell}% {{{3
+The first module under simulation is the shell module. It can be compiled by issuing the \texttt{make clean \&\& make test-shell} command in the \texttt{test} directory. After invoking the \texttt{test/test-shell} binary one has the following keyboard shortcuts to control the shell under test:
+
+\begin{itemize}
+    \item \textbf{F2:} Switches to the UART output screen. The UART output screen behaves like a terminal program connected via USB to the external AVR based mesh module. The same commands can be issued and the complete UART I/O using the hopemesh software stack can be simulated.
+    \item \textbf{F3:} Switches to the SPI output screen. The SPI output screen shows the complete SPI I/O to the virtually connected radio module.
+
+It is a hex-based view with line numbers rendered for easier rendering. The whole communication with the RFM12B radio module is based on 16-bit long integer requests and responses. Therefore the format \texttt{0xAAAA>0xBBBB} was chosen by the author to illustrate the communication between the AVR CPU and the RFM12 radio module, where \texttt{0xAAAA} is the two-byte long request sent via SPI and \texttt{0xBBBB} is the two-byte long response received from the SPI.
+
+Since the raw SPI byte stream is hamming encoded in the LLC network layer it is pretty difficult to examine the actual byte stream generated from upper network layers. Therefore the author implemented an additional feature by rendering \texttt{llc\_rx>0xAA\_\_} whenever a complete packet was received where \texttt{0xAA} represents the received bytes.
+
+At any time the user can press \texttt{Enter} in order to render a new line.
+    \item \textbf{F12:} Quits the program
+\end{itemize}
+
+Figure \ref{fig:test-shell1} shows a simulation session in the UART output screen. The commands \texttt{?}, \texttt{l} and \texttt{c} were issued to the software stack and as can be seen the correct output was generated (render help output, print the current route table and the current configuration). The route table is initialized with one entry during the startup of \texttt{test-shell} having a direct neighbour with the address \texttt{0xaaaa}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/research-shell1.png}
+\caption{test-shell: The UART output screen}
+\label{fig:test-shell1}
+\end{figure}
+
+Figure \ref{fig:test-shell2} shows the SPI output screen after issuing the command "\texttt{s 0xaaaa test}". Lines \texttt{000-001} show the byte stream from the RFM12B initialization routine. Lines \texttt{003-023} show the hamming byte stream as well as the sent raw packet stream.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/research-shell2.png}
+\caption{test-shell: The SPI output screen}
+\label{fig:test-shell2}
+\end{figure}
+
+By using this data it can be easily verified that the sent packet byte stream includes the packet format from the previously defined network layers. Table \ref{tab:research_lowerlayers} shows the raw byte stream sent via SPI and table \ref{tab:research_llc} shows the hamming decoded byte stream. Both tables refer to the actual network layers.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l | l | p{10cm}}
+Bytes & Layer & Description \\
+\hline
+\texttt{0x80e7} & 1 & Enable the TX register (see \cite{sis4221_datasheet}) \\ 
+\texttt{0x8238} & 1 & Enable the transceiver (see \cite{sis4221_datasheet}) \\ 
+\texttt{0x00>0x80} & 1 & Status command 0x00, answer 0x80 = $10000000_{2}$ = RGIT (TX register is ready to receive the next byte) (see \cite{sis4221_datasheet}).
+
+Now follow the send commands (0xb8) resembling the frame format from network layer 2a. \\ 
+\texttt{0xb8aa} & 2a & AFC stabilizer pattern \\ 
+\texttt{0xb8aa} & 2a & AFC stabilizer pattern \\ 
+\texttt{0xb82d} & 2a & Sync pattern \\ 
+\texttt{0xb8d4} & 2a & Sync pattern \\ 
+\texttt{\dots} & 2b & Hamming encoded data\\ 
+\texttt{0xb8aa} & 2a & Frame end \\ 
+\texttt{0xb8aa} & 2a & Dummy byte \\ 
+\texttt{0x8067} & 1 & Disable the TX register \\ 
+\texttt{0x82c8} & 1 & Enable the receiver \\ 
+\texttt{0xca81, 0xca83} & 1 & Reset the FIFO \\ 
+\end{tabular}
+\caption{Raw SPI byte stream}
+\label{tab:research_lowerlayers}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l | l | p{7cm}}
+Bytes & Layer & Description \\
+\hline
+\texttt{0xf0 0x00} & 2b & The type 0x0 = $0_{10}$ and length 0xf = $15_{10}$ \\
+\texttt{0x98 0xf1} & 2b & The CRC-16 checksum\\
+\texttt{0x01 0xa} & 3 & The unicast version 0x1 = $1_{10}$ and TTL 0xa = $10_{10}$ \\
+\texttt{0xff 0xff} & 3 & The originator address 0xffff \\
+\texttt{0xaa 0xaa} & 3 & The target address 0xaaaa \\
+\texttt{0xff 0xff} & 3 & The sender address 0xffff \\
+\texttt{0xaa 0xaa} & 3 & The gateway address 0xaaaa \\
+\texttt{0x74 0x65 0x73 0x74 0x00} & 4 & The ASCII encoded nul-terminated message string ("test") \\
+\end{tabular}
+\caption{Hamming decoded LLC byte stream}
+\label{tab:research_llc}
+\end{table}
+
 \subsection{Routing}% {{{3
-\subsection{Radio Transmission}% {{{3
 \section{Mesh evaluation}% {{{2
 \section{Results}% {{{2
 
@@ -1200,4 +1305,4 @@ Notes:\\
 - The MAC multiple access protocol can be much further improved\\
 - The LLC layer does not split packets into frames and does not provide any means of flow control\\
 - Sequence numbers are currently ignored for the routing metrics
-
+- Larger number of mesh nodes
