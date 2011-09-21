@@ -1409,8 +1409,24 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
   \caption{Route simulation test \#4}
 \end{figure}
 
+The next test starts with a rebroadcasted OGM sent from \texttt{0xc} (a direct bidirectional link neighbour) originated by \texttt{0xd}, an unknown node until now.
+
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#4]
+rx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xc, originator_addr=0xd, flags=0x0, seqno=23, ttl=49
+
+tx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xa, originator_addr=0xd, flags=0x0, seqno=23, ttl=48
+
+routing table: 
+target_addr: 0xb, gateway_addr: 0xb, seqno: 0, cnt: 2, time: 0
+target_addr: 0xc, gateway_addr: 0xc, seqno: 0, cnt: 1, time: 0
+target_addr: 0xd, gateway_addr: 0xc, seqno: 23, cnt: 1, time: 0
 \end{lstlisting}
+
+Node \texttt{0xd} is being added to the route table. The gateway \texttt{0xc} is a know neighbour therefore a secure route can be persisted.
 
 \subsubsection{Test \#5}% {{{4
 \begin{figure}[H]
@@ -1420,27 +1436,35 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
   \caption{Route simulation test \#5}
 \end{figure}
 
+The next test shown in figure shows the reception of an OGM originated from \texttt{0xc}.
+
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#5]
+rx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xc, originator_addr=0xc, flags=0x0, seqno=1, ttl=50
+
+tx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xa, originator_addr=0xc, flags=0x1, seqno=1, ttl=49
+
+routing table: 
+target_addr: 0xb, gateway_addr: 0xb, seqno: 0, cnt: 2, time: 0
+target_addr: 0xc, gateway_addr: 0xc, seqno: 1, cnt: 2, time: 0
+target_addr: 0xd, gateway_addr: 0xc, seqno: 23, cnt: 1, time: 0
 \end{lstlisting}
 
-\subsubsection{Test \#6}% {{{4
+As expected the OGM is being rebroadcasted by \texttt{0xa} with the "is direct" flag set.
+
+\subsubsection{Tests \#6-\#9}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/test6}
   \end{center}
-  \caption{Route simulation test \#6}
+  \caption{Route simulation test \#6-\#9}
+  \label{fig:test6-9} 
 \end{figure}
 
-\begin{lstlisting}[label=sim:test1,caption=Output of Test \#6]
-\end{lstlisting}
-
-\subsubsection{Test \#7}% {{{4
-\begin{lstlisting}[label=sim:test1,caption=Output of Test \#7]
-\end{lstlisting}
-
-\subsubsection{Test \#8}% {{{4
-\begin{lstlisting}[label=sim:test1,caption=Output of Test \#8]
-\end{lstlisting}
+The next tests are based on the topology shown in figure \ref{fig:test6-9}. Since they are not of particular interest for the network topology (they test algorithmic corner-cases only) they are not further explained. The results can be inspected by executing the \texttt{test-batman} simulation.
 
 \subsubsection{Test \#9}% {{{4
 \begin{figure}[H]
@@ -1450,40 +1474,38 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
   \caption{Route simulation test \#9}
 \end{figure}
 
+The next test brings a new interesting situation to node \texttt{0xa}. It now suddenly receives a direct OGM from \texttt{0xd} originated by \texttt{0xa}. \texttt{0xd} is already present in the route table via the gateway \texttt{0xc}. The behaviour of the algorithm is shown in the next listing.
+
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#9]
+rx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xd, originator_addr=0xa, flags=0x3, seqno=2, ttl=49
+
+routing table: 
+target_addr: 0xb, gateway_addr: 0xb, seqno: 0, cnt: 4, time: 0
+target_addr: 0xc, gateway_addr: 0xc, seqno: 1, cnt: 2, time: 0
+target_addr: 0xd, gateway_addr: 0xc, seqno: 23, cnt: 1, time: 0
+target_addr: 0xd, gateway_addr: 0xd, seqno: 0, cnt: 1, time: 0
 \end{lstlisting}
 
-\subsubsection{Test \#10}% {{{4
-\begin{figure}[H]
-  \begin{center}
-    \includegraphics[]{figures/test10}
-  \end{center}
-  \caption{Route simulation test \#10}
-\end{figure}
+The node \texttt{0xd} is added as a direct bidirectional link neighbour because it rebroadcasted our own OGM. Note that we have now two route entries to node \texttt{0xd}, one direct link and one via the \texttt{0xc} gateway.
 
-\begin{lstlisting}[label=sim:test1,caption=Output of Test \#10]
-\end{lstlisting}
-
-\subsubsection{Test \#11}% {{{4
-\begin{figure}[H]
-  \begin{center}
-    \includegraphics[]{figures/test11}
-  \end{center}
-  \caption{Route simulation test \#11}
-\end{figure}
-
-\begin{lstlisting}[label=sim:test1,caption=Output of Test \#11]
-\end{lstlisting}
-
+\subsubsection{Conclusion}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/testfinal}
   \end{center}
   \caption{Final route simulation topology}
+  \label{fig:testfinal}
 \end{figure}
 
+The final network topology is shown in figure \ref{fig:testfinal}. The tests \#10-\#12 only serve already presented cases (with different node addresses) so they are not discussed. The tests \#13-\#16 refer to unicast messages being evaluated based on the current route table and the assumed network topology in figure \ref{fig:testfinal}. Because unicast messages do not alter the network topology they are not further discussed.
+
+The very last test \#17 shows what happens if after a time of simulated 16 seconds no OGM has been received. The result is an empty route table which implies a correct behaviour. Currently after 10 seconds a route entry must be deleted if no OGM was received in this timeout. Again the results can be inspected by invoking the \texttt{test-batman} program.
+
+The research shows that the experiments based on a virtual simulation succeeded in a correct behaviour of the routing algorithm. Certainly not all cases of a network topology update were simulated but at least the basics of the algorithm work correctly.
+
 \section{Mesh evaluation}% {{{2
-\section{Results}% {{{2
 
 \chapter{Conclusion}% {{{1
 \section{Open issues}% {{{2
