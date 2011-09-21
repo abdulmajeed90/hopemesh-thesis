@@ -953,7 +953,7 @@ Due to the nature of a wireless connection which is a highly unreliable channel 
     \item \emph{CRC-16 checksum:} After decoding or encoding the hamming byte stream an additional CRC-16 based error detecting checksum was implemented for the payload provided by the upper network layers.
 \end{enumerate}
 
-\subsubsection{Error correction}
+\subsubsection{Error correction}% {{{4
 The implemented error correction code is an extended 8,4 hamming code. A 4 bit data nibble is redundantly encoded into an 8 bit code byte which nicely fit into a byte stream required by the MAC layer. The classical hamming code introduces parity bits $p_i$ at the $2^i$th position of the final code word. According to formula \ref{eq:hamming} by having $k=3$ parity bits we can encode an $n=4$ bits long data nibble into an $N = k + n = 4 + 3 = 7$ bits long code word.
 
 \begin{equation}
@@ -1027,7 +1027,7 @@ Data & Classical code & ETS code \\
 \label{tab:hamming_diff}
 \end{table}
 
-\subsubsection{Error detection}
+\subsubsection{Error detection}% {{{4
 After and before the hamming decoding process a further error detection algorithm was implemented by the author in order to detect errors during the transmission. As proposed by Tannenbaum a CRC check was used. The algorithm was not implemented by the author itself but rather reused from the existing AVR libc library which provides a hardware optimized CRC-16 routine.
 
 \subsection{Packet format}% {{{3
@@ -1401,7 +1401,7 @@ target_addr: 0xc, gateway_addr: 0xc, seqno: 0, cnt: 1, time: 0
 
 Node \texttt{0xc} is being added to the routing table and therefore a new direct bidirectional node neighbour. No OGM is being rebroadcasted since the received OGM is originated by \texttt{0xa}.
 
-\subsubsection{Test \#4}
+\subsubsection{Test \#4}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/test4}
@@ -1412,7 +1412,7 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#4]
 \end{lstlisting}
 
-\subsubsection{Test \#5}
+\subsubsection{Test \#5}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/test5}
@@ -1423,7 +1423,7 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#5]
 \end{lstlisting}
 
-\subsubsection{Test \#6}
+\subsubsection{Test \#6}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/test6}
@@ -1434,15 +1434,15 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#6]
 \end{lstlisting}
 
-\subsubsection{Test \#7}
+\subsubsection{Test \#7}% {{{4
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#7]
 \end{lstlisting}
 
-\subsubsection{Test \#8}
+\subsubsection{Test \#8}% {{{4
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#8]
 \end{lstlisting}
 
-\subsubsection{Test \#9}
+\subsubsection{Test \#9}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/test9}
@@ -1453,7 +1453,7 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#9]
 \end{lstlisting}
 
-\subsubsection{Test \#10}
+\subsubsection{Test \#10}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/test10}
@@ -1464,7 +1464,7 @@ Node \texttt{0xc} is being added to the routing table and therefore a new direct
 \begin{lstlisting}[label=sim:test1,caption=Output of Test \#10]
 \end{lstlisting}
 
-\subsubsection{Test \#11}
+\subsubsection{Test \#11}% {{{4
 \begin{figure}[H]
   \begin{center}
     \includegraphics[]{figures/test11}
