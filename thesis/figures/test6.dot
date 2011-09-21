@@ -1,0 +1,6 @@
+digraph test6 {
+    "0xb" -> a [color=blue, dir=both, len=1.00]
+    "0xd" -> "0xc" [color=blue, style=dotted, dir=both]
+    "0xc" -> a [color=blue, dir=both, len=1.00]
+    a [style=filled, label="0xa"]
+}

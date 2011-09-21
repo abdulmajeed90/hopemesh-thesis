@@ -1069,6 +1069,7 @@ The predecessor thesis used a basic B.A.T.M.A.N. approach. For the new implement
 \end{itemize}
 
 \subsection{Route propagation}% {{{3
+\label{sub:route_propagation}
 The biggest challenge of Mesh based networks is their dynamic nature. In contrast to static networks the topology changes constantly. As the predecessor thesis already showed the B.A.T.M.A.N. algorithm is very promising since it has one big advantage over many existing mesh routing protocols. That is that not the whole network topology information has to be stored on each mesh node but only the next visible gateway for each known destination.
 
 The B.A.T.M.A.N. RFC \cite{batmanrfc} proposes that each mesh node broadcasts OGM (originator) packets through the network in order to keep the route information up-to-date. The RFC only proposes \emph{what} has to be done by each mesh node when an OGM message is being received or has to be transmitted but not \emph{how} the implementation has to look like. Therefore the author had to investigate an appropriate algorithm and packet structures in order to fulfill the RFC's requirements.
@@ -1293,7 +1294,194 @@ Bytes & Layer & Description \\
 \label{tab:research_llc}
 \end{table}
 
+\subsubsection{Conclusion} % {{{4
+The above described research shows that:
+
+\begin{itemize}
+    \item The shell userspace module and UART driver module are working properly. They communicate correctly in the UART output screen, parse user input correctly and the described ring buffer algorithm reads and writes data in the correct order.
+    \item The network library module and RFM12 driver module are working as expected and generate the correct frame and packet formats. The protocol used to communicate with the RFM12 radio module generates the correct commands.
+\end{itemize}
+
 \subsection{Routing}% {{{3
+The next simulation emphasizes on the actual routing algorithm. Being the heart of the mesh communication it is very important to research whether the described algorithm as described in \ref{sub:route_propagation} is working correctly. For this purpose the author implemented a different simulation program which mainly simulates the network library module. It can be compiled by issuing the \texttt{make clean \&\& make test-batman} command in the \texttt{test} directory. After invoking the \texttt{test/test-batman} binary a total of 17 virtual experiments are executed and the results printed on the console. The next section will discuss each experiment and present the resulting simulated network topology.
+
+\subsubsection{Test \#0}% {{{4
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test0}
+  \end{center}
+  \caption{Route simulation test \#0}
+  \label{fig:test0}
+\end{figure}
+
+The first test starts from the point of view of a single mesh node having the address \texttt{0xa}. All further operations are performed from this node. As can be seen in listing \ref{sim:test0} a rebroadcasted OGM originated by \texttt{0xa} itself sent from a direct neighbour \texttt{0xb} is being received. The corresponding topology is shown in figure \ref{fig:test0}.
+
+\begin{lstlisting}[label=sim:test0,caption=Output of Test \#0]
+rx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xb, originator_addr=0xa, flags=0x3, seqno=0, ttl=49
+
+routing table: 
+target_addr: 0xb, gateway_addr: 0xb, seqno: 0, cnt: 1, time: 0
+\end{lstlisting}
+
+The algorithm adds a new routing table to \texttt{0xb}. The \texttt{0xb} node rebroadcasted an OGM sent from \texttt{0xa} so we can be sure that \texttt{0xb} can hear him. From the point of view of \texttt{0xa} a bidirectional communication link exists. \texttt{0xb} additionally sets the unidirectional flag to indicate that he yet does not know whether \texttt{0xa} can hear him. \texttt{0xa} does not rebroadcast this OGM since it is targeted to him.
+
+\subsubsection{Test \#1}% {{{4
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test1}
+  \end{center}
+  \caption{Route simulation test \#1}
+  \label{fig:test1}
+\end{figure}
+
+Figure \ref{fig:test1} shows the updated network topology. The blue bidirectional arrow indicates our updated routing information to \texttt{0xb}. The second test now starts with the reception of an OGM originated by \texttt{0xb} and sent by him. Listing \ref{sim:test1} shows the algorithm behaviour.
+
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#1]
+rx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xb, originator_addr=0xb, flags=0x0, seqno=0, ttl=50
+
+tx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xa, originator_addr=0xb, flags=0x1, seqno=0, ttl=49
+
+routing table: 
+target_addr: 0xb, gateway_addr: 0xb, seqno: 0, cnt: 2, time: 0
+\end{lstlisting}
+
+Node \texttt{0xa} rebroadcasts the received OGM from \texttt{0xb}. The TTL is being reduced by one and the "is direct" flag is set because \texttt{0xa} received this OGM from \texttt{0xb} directly. The unidirectional flag is not set because the link to \texttt{0xb} is assumed to be bidirectional.
+
+\subsubsection{Test \#2}% {{{4
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test2}
+  \end{center}
+  \caption{Route simulation test \#2}
+  \label{fig:test2}
+\end{figure}
+
+The next test involves a new neighbour node \texttt{0xc} as shown in figure \ref{fig:test2}. It starts by receiving an OGM from \texttt{0xc} originated by him. Listing \ref{sim:test2} illustrates the algorithm behaviour.
+
+\begin{lstlisting}[label=sim:test2,caption=Output of Test \#2]
+rx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xc, originator_addr=0xc, flags=0x0, seqno=1, ttl=50
+
+tx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xa, originator_addr=0xc, flags=0x3, seqno=1, ttl=49
+
+routing table: 
+target_addr: 0xb, gateway_addr: 0xb, seqno: 0, cnt: 2, time: 0
+\end{lstlisting}
+
+Node \texttt{0xa} rebroadcasts the received OGM from \texttt{0xc}. The "is direct" link is set as in the previous test but the unidirectional flag is set in contrast to the last test. No route entry to \texttt{0xc} is added since \texttt{0xa} has no confirmation about a bidirectional link from \texttt{0xc} yet.
+
+\subsubsection{Test \#3}% {{{4
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test3}
+  \end{center}
+  \caption{Route simulation test \#3}
+\end{figure}
+
+The next test starts with the reception of a rebroadcasted OGM sent from \texttt{0xc} originated by \texttt{0xa}. The "is direct" flag is set. Listing \ref{sim:test3} shows the algorithm behaviour.
+
+\begin{lstlisting}[label=sim:test3,caption=Output of Test \#3]
+rx:
+llc: crc=0x0, len=8, type=1
+ogm: sender_addr=0xc, originator_addr=0xa, flags=0x1, seqno=1, ttl=49
+
+routing table: 
+target_addr: 0xb, gateway_addr: 0xb, seqno: 0, cnt: 2, time: 0
+target_addr: 0xc, gateway_addr: 0xc, seqno: 0, cnt: 1, time: 0
+\end{lstlisting}
+
+Node \texttt{0xc} is being added to the routing table and therefore a new direct bidirectional node neighbour. No OGM is being rebroadcasted since the received OGM is originated by \texttt{0xa}.
+
+\subsubsection{Test \#4}
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test4}
+  \end{center}
+  \caption{Route simulation test \#4}
+\end{figure}
+
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#4]
+\end{lstlisting}
+
+\subsubsection{Test \#5}
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test5}
+  \end{center}
+  \caption{Route simulation test \#5}
+\end{figure}
+
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#5]
+\end{lstlisting}
+
+\subsubsection{Test \#6}
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test6}
+  \end{center}
+  \caption{Route simulation test \#6}
+\end{figure}
+
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#6]
+\end{lstlisting}
+
+\subsubsection{Test \#7}
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#7]
+\end{lstlisting}
+
+\subsubsection{Test \#8}
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#8]
+\end{lstlisting}
+
+\subsubsection{Test \#9}
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test9}
+  \end{center}
+  \caption{Route simulation test \#9}
+\end{figure}
+
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#9]
+\end{lstlisting}
+
+\subsubsection{Test \#10}
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test10}
+  \end{center}
+  \caption{Route simulation test \#10}
+\end{figure}
+
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#10]
+\end{lstlisting}
+
+\subsubsection{Test \#11}
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/test11}
+  \end{center}
+  \caption{Route simulation test \#11}
+\end{figure}
+
+\begin{lstlisting}[label=sim:test1,caption=Output of Test \#11]
+\end{lstlisting}
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/testfinal}
+  \end{center}
+  \caption{Final route simulation topology}
+\end{figure}
+
 \section{Mesh evaluation}% {{{2
 \section{Results}% {{{2
 

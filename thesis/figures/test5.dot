@@ -1,0 +1,8 @@
+digraph test5 {
+    "0xb" -> a [color=blue, dir=both, len=1.00]
+    "0xd" -> "0xc" [color=blue, style=dotted, dir=both]
+    "0xc" -> a [color=blue, dir=both, len=1.00]
+    "0xc" -> a [label="1.\norigin=0xc"]
+    a -> "0xc" [label="2.\norigin=0xc\nflags=0x1"]
+    a [style=filled, label="0xa"]
+}

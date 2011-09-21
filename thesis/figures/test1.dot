@@ -1,0 +1,6 @@
+digraph test1 {
+    "0xb" node [style=filled] 
+    "0xb" -> "0xa" [label="1.\norigin=0xb", len=3.00]
+    "0xa" -> "0xb" [label="2.\norigin=0xb\nflags=0x1", len=3.00]
+    "0xb" -> "0xa" [color=blue, dir=both, len=1.00]
+}
