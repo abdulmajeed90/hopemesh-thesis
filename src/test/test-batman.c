@@ -23,8 +23,8 @@ print_routing_table(void)
   printf("\nrouting table: \n");
   while (r != NULL) {
     printf(
-        "target_addr: 0x%x, gateway_addr: 0x%x, seqno: %u, cnt: %u, time: %u\n",
-        r->target_addr, r->gateway_addr, r->seqno, r->cnt, r->time);
+        "target_addr: 0x%x, gateway_addr: 0x%x, seqno: %u, lost: %u, cnt: %u, time: %u\n",
+        r->target_addr, r->gateway_addr, r->seqno, r->lost, r->cnt, r->time);
     r = r->next;
   }
   printf("\n");
@@ -269,7 +269,7 @@ __wrap_llc_rx(packet_t *packet)
       ogm->version = BATMAN_VERSION;
       ogm->flags = 0;
       ogm->ttl = 49;
-      ogm->seqno = 25;
+      ogm->seqno = 29;
       ogm->originator_addr = 0xd;
       ogm->sender_addr = 0xc;
 

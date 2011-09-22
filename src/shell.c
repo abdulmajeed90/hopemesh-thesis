@@ -40,7 +40,7 @@ static PROGMEM const char pgm_debug[] = "MCUCSR: 0x%x\n\r"
     "uptime: %u\n\r";
 
 static PROGMEM const char route_entry[] =
-    "target_addr: 0x%x, gateway_addr: 0x%x, seqno: %u, cnt: %u, time: %u\n\r";
+    "target_addr: 0x%x, gw_addr: 0x%x, seqno: %u, lost: %u, cnt: %u, time: %u\n\r";
 
 static const char txt_prompt[] = "$ ";
 
@@ -78,7 +78,7 @@ PT_THREAD(shell_list)(void)
 
   while (r != NULL) {
     sprintf_P(out_buf, route_entry,
-        r->target_addr, r->gateway_addr, r->seqno, r->cnt, r->time);
+        r->target_addr, r->gateway_addr, r->seqno, r->lost, r->cnt, r->time);
     UART_TX_NOSIGNAL(&pt_cmd, out_buf);
     r = r->next;
   }

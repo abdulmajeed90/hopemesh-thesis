@@ -119,6 +119,7 @@ route_save_or_update(addr_t target_addr, addr_t gateway_addr, uint16_t seqno)
   route_t *r = route_table;
   route_t *prev = NULL;
   uint16_t cnt = 0;
+  bool new = false;
 
   while (r != NULL) {
     if ((r->target_addr == target_addr) && (r->gateway_addr == gateway_addr)) {
@@ -142,9 +143,19 @@ route_save_or_update(addr_t target_addr, addr_t gateway_addr, uint16_t seqno)
       if (route_table == NULL) {
         route_table = r;
       }
+
+      new = true;
     } else {
       return;
     }
+  }
+
+  if (!new && (r->cnt == 1)) {
+    new = true;
+  }
+
+  if (!new && (seqno-1 != r->seqno)) {
+    r->lost += seqno - r->seqno;
   }
 
   r->gateway_addr = gateway_addr;

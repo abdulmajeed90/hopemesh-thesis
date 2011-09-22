@@ -17,6 +17,7 @@ typedef struct route_t
   uint16_t seqno;
   uint16_t cnt;
   uint16_t time;
+  uint16_t lost;
   struct route_t *next;
 } route_t;
 
