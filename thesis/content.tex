@@ -1506,6 +1506,13 @@ The very last test \#17 shows what happens if after a time of simulated 16 secon
 The research shows that the experiments based on a virtual simulation succeeded in a correct behaviour of the routing algorithm. Certainly not all cases of a network topology update were simulated but at least the basics of the algorithm work correctly.
 
 \section{Mesh evaluation}% {{{2
+probe \#1 \\
+target\_addr: 0xb, gw\_addr: 0xb, seqno: 1000, lost: 4, cnt: 1000, time: 1038 \\
+target\_addr: 0xa, gw\_addr: 0xa, seqno: 1000, lost: 10, cnt: 959, time: 963 \\
+
+probe \#2 \\
+target\_addr: 0xb, gw\_addr: 0xb, seqno: 1000, lost: 39, cnt: 982, time: 1056 \\
+target\_addr: 0xa, gw\_addr: 0xa, seqno: 1050, lost: 10, cnt: 991, time: 995 \\
 
 \chapter{Conclusion}% {{{1
 \section{Open issues}% {{{2

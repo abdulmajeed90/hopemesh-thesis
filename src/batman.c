@@ -135,6 +135,7 @@ route_save_or_update(addr_t target_addr, addr_t gateway_addr, uint16_t seqno)
     if (cnt != MAX_ROUTE_ENTRIES) {
       r = malloc(sizeof(route_t));
       r->cnt = 0;
+      r->lost = 0;
       r->next = NULL;
       if (prev != NULL) {
         prev->next = r;
