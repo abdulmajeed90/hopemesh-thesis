@@ -1,5 +1,26 @@
 \chapter{Introduction}% {{{1
+\section{Wireless mesh networks}% {{{2
+Wireless mesh networks (WMN) play an important role in current research and standardizations of mobile computer networking. According to Akyildiz et al \cite{wmn-survey} "a WMN consists of mesh routers and clients where mesh routers have minimal mobility and form a mesh of self-configuring, self-healing links among themselves" where the network architecture can be classified into the following three types:
 
+\begin{itemize}
+    \item \textbf{Infrastructure/Backbone WMNs:} Using this infrastructure mesh routers form the central access to mesh clients.
+    \item \textbf{Client WMNs:} This network architecture provides a peer-to-peer network among all connected clients. According to Akyildiz et al \cite{wmn-survey} this architecture is the most challenging one because network clients have to perform all functions of the network like routing and self-configuration.
+    \item \textbf{Hybrid WMNs:} This infrastructure forms a hybrid between the two above mentioned architectures.
+\end{itemize}
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[]{figures/client_wmn}
+  \end{center}
+  \caption{Client wireless mesh node architecture}
+  \label{fig:client_wmn}
+\end{figure}
+
+Many if not most publications concentrate one hand on the issues of connecting existing internet based topologies to a wireless mesh node structure using end-user hardware and software on laptops or desktops. On the other hand WMN topologies are also very frequently discussed in many publications regarding sensor networks where hardware resources are very limited.
+
+Nevertheless the author did find only few publications (and mostly only open source projects) based on client WMN architectures using general-purpose embedded hardware. The author of this thesis was especially interested in the most challenging "Client WMN" architecture where general-purpose embedded hardware mesh clients form a peer-to-peer network. Figure \ref{fig:client_wmn} shows a client WMN sample topology where red arrows indicate packets traveling from node "n1" to node "n8". The algorithmic, architectural and network challenges for the realization of this scenario on general-purpose embedded hardware will be discussed throughout this thesis.
+
+\section{Thesis goals}% {{{2
 \begin{figure}[H]
 \begin{tikzpicture}
 \path[mindmap, concept color=lightgray!80]
@@ -1503,23 +1524,64 @@ The final network topology is shown in figure \ref{fig:testfinal}. The tests \#1
 
 The very last test \#17 shows what happens if after a time of simulated 16 seconds no OGM has been received. The result is an empty route table which implies a correct behaviour. Currently after 10 seconds a route entry must be deleted if no OGM was received in this timeout. Again the results can be inspected by invoking the \texttt{test-batman} program.
 
-The research shows that the experiments based on a virtual simulation succeeded in a correct behaviour of the routing algorithm. Certainly not all cases of a network topology update were simulated but at least the basics of the algorithm work correctly.
+The research shows that the experiments based on a virtual simulation succeeded in a correct behaviour of the routing algorithm. Certainly not all cases of a network topology update were simulated which opens new scenarios for future implementations.
 
-\section{Mesh evaluation}% {{{2
-probe \#1 \\
-target\_addr: 0xb, gw\_addr: 0xb, seqno: 1000, lost: 4, cnt: 1000, time: 1038 \\
-target\_addr: 0xa, gw\_addr: 0xa, seqno: 1000, lost: 10, cnt: 959, time: 963 \\
+\section{Performance measurements}% {{{2
+The final experiments have the goal to prove that the implementation of the described algorithms actually improve the reception statistics of packets in a real world scenario. Furthermore the experiments prove that the CPU actually is powerful enough to handle the load of the complete architectural stack.
 
-probe \#2 \\
-target\_addr: 0xb, gw\_addr: 0xb, seqno: 1000, lost: 39, cnt: 982, time: 1056 \\
-target\_addr: 0xa, gw\_addr: 0xa, seqno: 1050, lost: 10, cnt: 991, time: 995 \\
+The author decided to use the exact same metrics as the predecessor thesis \cite{korniowski}. The metrics are expressed as a percentage of lost packets.
+
+The experiment setup used the available two hardware modules placed next to each other in order to reduce the effect of reception damping. The route list algorithm was added with a new data field "lost packets". The amount of lost packets $n_i$ for a given known node $i$ is calculated by adding the previously calculated amount of lost packets $n_{i,p}$ with the difference between the currently received sequence number $s_i$ and the previously received sequence number $s_{i,p}$. Equation \ref{eq:lost packets} illustrates the calculation.
+
+\begin{equation}
+\label{eq:lost packets}
+n_i = n_{i,p} + (s_i - s_{i,p})
+\end{equation}
+
+Given the hardware addresses \texttt{0xa} and \texttt{0xb} measurements were taken as seen in table \ref{tab:probes}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l | l | l | l | l | l}
+Probe & Receiver & Sender & \# Packets & \# Lost & \% \\
+\hline
+\#1 & \texttt{0xa} & \texttt{0xb} & 1000 & 4 & 0.4\% \\
+\#2 & \texttt{0xb} & \texttt{0xa} & 959 & 10 & 1.04\% \\
+\#3 & \texttt{0xa} & \texttt{0xb} & 982 & 39 & 3.97\% \\
+\#4 & \texttt{0xb} & \texttt{0xa} & 991 & 10 & 1\% \\
+\end{tabular}
+\caption{OGM packet reception statistics}
+\label{tab:probes}
+\end{table}
+
+The average packet drop is 1.6\% in contrast to 15\% of the predecessor implementation. In the opinion of the author this value could even be more dropped after more sophisticated finetuning of the hardware parameters. The author also wanted to compare the CPU load between the two implementations. One indicator was the amount of lines of code included in C files:
+
+\begin{itemize}
+    \item \textbf{HopeMesh LOC:} 1805 lines of code
+    \item \textbf{Predecessor LOC:} 1159 lines of code
+\end{itemize}
+
+The current HopeMesh implementation introduced 55\% additional lines of code which have to be executed on the CPU. Another indicator is the communication speed setup of the RFM12B modules:
+
+\begin{itemize}
+    \item \textbf{HopeMesh kbps setting:} 57.5 kbps (RFM12B command: \texttt{0xC605})
+    \item \textbf{Predecessor kbps setting:} 4.8 kbps (RFM12B command: \texttt{0xC647})
+\end{itemize}
+
+The current HopeMesh implementation configured a ten times higher communication speed than the predecessor implementation. Despite the increased CPU load (more code has to be executed) and the increased packet processing requirement (ten times higher communication speed) the packet drop average was reduced ten times.
+
+The author therefore concludes that the CPU is far away from its peak load saturation and it seems there is still enough headroom for additional computational complexity. This opens up new research possibilities and protocol refinement challenges for future implementations.
 
 \chapter{Conclusion}% {{{1
-\section{Open issues}% {{{2
-Notes:\\
-- Sequence numbers are ignored in the batman routing algorithm \\
-- The transport layer is incomplete \\
-- The MAC multiple access protocol can be much further improved\\
-- The LLC layer does not split packets into frames and does not provide any means of flow control\\
-- Sequence numbers are currently ignored for the routing metrics
-- Larger number of mesh nodes
+The author concludes that the major goals set up in the first chapter could be achieved. Nevertheless there are some open issues which could be resolved in future research or thesis works. The following aspects are left open:
+
+\begin{itemize}
+    \item \textbf{Node addresses:} Currently node addresses have to be set up manually. This can be done either at compile time or at runtime in the shell. Further algorithms could be researched for automatic ID establishment algorithms.
+    \item \textbf{Packet drops:} There is still significant amount of packet drops. It could be investigated whether the hardware resources are the limit or the electrical parameters can be enhanced.
+    \item \textbf{Topology simulations:} Further network topology changes and complexities could be simulated and investigated with the current algorithm.
+    \item \textbf{Sequence numbers:} Currently OGM sequence numbers are mostly ignored for route metrics. This could be enhanced.
+    \item \textbf{Transport layer (4):} The current transport layer implementation is practically not existent. Further implementation could implement a real layer 4 protocol.
+    \item \textbf{MAC network layer:} At the MAC layer further enhanced MAC protocols could be investigated.
+    \item \textbf{Large mesh network:} The most important lack is the missing amount of real world mesh prototypes. A real mesh network with different topologies could be built.
+    \item \textbf{Additional periphery:} Currently a separate USB terminal is needed in order to interact with a mesh node. Although hardware connectors are available for a PS/2 keyboard and a HD4780 LCD display the firmware implementation is still missing.
+\end{itemize}

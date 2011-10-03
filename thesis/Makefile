@@ -6,8 +6,13 @@ SRC = \
 
 TARGET = praca
 
-%.pdf: figures/%.dot
+dot_%.pdf: figures/%.dot
 	dot -Tps $< -o figures/$*.eps
+	epstopdf figures/$*.eps
+	rm figures/$*.eps
+
+neato_%.pdf: figures/%.dot
+	neato -Tps $< -o figures/$*.eps
 	epstopdf figures/$*.eps
 	rm figures/$*.eps
 
