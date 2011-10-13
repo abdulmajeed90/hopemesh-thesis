@@ -1,0 +1,36 @@
+\path[mindmap, concept color=lightgray!80]
+node[concept] {HopeMesh}
+[clockwise from=45]
+child[concept color=lightgray!40] {node[concept] {\textbf{Hardware}}
+    [clockwise from=180]
+    child[concept color=lightgray!20] {node[concept] {CPU}}
+    child[concept color=lightgray!20] {node[concept] {Radio}}
+    child[concept color=lightgray!20] {node[concept] {RAM}}
+    child[concept color=lightgray!20] {node[concept] {...}}
+}
+child[concept color=lightgray!40] {node[concept] {Software}
+    child {node[concept] {\textbf{Modules}}
+        child {node[concept] {UART}}
+        child {node[concept] {SPI}}
+        child {node[concept] {...}}
+    }
+    child {node[concept] {\textbf{Core algorithms}}
+        [clockwise from=10]
+        child {node[concept] {Concurrency}}
+        child {node[concept] {Ring buffers}}
+        child {node[concept] {Radio Access}}
+    }
+    child {node[concept] {\textbf{Network}}
+        [clockwise from=330]
+        child {node[concept] {MAC}}
+        child {node[concept] {LLC}}
+        child {node[concept] {...}}
+    }
+    child {node[concept] {\textbf{Simulations}}
+        [clockwise from=240]
+        child {node[concept] {Shell}}
+        child {node[concept] {Routing}}
+        child {node[concept] {...}}
+    }
+}
+;

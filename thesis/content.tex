@@ -23,48 +23,13 @@ Nevertheless the author did find only few publications (and mostly only open sou
 \section{Thesis goals}% {{{2
 \begin{figure}[H]
 \begin{tikzpicture}
-\path[mindmap, concept color=lightgray!80]
-    node[concept] {HopeMesh}
-    [clockwise from=45]
-    child[concept color=lightgray!40] {node[concept] {\textbf{Hardware}}
-        [clockwise from=180]
-        child[concept color=lightgray!20] {node[concept] {CPU}}
-        child[concept color=lightgray!20] {node[concept] {Radio}}
-        child[concept color=lightgray!20] {node[concept] {RAM}}
-        child[concept color=lightgray!20] {node[concept] {...}}
-    }
-    child[concept color=lightgray!40] {node[concept] {Software}
-        child {node[concept] {\textbf{Modules}}
-            child {node[concept] {UART}}
-            child {node[concept] {SPI}}
-            child {node[concept] {...}}
-        }
-        child {node[concept] {\textbf{Core algorithms}}
-            [clockwise from=10]
-            child {node[concept] {Concurrency}}
-            child {node[concept] {Ring buffers}}
-            child {node[concept] {Radio Access}}
-        }
-        child {node[concept] {\textbf{Network}}
-            [clockwise from=330]
-            child {node[concept] {MAC}}
-            child {node[concept] {LLC}}
-            child {node[concept] {...}}
-        }
-        child {node[concept] {\textbf{Simulations}}
-            [clockwise from=240]
-            child {node[concept] {Shell}}
-            child {node[concept] {Routing}}
-            child {node[concept] {...}}
-        }
-    }
-    ;
+\input{mindmap}
 \end{tikzpicture}
 \caption{HopeMesh project mind map}
 \label{fig:mindmap}
 \end{figure}
 
-This thesis has the goal to implement an advanced and refined version of the predecessor implementation \cite{korniowski} for a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HOPERF radio modules. This goal can be split in the following aspects according to the mind map as seen in figure \ref{fig:mindmap}:
+This thesis has the goal to implement an advanced and refined version of the predecessor implementation \cite{korniowski} for a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HopeRF radio modules. This goal can be split in the following aspects according to the mind map as seen in figure \ref{fig:mindmap}:
 \begin{itemize}
     \item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
     \item \textbf{Modules:} The goal is to find the necessary software modules from an abstract architectural point of view.
@@ -91,14 +56,14 @@ The last part elaborates on the implemented simulations in order to verify the m
 \section{Hardware Modules}% {{{2
 \subsection{CPU} % {{{3
 \label{sub:cpu}
-The predecessor implementation uses an Atmel Atmega16 RISC microprocessor implementing the harvard architecture. The author decided to analyze whether this CPU is still adequate for the new implementation. The author set up the following requirements for the new hardware architecture:
+The predecessor implementation uses an Atmel ATmega16 RISC microprocessor implementing the harvard architecture. The author decided to analyze whether this CPU is still adequate for the new implementation. The author set up the following requirements for the new hardware architecture:
 
 \begin{itemize}
     \item \textbf{GCC tool chain:} The author wanted to use an open source development environment using the C language. The existing GCC tool chain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
     \item \textbf{Extensibility:} The author wanted to use a CPU which has the possibility to be extended with external hardware. Especially the author wanted to use a CPU which allowed to be extended with external RAM.
 \end{itemize}
 
-The result was a different CPU being used in this thesis, namely the Atmega162 and not the Atmega16 as in the predecessor thesis. The Atmega162 does not have ADC capabilities but is rather specialized on digital peripheral hardware. It has an external memory interface called XMEM which allows the connection of an external SRAM module. Furthermore it has more digital I/O pins available than the Atmega16.
+The result was a different CPU being used in this thesis, namely the ATmega162 and not the ATmega16 as in the predecessor thesis. The ATmega162 does not have ADC capabilities but is rather specialized on digital peripheral hardware. It has an external memory interface called XMEM which allows the connection of an external SRAM module. Furthermore it has more digital I/O pins available than the ATmega16.
 
 \subsection{RAM}% {{{3
 The CPU was connected with an external 62256 SRAM \cite{62256-datasheet} chip using a register latch. It offers 32k external RAM. The configured RAM configuration is shown in figure \ref{fig:ram}. Since the CPU implements the harvard architecture no program space is available in the RAM.
@@ -114,14 +79,14 @@ The following memory data sections were configured:
 
 \begin{itemize}
     \item \textbf{Register Memory space (256 Bytes):} This memory space is constant. It contains internal registers.
-    \item \textbf{Stack in internal SRAM (1,024 Bytes):} This memory space is solely used for the stack. In the predecessor thesis \cite{korniowski} this memory space also held static data and the heap.
-    \item \textbf{Data section in external SRAM (1,544 Bytes):} This newly available memory space is used for static data. This data section was measured by listing the symbols of the final binary using the "avr-nm" program and differs depending on the usage of static variables in the program.
-    \item \textbf{Heap section in external SRAM (31,223 Bytes):} This newly available memory space is used for the heap. It depends on the size of the data section.
+    \item \textbf{Stack in internal SRAM (1024 Bytes):} This memory space is solely used for the stack. In the predecessor thesis \cite{korniowski} this memory space also held static data and the heap.
+    \item \textbf{Data section in external SRAM (1544 Bytes):} This newly available memory space is used for static data. This data section was measured by listing the symbols of the final binary using the "avr-nm" program and differs depending on the usage of static variables in the program.
+    \item \textbf{Heap section in external SRAM (31223 Bytes):} This newly available memory space is used for the heap. It depends on the size of the data section.
 \end{itemize}
 
 One can see that the external RAM configuration was desperately needed. The new thesis implementation uses more than 1K of static variable space which already exceeds the available native CPU memory. With the usage of external RAM a total of nearly 32K heap RAM is available not including static variables. Furthermore the complete (and efficient) internal RAM is used solely for the runtime stack.
 
-One entry in the network routing table (see chapter \ref{sec:route}) needs of a total 11 bytes. With the current RAM configuration therefore a maximum number of 2,838 nodes can be addressed if no other data is stored on the heap.
+One entry in the network routing table (see chapter \ref{sec:route}) needs of a total 11 bytes. With the current RAM configuration therefore a maximum number of 2838 nodes can be addressed if no other data is stored on the heap.
 
 \section{Schematic}% {{{2
 The predecessor thesis \cite{korniowski} connected the RFM12B radio module directly to the CPU. The consequence is an operating voltage of 5V for the radio module which is out of specification. The maximum operating voltage for the radio module is 3.3V. Therefore the author connected the radio module using level shifters \cite{schutte}.
@@ -172,11 +137,6 @@ The actual design of the PCB (Printed Circuit Board) was performed in three iter
     \item \textbf{2nd revision PCB :} The final revision of the PCB was designed in smaller dimensions and the design flaws from the first revision were corrected.
 \end{itemize}
 
-\begin{figure}[H]
-\includegraphics[width=\textwidth]{figures/prototype_pcb.jpg}
-\caption{Manually wired prototype board}
-\end{figure}
-
 The final version of the PCB was carefully designed to have a logical and effective layout of components. Figure \ref{fig:2ndrev_pcb} shows the zones which include the different hardware modules. The following zones were designed:
 
 \begin{figure}[H]
@@ -201,7 +161,7 @@ The final version of the PCB was carefully designed to have a logical and effect
 \begin{figure}[H]
 \centering
 \import{figures/}{modules_component_diagram.pdf_tex}
-\caption{Software modules (UML 2.0 component diagram)}
+\caption{Software modules}
 \label{fig:modules}
 \end{figure}
 
@@ -539,7 +499,7 @@ Listing \ref{lst:korniowski_uart} shows that the algorithm examines the UCSRA (U
     \item Migration to a concurrent execution model using protothreads.
 \end{itemize}
 
-The Atmega162 micro-processor offers the following ISRs for receiving and sending data via the UART \cite{atmega162datasheet}:
+The ATmega162 micro-processor offers the following ISRs for receiving and sending data via the UART \cite{atmega162datasheet}:
 
 \begin{itemize}
     \item \textbf{SIG\_USART\_RECV}: Is being invoked, when the UDR register contains a new byte received from the UART.
@@ -622,7 +582,7 @@ void rfTx(uint8_t data)
 
 This implementation physically blocks the main loop the same way as the UART algorithm shown in listing \ref{lst:korniowski_uart}. In this case the algorithm does not wait for the status of an internal register to send data but rather waits for the external nIRQ pin from the RFM12B hardware module to go low. The official "RF12B programming guide" \cite{rf12b_programming_guide} also proposes a physically blocking algorithm.
 
-The author wanted to improve the algorithm in a similar fashion as the UART algorithm. The nIRQ pin of the RFM12B was connected to the INT0 pin of the ATMega162 micro-processor allowing to execute the SIG\_INTERRUPT0 interrupt service routine asynchronously. But it turned out that the implementation could not be reused at all. The RFM12B radio hardware imposes the following algorithmic challenges for the driver implementation:
+The author wanted to improve the algorithm in a similar fashion as the UART algorithm. The nIRQ pin of the RFM12B was connected to the INT0 pin of the ATmega162 micro-processor allowing to execute the SIG\_INTERRUPT0 interrupt service routine asynchronously. But it turned out that the implementation could not be reused at all. The RFM12B radio hardware imposes the following algorithmic challenges for the driver implementation:
 
 \begin{itemize}
     \item \textbf{Single interrupt request for multiple events:} The RFM12 radio module uses only one nIRQ pin in order to generate an interrupt for the following events \cite{sis4221_datasheet}:
@@ -879,11 +839,11 @@ As described above the two major use cases for data transmission and data recept
 \begin{figure}[H]
     \centering
     \import{figures/}{layers.pdf_tex}
-    \caption{Tannenbaum hybrid reference model \cite{tannenbaum}}
+    \caption{Tanenbaum hybrid reference model}
     \label{fig:tannenbaum_model}
 \end{figure}
 
-The author used Tannenbaum's hybrid network model \cite{tannenbaum} in order to research and implement the network stack. The advantage over the classic OSI model is Tannenbaum's pragmatic approach to the network stack having less layers than its OSI pendant. This also fits the constraints imposed by the embedded architecture used in this thesis implementation. The next chapters will refer to each Tannenbaum network layer and describe the concrete implementation done by the author.
+The author used Tanenbaum's hybrid network model \cite{tannenbaum} in order to research and implement the network stack. The advantage over the classic OSI model is Tanenbaum's pragmatic approach to the network stack having less layers than its OSI pendant. This also fits the constraints imposed by the embedded architecture used in this thesis implementation. The next chapters will refer to each Tanenbaum network layer and describe the concrete implementation done by the author.
 
 The concrete implementation was heavily inspired by a project available at \cite{stahl}. Unfortunately this project is unfinished (only the PHY and MAC layers are working). Furthermore the author used its own algorithms (especially for the PHY radio driver layer) and data structures in many places.
 
@@ -916,12 +876,12 @@ By using a simple quarter wavelength wire (which approximately resembles a dipol
 Furthermore this transceiver can only operate in half-duplex mode. Special care therefore has to be taken when writing device drivers for this module. The algorithmic solution to this problem was already presented in chapter \ref{sec:petri}.
 
 \section{Layer 2a: MAC Layer}% {{{2
-The MAC layer for the thesis implementation follows the Tannenbaum \cite{tannenbaum} model for dynamic channel allocation with the following key assumptions and exceptions:
+The MAC layer for the thesis implementation follows the Tanenbaum \cite{tannenbaum} model for dynamic channel allocation with the following key assumptions and exceptions:
 
 \begin{itemize}
     \item \textbf{Station Model:} The independent stations are represented by single mesh nodes in the network.
     \item \textbf{Single Channel Assumption:} The single channel is represented by the common frequency on which the mesh nodes transmit and receive data.
-    \item \textbf{Collision Assumption:} This assumption unfortunately does not fully apply to the used RFM12B modules. Although collisions can happen the module does not provide any facility to detect frame collisions on the carrier since it operates in half-duplex mode only. Therefore Tannenbaum's requirement to resend collided frames could not implemented.
+    \item \textbf{Collision Assumption:} This assumption unfortunately does not fully apply to the used RFM12B modules. Although collisions can happen the module does not provide any facility to detect frame collisions on the carrier since it operates in half-duplex mode only. Therefore Tanenbaum's requirement to resend collided frames could not implemented.
     \item \textbf{Continuous Time:} The frame transmission can indeed begin at any time so this assumption is fulfilled.
     \item \textbf{Carrier Sense:} Using the RSSI (Radio Signal Strength Indicator) command being provided by the RFM12B module the MAC layer can detect whether the carrier is free or occupied. The requirement not to send any data until the carrier is free was implemented by the author as shown in algorithm \ref{alg:mac}.
 \end{itemize}
@@ -958,7 +918,7 @@ The actual MAC frame format can be seen in figure \ref{fig:mac}. The frame consi
 One can see that the implemented MAC frame format does not include any error checking. The algorithm will simply stream bytes to or from the upper network layers until the postamble byte 0xAA is being detected. Only then the MAC layer assumes that the frame reception or transmission is complete.
 
 \section{Layer 2b: Logical Link Control}% {{{2
-The logical link control layer provides the virtual data path for the upper network layers. The implementation in this thesis follows Tannenbaum's \cite{tannenbaum} category of an unacknowledged connectionless service. According to Tannenbaum's data link layer design principles the following functions were implemented in the LLC layer:
+The logical link control layer provides the virtual data path for the upper network layers. The implementation in this thesis follows Tanenbaum's \cite{tannenbaum} category of an unacknowledged connectionless service. According to Tanenbaum's data link layer design principles the following functions were implemented in the LLC layer:
 
 \begin{itemize}
     \item \textbf{Service interface for the network layer:} In contrast to the stream-oriented interface between the LLC layer and the MAC layer the interface between the LLC and upper network layers is packet-oriented. However in this implementation no additional algorithmic efforts were done in order to split up packets in separate frames. For simplicity each packet is transmitted in one frame.
@@ -1049,7 +1009,7 @@ Data & Classical code & ETS code \\
 \end{table}
 
 \subsubsection{Error detection}% {{{4
-After and before the hamming decoding process a further error detection algorithm was implemented by the author in order to detect errors during the transmission. As proposed by Tannenbaum a CRC check was used. The algorithm was not implemented by the author itself but rather reused from the existing AVR libc library which provides a hardware optimized CRC-16 routine.
+After and before the hamming decoding process a further error detection algorithm was implemented by the author in order to detect errors during the transmission. As proposed by Tanenbaum a CRC check was used. The algorithm was not implemented by the author itself but rather reused from the existing AVR libc library which provides a hardware optimized CRC-16 routine.
 
 \subsection{Packet format}% {{{3
 The packet format for the LLC layer can be seen in figure \ref{fig:llc_format}. The maximum size of a packet can be 256 bytes including the LLC header. Upper network layers can therefore transmit a maximum of 256 - 2 (Type + Length) - 2 (CRC) = 252 bytes of data payload per packet. The following fields were introduced:
@@ -1070,16 +1030,16 @@ The packet format for the LLC layer can be seen in figure \ref{fig:llc_format}. 
     \label{fig:llc_format}
 \end{figure}
 
-\section{Layer 3: Batman Routing}% {{{2
-According to Tannenbaum the network layer is mainly responsible for transparently routing packets from a source to a destination inside the network. The following requirements for this network layer were implemented by the author:
+\section{Layer 3: B.A.T.M.A.N. Routing}% {{{2
+According to Tanenbaum the network layer is mainly responsible for transparently routing packets from a source to a destination inside the network. The following requirements for this network layer were implemented by the author:
 
 \begin{enumerate}
     \item \textbf{Topology information:} The network layer knows about the network topology by using the B.A.T.M.A.N. routing algorithm.
     \item \textbf{Technology independence:} The network layer completely hides the routing technologies and algorithms from the upper network layers. The only information which has to be provided from the upper network layers is the destination address.
-    \item \textbf{Uniform addressing:} The upper network layers have to provide an uniform address of the destination by using a 16 bit long address value. Using 16 bits a maximum of 65,536 destinations can be addressed.
+    \item \textbf{Uniform addressing:} The upper network layers have to provide an uniform address of the destination by using a 16 bit long address value. Using 16 bits a maximum of 65536 destinations can be addressed.
 \end{enumerate}
 
-The routing layer was implemented as a connectionless service which can be qualified as a datagram subnet. Each packet contains the full source and destination address and each router (mesh node) does not hold any state informations about connections. Therefore quality of service (QOS) based transmissions are rather not possible.
+The routing layer was implemented as a connectionless service which can be qualified as a datagram subnet. Each packet contains the full source and destination address and each router (mesh node) does not hold any state informations about connections. Therefore quality of service (QoS) based transmissions are rather not possible.
 
 The predecessor thesis used a basic B.A.T.M.A.N. approach. For the new implementation the author wanted to implement the following enhanced features:
 
@@ -1133,13 +1093,13 @@ Each mesh node always sends an OGM packet after a configurable interval. In this
     \sffamily
     \import{figures/}{ogm_rx_activity_diagram.pdf_tex}
     \rmfamily
-    \caption{OGM packet reception algorithm (UML 2.0 activity diagram)}
+    \caption{OGM packet reception algorithm}
     \label{fig:ogm_rx}
 \end{figure}
 
 Upon the reception of an OGM packet the algorithm first performs a few basic checks. The version header must match, the sender must be different from the node address and the TTL must be greater than 0. Afterwards the algorithm checks whether the received OGM is a self-originated rebroadcasted packet or a foreign OGM. If the OGM is self-originated the OGM flags are used to check whether the rebroadcasted packet was sent by a direct neighbor. Otherwise the packet is dropped. If the packet is a foreign OGM and not unidirectional the algorithm checks whether a bidirectional route to the sender exists. If it does the routing information about the originator is updated in the routing table. Finally the foreign OGM is resent.
 
-Unfortunately additional sequence number and window checks where not implemented. The author leaves this algorithmic improvement for further implementations.
+Unfortunately additional sequence number and window checks were not implemented. The author leaves this algorithmic improvement for further implementations.
 
 \subsection{Unicast messages}% {{{3
 Unicast messages carry the actual data payload which has to be routed from an originator to a target. The fields for unicast messages can be seen in figure \ref{fig:unicast_packet}. All of the shown fields already were described above. The type field is currently unused.
@@ -1158,7 +1118,7 @@ The routing list being built using received OGM packets is now consulted wheneve
     \sffamily
     \import{figures/}{unicast_rx_activity_diagram.pdf_tex}
     \rmfamily
-    \caption{Unicast packet reception algorithm (UML 2.0 activity diagram)}
+    \caption{Unicast packet reception algorithm}
     \label{fig:unicast_alg}
 \end{figure}
 
@@ -1180,7 +1140,7 @@ The algorithm for finding the best gateway in its current implementation is very
 The routing table with the above described fields is constantly updated upon the reception of new OGM packets. Every second the routing table is examined for entries which can be purged. The purge timeout is configurable and is set up for 10 seconds in the current implementation. Route entries older than 10 seconds will be permanently deleted from the routing table. This algorithm ensures that no outdated routing entries are persisted in the routing table. Whenever a mesh gateway node is not reachable anymore, no OGM packets will be received from it. The time field for targets using this gateway will not be updated and after 10 seconds these entries will be deleted. This allows to adapt the routing information dynamically with a changing network and conforms to the requirements stated in the RFC \cite{batmanrfc}.
 
 \section{Layer 4: Transport}% {{{2
-The transport layer according to Tannenbaum \cite{tannenbaum} is the central aspect of the whole network layer stack. Due to a different focus on this thesis the requirements for this layer were inherited from the lower layers. According to Tannenbaum the transport layer has to ensure:
+The transport layer according to Tanenbaum \cite{tannenbaum} is the central aspect of the whole network layer stack. Due to a different focus on this thesis the requirements for this layer were inherited from the lower layers. According to Tanenbaum the transport layer has to ensure:
 
 \begin{itemize}
     \item \textbf{Reliability:} In order to send simple text messages the author decided that the error correction and detection codes used in the network layer are sufficient for prototype purposes.
@@ -1573,7 +1533,7 @@ The current HopeMesh implementation configured a ten times higher communication 
 The author therefore concludes that the CPU is far away from its peak load saturation and it seems there is still enough headroom for additional computational complexity. This opens up new research possibilities and protocol refinement challenges for future implementations.
 
 \chapter{Conclusion}% {{{1
-The author concludes that the major goals set up in the first chapter could be achieved. Nevertheless there are some open issues which could be resolved in future research or thesis works. The following aspects are left open:
+The author concludes that the major goals set up in the first chapter have be achieved. Nevertheless there are some open issues which could be resolved in future research or thesis works. The following aspects are left open:
 
 \begin{itemize}
     \item \textbf{Node addresses:} Currently node addresses have to be set up manually. This can be done either at compile time or at runtime in the shell. Further algorithms could be researched for automatic ID establishment algorithms.
