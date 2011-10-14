@@ -29,7 +29,7 @@ Nevertheless the author did find only few publications (and mostly only open sou
 \label{fig:mindmap}
 \end{figure}
 
-This thesis has the goal to implement an advanced and refined version of the predecessor implementation \cite{korniowski} for a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HopeRF radio modules. This goal can be split in the following aspects according to the mind map as seen in figure \ref{fig:mindmap}:
+This thesis has the goal to implement an advanced and refined version of a fail-safe mesh network prototype using embedded technologies. The project name "HopeMesh" reflects the major goal to implement a mesh routing algorithm based on cheap HopeRF radio modules. This goal can be split in the following aspects according to the mind map as seen in figure \ref{fig:mindmap}:
 \begin{itemize}
     \item \textbf{Hardware: } The goal is to explore alternative, enhanced and reusable hardware solutions for an embedded implementation.
     \item \textbf{Modules:} The goal is to find the necessary software modules from an abstract architectural point of view.
@@ -56,14 +56,14 @@ The last part elaborates on the implemented simulations in order to verify the m
 \section{Hardware Modules}% {{{2
 \subsection{CPU} % {{{3
 \label{sub:cpu}
-The predecessor implementation uses an Atmel ATmega16 RISC microprocessor implementing the harvard architecture. The author decided to analyze whether this CPU is still adequate for the new implementation. The author set up the following requirements for the new hardware architecture:
+The implementation as outlined in \cite{korniowski} uses an Atmel ATmega16 RISC microprocessor implementing the harvard architecture. The author decided to analyze whether this CPU is still adequate for the new implementation. The author set up the following requirements for the new hardware architecture:
 
 \begin{itemize}
     \item \textbf{GCC tool chain:} The author wanted to use an open source development environment using the C language. The existing GCC tool chain is known to most programmers and the compiler can be used cross-platform on Windows, the MacOS and Linux operating systems.
     \item \textbf{Extensibility:} The author wanted to use a CPU which has the possibility to be extended with external hardware. Especially the author wanted to use a CPU which allowed to be extended with external RAM.
 \end{itemize}
 
-The result was a different CPU being used in this thesis, namely the ATmega162 and not the ATmega16 as in the predecessor thesis. The ATmega162 does not have ADC capabilities but is rather specialized on digital peripheral hardware. It has an external memory interface called XMEM which allows the connection of an external SRAM module. Furthermore it has more digital I/O pins available than the ATmega16.
+The result was a different CPU being used in this thesis, namely the ATmega162 and not the ATmega16. The ATmega162 does not have ADC capabilities but is rather specialized on digital peripheral hardware. It has an external memory interface called XMEM which allows the connection of an external SRAM module. Furthermore it has more digital I/O pins available than the ATmega16.
 
 \subsection{RAM}% {{{3
 The CPU was connected with an external 62256 SRAM \cite{62256-datasheet} chip using a register latch. It offers 32k external RAM. The configured RAM configuration is shown in figure \ref{fig:ram}. Since the CPU implements the harvard architecture no program space is available in the RAM.
@@ -79,7 +79,7 @@ The following memory data sections were configured:
 
 \begin{itemize}
     \item \textbf{Register Memory space (256 Bytes):} This memory space is constant. It contains internal registers.
-    \item \textbf{Stack in internal SRAM (1024 Bytes):} This memory space is solely used for the stack. In the predecessor thesis \cite{korniowski} this memory space also held static data and the heap.
+    \item \textbf{Stack in internal SRAM (1024 Bytes):} This memory space is solely used for the stack.
     \item \textbf{Data section in external SRAM (1544 Bytes):} This newly available memory space is used for static data. This data section was measured by listing the symbols of the final binary using the "avr-nm" program and differs depending on the usage of static variables in the program.
     \item \textbf{Heap section in external SRAM (31223 Bytes):} This newly available memory space is used for the heap. It depends on the size of the data section.
 \end{itemize}
@@ -89,7 +89,7 @@ One can see that the external RAM configuration was desperately needed. The new 
 One entry in the network routing table (see chapter \ref{sec:route}) needs of a total 11 bytes. With the current RAM configuration therefore a maximum number of 2838 nodes can be addressed if no other data is stored on the heap.
 
 \section{Schematic}% {{{2
-The predecessor thesis \cite{korniowski} connected the RFM12B radio module directly to the CPU. The consequence is an operating voltage of 5V for the radio module which is out of specification. The maximum operating voltage for the radio module is 3.3V. Therefore the author connected the radio module using level shifters \cite{schutte}.
+The implementation as described in \cite{korniowski} connected the RFM12B radio module directly to the CPU. The consequence is an operating voltage of 5V for the radio module which is out of specification. The maximum operating voltage for the radio module is 3.3V. Therefore the author connected the radio module using level shifters \cite{schutte}.
 
 Furthermore the nowadays nearly deprecated RS-232 connection was replaced with an USB connection. The USB driver was migrated from the AVR-CDC \cite{avrcdc} project. It uses an AVR Attiny2323 processor in order to simulate a low-speed USB stack. The CDC protocol has native support in Linux (using a kernel version >2.6.31) but a Windows driver is available on the project site \cite{avrcdc}.
 
@@ -263,7 +263,7 @@ State machine models can be implemented using \texttt{if} or \texttt{case} state
 \end{algorithmic}
 \end{algorithm}
 
-This implementation emulates a concurrent execution of modules. The context switch between module executions is being done by the modules themselves (using self-interruption) and no external scheduler is involved. This form of concurrent behavior can therefore be described as a non-preemptive or cooperative multi-tasking between modules. The predecessor thesis \cite{korniowski} implementation heavily used the described state machine algorithm although the model theory behind the implementation was not being mentioned in the thesis. Listing \ref{lst:korniowski_main} shows the main function of the predecessor implementation.
+This implementation emulates a concurrent execution of modules. The context switch between module executions is being done by the modules themselves (using self-interruption) and no external scheduler is involved. This form of concurrent behavior can therefore be described as a non-preemptive or cooperative multi-tasking between modules. The implementation outlined in \cite{korniowski} heavily used the described state machine algorithm as shown in listing \ref{lst:korniowski_main}.
 
 \begin{lstlisting}[
 	label=lst:korniowski_main,
@@ -323,7 +323,7 @@ Listing \ref{lst:urbaniak_main} shows the new implementation of the main loop. T
 102 }
 \end{lstlisting}
 
-The next question was how to implement the actual concurrently running modules. One possibility was to reuse the predecessor's methodology and use state machine based implementations. There is a problem though in state machine based implementations and that is the rapidly growing complexity. This problem is called "state explosion problem" and has even a exponential behavior as shown in \cite{katoen}. The equation \ref{eq:state explosion} shows that the number of states is dependent on the number of program locations, the number of used variables and their dimensions.
+The next question was how to implement the actual concurrently running modules. One possibility was to reuse the methodology as implemented in \cite{korniowski} and use state machine based implementations. There is a problem though in state machine based implementations and that is the rapidly growing complexity. This problem is called "state explosion problem" and has even a exponential behavior as shown in \cite{katoen}. The equation \ref{eq:state explosion} shows that the number of states is dependent on the number of program locations, the number of used variables and their dimensions.
 
 \begin{equation}
 \label{eq:state explosion}
@@ -479,7 +479,7 @@ The expanded version after the preprocessor stage of the implementation looks mu
 Due to the lightweight nature of protothreads and the possibility to express algorithms in a linear thread-like fashion this framework was chosen by the author for the implementation.
 
 \section{Ring Buffers}% {{{2
-The predecessor thesis \cite{korniowski} used the UART interface in order to communicate with the user and to inform about incoming packets, changes to routes, etc.. As already analyzed in the previous chapter a state machine based sequential concurrent model was used to implement the UART module. There exists one problem with the current implementation.
+The implementation as outlined in \cite{korniowski} used the UART interface in order to communicate with the user and to inform about incoming packets, changes to routes, etc.. As already analyzed in the previous chapter a state machine based sequential concurrent model was used to implement the UART module. There exists one problem with the current implementation.
 
 \begin{lstlisting}[
 	float,
@@ -567,7 +567,7 @@ Instead of \emph{physically} blocking the algorithm expressed in listing \ref{ls
 \section{Half-Duplex Radio Access}% {{{2
 \label{sec:petri}
 \subsection{Problem definition} %{{{3
-The predecessor implementation used an identical (physically) blocking implementation in order to send or receive data via the RFM12B hardware module. Listing \ref{lst:rfm12b_predecessor_tx} shows the algorithm used for sending data.
+The implementation outlined in \cite{korniowski} used an identical (physically) blocking implementation in order to send or receive data via the RFM12B hardware module. Listing \ref{lst:rfm12b_predecessor_tx} shows the algorithm used for sending data.
 
 \begin{lstlisting}[
     label=lst:rfm12b_predecessor_tx,
@@ -1041,7 +1041,7 @@ According to Tanenbaum the network layer is mainly responsible for transparently
 
 The routing layer was implemented as a connectionless service which can be qualified as a datagram subnet. Each packet contains the full source and destination address and each router (mesh node) does not hold any state informations about connections. Therefore quality of service (QoS) based transmissions are rather not possible.
 
-The predecessor thesis used a basic B.A.T.M.A.N. approach. For the new implementation the author wanted to implement the following enhanced features:
+The implementation outlined in \cite{korniowski} used a basic B.A.T.M.A.N. approach. For the new implementation the author wanted to implement the following enhanced features:
 
 \begin{itemize}
     \item \textbf{RFC conformance:} The real B.A.T.M.A.N. draft RFC \cite{batmanrfc} was used as a template for implementing the routing algorithm.
@@ -1051,7 +1051,7 @@ The predecessor thesis used a basic B.A.T.M.A.N. approach. For the new implement
 
 \subsection{Route propagation}% {{{3
 \label{sub:route_propagation}
-The biggest challenge of Mesh based networks is their dynamic nature. In contrast to static networks the topology changes constantly. As the predecessor thesis already showed the B.A.T.M.A.N. algorithm is very promising since it has one big advantage over many existing mesh routing protocols. That is that not the whole network topology information has to be stored on each mesh node but only the next visible gateway for each known destination.
+The biggest challenge of Mesh based networks is their dynamic nature. In contrast to static networks the topology changes constantly. As was already shown in \cite{korniowski} the B.A.T.M.A.N. algorithm is very promising since it has one big advantage over many existing mesh routing protocols. That is that not the whole network topology information has to be stored on each mesh node but only the next visible gateway for each known destination.
 
 The B.A.T.M.A.N. RFC \cite{batmanrfc} proposes that each mesh node broadcasts OGM (originator) packets through the network in order to keep the route information up-to-date. The RFC only proposes \emph{what} has to be done by each mesh node when an OGM message is being received or has to be transmitted but not \emph{how} the implementation has to look like. Therefore the author had to investigate an appropriate algorithm and packet structures in order to fulfill the RFC's requirements.
 
@@ -1489,7 +1489,7 @@ The research shows that the experiments based on a virtual simulation succeeded 
 \section{Performance measurements}% {{{2
 The final experiments have the goal to prove that the implementation of the described algorithms actually improve the reception statistics of packets in a real world scenario. Furthermore the experiments prove that the CPU actually is powerful enough to handle the load of the complete architectural stack.
 
-The author decided to use the exact same metrics as the predecessor thesis \cite{korniowski}. The metrics are expressed as a percentage of lost packets.
+The author decided to use the exact same metrics as outlined in \cite{korniowski}. The metrics are expressed as a percentage of lost packets.
 
 The experiment setup used the available two hardware modules placed next to each other in order to reduce the effect of reception damping. The route list algorithm was added with a new data field "lost packets". The amount of lost packets $n_i$ for a given known node $i$ is calculated by adding the previously calculated amount of lost packets $n_{i,p}$ with the difference between the currently received sequence number $s_i$ and the previously received sequence number $s_{i,p}$. Equation \ref{eq:lost packets} illustrates the calculation.
 
@@ -1514,21 +1514,21 @@ Probe & Receiver & Sender & \# Packets & \# Lost & \% \\
 \label{tab:probes}
 \end{table}
 
-The average packet drop is 1.6\% in contrast to 15\% of the predecessor implementation. In the opinion of the author this value could even be more dropped after more sophisticated finetuning of the hardware parameters. The author also wanted to compare the CPU load between the two implementations. One indicator was the amount of lines of code included in C files:
+The average packet drop is 1.6\% in contrast to 15\% of the implementation outlined in \cite{korniowski}. In the opinion of the author this value could even be more dropped after more sophisticated finetuning of the hardware parameters. The author also wanted to compare the CPU load between the two implementations. One indicator was the amount of lines of code included in C files:
 
 \begin{itemize}
     \item \textbf{HopeMesh LOC:} 1805 lines of code
-    \item \textbf{Predecessor LOC:} 1159 lines of code
+    \item \textbf{LOC as implemented in \cite{korniowski}:} 1159 lines of code
 \end{itemize}
 
 The current HopeMesh implementation introduced 55\% additional lines of code which have to be executed on the CPU. Another indicator is the communication speed setup of the RFM12B modules:
 
 \begin{itemize}
     \item \textbf{HopeMesh kbps setting:} 57.5 kbps (RFM12B command: \texttt{0xC605})
-    \item \textbf{Predecessor kbps setting:} 4.8 kbps (RFM12B command: \texttt{0xC647})
+    \item \textbf{kbps setting as implemented in \cite{korniowski}:} 4.8 kbps (RFM12B command: \texttt{0xC647})
 \end{itemize}
 
-The current HopeMesh implementation configured a ten times higher communication speed than the predecessor implementation. Despite the increased CPU load (more code has to be executed) and the increased packet processing requirement (ten times higher communication speed) the packet drop average was reduced ten times.
+The current HopeMesh implementation configured a ten times higher communication speed than the implementation in \cite{korniowski}. Despite the increased CPU load (more code has to be executed) and the increased packet processing requirement (ten times higher communication speed) the packet drop average was reduced ten times.
 
 The author therefore concludes that the CPU is far away from its peak load saturation and it seems there is still enough headroom for additional computational complexity. This opens up new research possibilities and protocol refinement challenges for future implementations.
 
