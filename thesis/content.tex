@@ -93,29 +93,21 @@ The implementation as described in \cite{korniowski} connected the RFM12B radio 
 
 Furthermore the nowadays nearly deprecated RS-232 connection was replaced with an USB connection. The USB driver was migrated from the AVR-CDC \cite{avrcdc} project. It uses an AVR Attiny2323 processor in order to simulate a low-speed USB stack. The CDC protocol has native support in Linux (using a kernel version >2.6.31) but a Windows driver is available on the project site \cite{avrcdc}.
 
-Finally the author placed PS/2 keyboard and HD4780 LCD connectors for future enhancements.
+Finally the author placed PS/2 keyboard and HD4780 LCD connectors for future enhancements. The complete schematic of the HopeMesh hardware is shown in figures \ref{fig:hopemesh-sch} and \ref{fig:hopemesh-levelshifter-sch}.
 
-The complete schematic of the HopeMesh hardware is shown on the next two following pages.
+\begin{figure}[H]
+\centering
+\includegraphics[angle=90, scale=0.83]{figures/hopemesh-sch-crop}
+\caption{HopeMesh schematic}
+\label{fig:hopemesh-sch}
+\end{figure}
 
-\includepdf[
-    landscape,
-    addtolist={
-        1,
-        figure,
-        HopeMesh schematic,
-        fig:hopemesh-sch
-    }
-]{figures/hopemesh-sch.pdf}
-
-\includepdf[
-    landscape,
-    addtolist={
-        1,
-        figure,
-        HopeMesh level shifter schematic,
-        fig:hopemesh-sch-levelshifter
-    }
-]{figures/hopemesh-sch-levelshifter.pdf}
+\begin{figure}[H]
+\centering
+\includegraphics[]{figures/hopemesh-sch-levelshifter-crop.pdf}
+\caption{HopeMesh level shifter schematic}
+\label{fig:hopemesh-levelshifter-sch}
+\end{figure}
 
 \section{Printed Circuit Board}% {{{2
 \begin{figure}[H]
