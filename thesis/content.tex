@@ -815,9 +815,11 @@ The end of the transmission (final byte) is shown in figure \ref{fig:petri-tx3}.
     \item The sender thread leaves the waiting state and finishes the transmission of the packet. Whenever the user prompts a new send command a new packet can be transmitted.
 \end{enumerate}
 
+\pagebreak
+\begin{samepage} % doesn't seem to work, need to insert pagebreak above
 \subsection{Conclusion} % {{{4
 As described above the two major use cases for data transmission and data reception could be successfully modelled using petri nets. The author used the above model for the concrete implementation. A java based simulation program is attached in appendix \ref{cha:appendix_a}.
-
+\end{samepage}
 \chapter{Network Stack}% {{{1
 \section{Reference model and implementation}% {{{2
 \begin{figure}[H]
