@@ -332,15 +332,7 @@ This model requires support from an existing operating system. An existing frame
     \item \textbf{Threads}: Threads are concurrently running code parts from the same program. The initial program is considered to run in its own "main thread". Other threads can be started from the main thread. Threads also do run in isolation to each other. Each thread has its own stack. Communication with other threads happens through shared memory provided by static data or the heap.
 \end{itemize}
 
-Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of embedded micro-controllers these concepts also are implemented in many different embedded operating systems:
-
-\begin{enumerate}
-    \item FreeRTOS (http://www.freertos.org)
-    \item TinyOS (http://www.tinyos.net)
-    \item Atomthreads (http://http://atomthreads.com)
-    \item Nut/OS (http://www.ethernut.de/en/firmware/nutos.html)
-    \item BeRTOS (http://www.bertos.org)
-\end{enumerate}
+Processes as well as threads are widely known concepts in classical desktop operating systems. In the area of embedded micro-controllers these concepts also are implemented in many different embedded operating systems like FreeRTOS, TinyOS, Atomthreads, Nut/OS or BeRTOS.
 
 The above solutions have chosen different names for threads or processes (some call them "tasks") but essentially they all share the same concept of the concurrent execution model and will be referred to as concurrent modules from now on. Algorithm \ref{alg:threads} shows the pseudo-code that initializes concurrent modules. One can see that in contrast to the sequential execution model the main loop actually does nothing.
 
