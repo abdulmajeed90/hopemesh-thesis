@@ -53,6 +53,7 @@ The fourth part is solely dedicated to the network stack. The implemented networ
 The last part elaborates on the implemented simulations in order to verify the modeled algorithms, data structures and network stacks on a regular PC.
 
 \chapter{Hardware Design}% {{{1
+\label{ch:hw}
 \section{Hardware Modules}% {{{2
 \subsection{CPU} % {{{3
 \label{sub:cpu}
@@ -189,6 +190,7 @@ Afterwards the following concrete modules were identified and implemented by the
 \end{enumerate}
 
 \section{Module orchestration}% {{{2
+\label{ch:concurrency}
 Designing a software system that executes on embedded micro-controllers implies a lot of challenges when many software modules are involved and complexity grows. The conceptually defined modules must be somehow implemented. If the micro-controller lacks an operating system then there is no possibility of using provided abstractions and APIs for module orchestration and execution. Another challenge are limited hardware resources which prevent the deployment of many existing operating system kernels. Basically there are two types of execution models which can be implemented in micro-controllers:
 
 \begin{enumerate}
@@ -827,6 +829,7 @@ The end of the transmission (final byte) is shown in figure \ref{fig:petri-tx3}.
 As described above the two major use cases for data transmission and data reception could be successfully modelled using petri nets. The author used the above model for the concrete implementation. A java based simulation program is attached in appendix \ref{cha:appendix_a}.
 \end{samepage}
 \chapter{Network Stack}% {{{1
+\label{ch:network_stack}
 \section{Reference model and implementation}% {{{2
 \begin{figure}[H]
     \centering
@@ -1023,6 +1026,7 @@ The packet format for the LLC layer can be seen in figure \ref{fig:llc_format}. 
 \end{figure}
 
 \section{Layer 3: B.A.T.M.A.N. Routing}% {{{2
+\label{ch:batman}
 According to Tanenbaum the network layer is mainly responsible for transparently routing packets from a source to a destination inside the network. The following requirements for this network layer were implemented by the author:
 
 \begin{enumerate}
@@ -1160,6 +1164,7 @@ Since the implemented transport layer offers a nul terminated interface. The use
 
 \chapter{Research}% {{{1
 \section{Simulations}% {{{2
+\label{ch:simulations}
 The author had only two real working mesh nodes available in order to test the physical implementation of the previously described software stack. Unfortunately the debugging and simulation capabilities of the embedded hardware environment are very limited. Essentially the only possibility to debug algorithms on the target hardware is either to buy additional hardware debugging facilities (like JTAG debuggers) or using simple debug print statements via the UART.
 
 The first option imposes additional costs on the project and the second option is not sophisticated enough in case an algorithm bug blocks the complete CPU. Therefore the author decided to use a PC based approach for simulation scenarios. Two approaches are possible for a PC based simulation:
@@ -1276,6 +1281,7 @@ The above described research shows that:
 \end{itemize}
 
 \subsection{Routing}% {{{3
+\label{ch:routing_simulation}
 The next simulation emphasizes on the actual routing algorithm. Being the heart of the mesh communication it is very important to research whether the described algorithm as described in \ref{sub:route_propagation} is working correctly. For this purpose the author implemented a different simulation program which mainly simulates the network library module. It can be compiled by issuing the \texttt{make clean \&\& make test-batman} command in the \texttt{test} directory. After invoking the \texttt{test/test-batman} binary a total of 17 virtual experiments are executed and the results printed on the console. The next section will discuss each experiment and present the resulting simulated network topology.
 
 \subsubsection{Test \#0}% {{{4
@@ -1479,6 +1485,7 @@ The very last test \#17 shows what happens if after a time of simulated 16 secon
 The research shows that the experiments based on a virtual simulation succeeded in a correct behaviour of the routing algorithm. Certainly not all cases of a network topology update were simulated which opens new scenarios for future implementations.
 
 \section{Performance measurements}% {{{2
+\label{ch:performance_measurement}
 The final experiments have the goal to prove that the implementation of the described algorithms actually improve the reception statistics of packets in a real world scenario. Furthermore the experiments prove that the CPU actually is powerful enough to handle the load of the complete architectural stack.
 
 The author decided to use the exact same metrics as outlined in \cite{korniowski}. The metrics are expressed as a percentage of lost packets.
@@ -1525,7 +1532,19 @@ The current HopeMesh implementation configured a ten times higher communication 
 The author therefore concludes that the CPU is far away from its peak load saturation and it seems there is still enough headroom for additional computational complexity. This opens up new research possibilities and protocol refinement challenges for future implementations.
 
 \chapter{Conclusion}% {{{1
-The author concludes that the major goals set up in the first chapter have be achieved. Nevertheless there are some open issues which could be resolved in future research or thesis works. The following aspects are left open:
+The author concludes that the following achievements defined in the previous chapters have been achieved:
+
+\begin{itemize}
+    \item \textbf{Hardware design and implementation:} As described in chapter \ref{ch:hw} a new hardware design was researched and implemented by the author where pure electrical, CPU and RAM improvements were achieved.
+    \item \textbf{Software architecture design:} As shown in chapter \ref{sec:module_architecture} a modular architecture was designed resulting in an improved maintainability.
+    \item \textbf{Module concurrency algorithms:} One of the most critical aspects of the software implementation, the concurrent behaviour of software modules, was researched in chapter \ref{ch:concurrency}. An improved thread-based implementation was chosen.
+    \item \textbf{Petri net research and simulations:} Chapter \ref{sec:petri} reveals a concurrent model for the radio module access using a petri net. A simulation for verification was presented.
+    \item \textbf{Network stack design, implementation and simulation:} A complete network stack was designed and implemented as shown in chapter \ref{ch:network_stack}. Furthermore a simulation was implemented as shown in chapter \ref{ch:simulations}.
+    \item \textbf{Route algorithm implementation and simulation:} A B.A.T.M.A.N. based routing algorithm was designed in chapter \ref{ch:batman} and simulated in chapter \ref{ch:routing_simulation}.
+    \item \textbf{Performance measurements:} At last performance measurements were done in order to verify the theoretical research and assumptions as shown in chapter \ref{ch:performance_measurement}.
+\end{itemize}
+
+Nevertheless there are some open issues which could be resolved in future research or thesis works. The following aspects are left open:
 
 \begin{itemize}
     \item \textbf{Node addresses:} Currently node addresses have to be set up manually. This can be done either at compile time or at runtime in the shell. Further algorithms could be researched for automatic ID establishment algorithms.
