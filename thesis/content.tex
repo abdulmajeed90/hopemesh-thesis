@@ -321,6 +321,12 @@ The next question was how to implement the actual concurrently running modules. 
 \label{eq:state explosion}
 \#states = \abs{\#locations} \cdot \prod_{variable \: x} \: \abs{dom(x)}
 \end{equation}
+where
+\begin{align*}
+\#states &= \text{count of states} \\
+\#locations &= \text{count of program locations} \\
+\abs{dom(x)} &= \text{the domain of variable $x$}
+\end{align*}
 
 This equation shows that for instance a program having 10 locations and only 3 boolean variables already has 80 different states. Although this equation might not apply exactly to state machine based implementations it underlines the practical experience of big state-machine based implementations. The alternative to state-machine based applications are thread or process based implementations using the concurrent execution model as shown below.
 
