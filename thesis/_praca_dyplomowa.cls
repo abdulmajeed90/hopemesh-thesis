@@ -748,6 +748,7 @@
 \pagestyle{plain}
 \pagenumbering{arabic}
 \if@twoside
+  \raggedbottom
 \else
   \raggedbottom
 \fi
