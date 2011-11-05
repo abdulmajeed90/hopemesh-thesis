@@ -838,7 +838,7 @@
          style="font-size:13.96792698px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
          y="-3379.2488"
          x="491.6488"
-         sodipodi:role="line">\emph{&lt;&lt;driver&gt;&gt;}</tspan></text>
+         sodipodi:role="line">\emph{$\ll$driver$\gg$}</tspan></text>
     <text
        transform="scale(1.0022962,0.99770906)"
        xml:space="preserve"
@@ -851,7 +851,7 @@
          x="631.24066"
          y="-3218.9512"
          style="font-size:13.96792698px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
-         id="tspan6464">\emph{&lt;&lt;driver&gt;&gt;}</tspan></text>
+         id="tspan6464">\emph{$\ll$driver$\gg$}</tspan></text>
     <text
        transform="scale(1.0022962,0.99770906)"
        xml:space="preserve"
@@ -864,7 +864,7 @@
          x="491.63364"
          y="-3219.0559"
          style="font-size:13.96792698px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
-         id="tspan6476">\emph{&lt;&lt;driver&gt;&gt;}</tspan></text>
+         id="tspan6476">\emph{$\ll$driver$\gg$}</tspan></text>
     <text
        transform="scale(1.0024781,0.99752804)"
        sodipodi:linespacing="125%"
@@ -877,7 +877,7 @@
          style="font-size:13.96539307px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
          y="-3379.9336"
          x="351.72726"
-         sodipodi:role="line">\emph{&lt;&lt;userspace&gt;&gt;}</tspan></text>
+         sodipodi:role="line">\emph{$\ll$userspace$\gg$}</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:39.90112305px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -890,7 +890,7 @@
          x="631.36688"
          y="-3381.2114"
          style="font-size:13.96539307px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
-         id="tspan6550">\emph{&lt;&lt;userspace&gt;&gt;}</tspan></text>
+         id="tspan6550">\emph{$\ll$userspace$\gg$}</tspan></text>
     <text
        transform="scale(1.0024781,0.99752803)"
        sodipodi:linespacing="125%"
@@ -903,7 +903,7 @@
          style="font-size:13.96539307px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
          y="-3301.0132"
          x="491.71298"
-         sodipodi:role="line">\emph{&lt;&lt;library&gt;&gt;}</tspan></text>
+         sodipodi:role="line">\emph{$\ll$library$\gg$}</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text6571"
@@ -916,7 +916,7 @@
          style="font-size:13.96792698px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
          y="-3300.4131"
          x="631.48151"
-         sodipodi:role="line">\emph{&lt;&lt;driver&gt;&gt;}</tspan></text>
+         sodipodi:role="line">\emph{$\ll$driver$\gg$}</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:39.90112305px;font-style:normal;font-weight:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -929,7 +929,7 @@
          x="352.05905"
          y="-3220.8149"
          style="font-size:13.96539307px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
-         id="tspan6577">\emph{&lt;&lt;daemon&gt;&gt;}</tspan></text>
+         id="tspan6577">\emph{$\ll$daemon$\gg$}</tspan></text>
     <text
        transform="scale(1.0024781,0.99752803)"
        sodipodi:linespacing="125%"
@@ -942,6 +942,6 @@
          style="font-size:13.96539307px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:LM Roman 12;-inkscape-font-specification:'LM Roman 12,'"
          y="-3140.6167"
          x="491.71298"
-         sodipodi:role="line">\emph{&lt;&lt;daemon&gt;&gt;}</tspan></text>
+         sodipodi:role="line">\emph{$\ll$daemon$\gg$}</tspan></text>
   </g>
 </svg>
