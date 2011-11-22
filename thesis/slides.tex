@@ -6,7 +6,21 @@
 \tableofcontents
 \end{frame}
 
-\section{Introduction} % {{{2
+\section{Introduction}
+\begin{frame}{Goals}
+
+\begin{exampleblock}{Main Goal}
+Research and implement a fail-safe wireless mesh network prototype using embedded technologies.
+\end{exampleblock}
+
+\begin{itemize}
+    \item \textbf{Hardware:} Research and develop easily reproducible hardware design.
+    \item \textbf{Software:} Research, analyze and implement enhanced concurrent algorithms.
+    \item \textbf{Network:} Implement a pragmatic network stack and a B.A.T.M.A.N. based routing algorithm.
+    \item \textbf{Simulation:} Make it possible to simulate algorithmic behaviour on x86 based PCs.
+\end{itemize} 
+\end{frame}
+
 \begin{frame}{Project mind map}
 \begin{center}
 \scalebox{0.56} {
@@ -17,9 +31,25 @@
 \end{center}
 \end{frame}
 
-\section{Research Overview} % {{{2
+\section{Hardware}
+\begin{frame}{Hardware modules}
+\begin{itemize}
+    \item \textbf{CPU:} ATMega162: Includes the XMEM extension allowing to use external RAM natively.
+    \item \textbf{RAM:} 32kB SRAM: Connected to the CPU using a Latch.
+    \item \textbf{Periphery:} USB connection to PC based terminal emulators, LCD and PS/2 keyboard connection.
+    \item \textbf{Wireless connection:} RFM12B radio module from HOPERF.
+\end{itemize} 
+\end{frame}
 
-\section{Architecture}
+\begin{frame}{PCB - Printed Circuit Board}
+\begin{center}
+\scalebox{0.59} {
+    \import{figures/}{2nd_rev_pcb.pdf_tex}
+}
+\end{center}
+\end{frame}
+
+\section{Software}
 \begin{frame}{Module Architecture}
 \begin{center}
 \scalebox{0.8} {
@@ -29,10 +59,13 @@
 \end{frame}
 
 \begin{frame}{Concurrency Model}
-\begin{itemize}
-    \item Sequential Execution
-    \item Concurrent Execution
-\end{itemize} 
+\begin{block}{Sequential Execution}
+Executes modules inside an infinite main loop starting from the first module until the last one.
+Once the last module ends the execution starts again from the first module.
+\end{block}
+\begin{block}{Concurrent Execution}
+The main function only initializes and launches concurrent modules. Modules run in their own stack space and can execute individual main loops.
+\end{block}
 \end{frame}
 
 \begin{frame}{Petri net driver}
@@ -42,3 +75,6 @@
 }
 \end{center}
 \end{frame}
+
+\section{Network}
+
