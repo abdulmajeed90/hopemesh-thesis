@@ -21,7 +21,7 @@ Research and implement a fail-safe wireless mesh network prototype using embedde
 \end{itemize} 
 \end{frame}
 
-\begin{frame}{Project mind map}
+\begin{frame}{Project structure}
 \begin{center}
 \scalebox{0.56} {
     \begin{tikzpicture}[auto,swap]
@@ -33,9 +33,11 @@ Research and implement a fail-safe wireless mesh network prototype using embedde
 
 \section{Hardware}
 \begin{frame}{Hardware modules}
+The goal was to use easily accessible embedded hardware parts:
+
 \begin{itemize}
-    \item \textbf{CPU:} ATMega162: Includes the XMEM extension allowing to use external RAM natively.
-    \item \textbf{RAM:} 32kB SRAM: Connected to the CPU using a Latch.
+    \item \textbf{CPU:} ATmega162: Includes the XMEM extension allowing to use external RAM natively.
+    \item \textbf{RAM:} 62256 32kB SRAM: Connected to the CPU using a Latch.
     \item \textbf{Periphery:} USB connection to PC based terminal emulators, LCD and PS/2 keyboard connection.
     \item \textbf{Wireless connection:} RFM12B radio module from HOPERF.
 \end{itemize} 
@@ -59,6 +61,8 @@ Research and implement a fail-safe wireless mesh network prototype using embedde
 \end{frame}
 
 \begin{frame}{Concurrency Model}
+Concurrency models for embedded systems with an operating system:
+
 \begin{block}{Sequential Execution}
 Executes modules inside an infinite main loop starting from the first module until the last one.
 Once the last module ends the execution starts again from the first module.
