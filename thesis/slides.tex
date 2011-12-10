@@ -6,7 +6,7 @@
 \tableofcontents
 \end{frame}
 
-\section{Introduction}
+\section{Goals}
 \begin{frame}{Goals}
 
 \begin{exampleblock}{Main Goal}
@@ -37,7 +37,7 @@ The goal was to use easily accessible embedded hardware parts:
 
 \begin{itemize}
     \item \textbf{CPU:} ATmega162: Includes the XMEM extension allowing to use external RAM natively.
-    \item \textbf{RAM:} 62256 32kB SRAM: Connected to the CPU using a Latch.
+    \item \textbf{RAM:} 62256 32kB SRAM: Connected to the CPU using a Latch buffer.
     \item \textbf{Periphery:} USB connection to PC based terminal emulators, LCD and PS/2 keyboard connection.
     \item \textbf{Wireless connection:} RFM12B radio module from HOPERF.
 \end{itemize} 
@@ -51,7 +51,7 @@ The goal was to use easily accessible embedded hardware parts:
 \end{center}
 \end{frame}
 
-\section{Software}
+\section{Software Modules}
 \begin{frame}{Module Architecture}
 \begin{center}
 \scalebox{0.8} {
@@ -60,8 +60,9 @@ The goal was to use easily accessible embedded hardware parts:
 \end{center} 
 \end{frame}
 
+\section{Concurrency}
 \begin{frame}{Concurrency Model}
-Concurrency models for embedded systems with an operating system:
+Concurrency models for embedded systems without any operating system:
 
 \begin{block}{Sequential Execution}
 Executes modules inside an infinite main loop starting from the first module until the last one.
@@ -70,6 +71,18 @@ Once the last module ends the execution starts again from the first module.
 \begin{block}{Concurrent Execution}
 The main function only initializes and launches concurrent modules. Modules run in their own stack space and can execute individual main loops.
 \end{block}
+\end{frame}
+
+\begin{frame}{Protothreads}
+\begin{itemize}
+    \item \textbf{State machine based concurrency:} Bloats complexity and cannot be modeled using linear thread-based algorithms.
+    \item \textbf{Thread based concurrency:} Results in high runtime overhead due to heavy-weight implementations.
+\end{itemize}
+
+\begin{exampleblock}{Solution}
+Protothreads is a C-macro based implementation of state machines exposing a thread-like linear API.  Classical thread based concurrency modelling can be used.
+\end{exampleblock}
+
 \end{frame}
 
 \begin{frame}{Petri net driver}
@@ -81,4 +94,57 @@ The main function only initializes and launches concurrent modules. Modules run 
 \end{frame}
 
 \section{Network}
+\begin{frame}{Network stack}
+Modeled and implemented after Tanenbaum's hybrid model:
 
+\begin{itemize}
+    \item \textbf{1. Physical layer}: RFM12B low cost half-duplex transceiver.
+    \item \textbf{2. Data link layer}: A simple MAC frame format, error correction (using a Hamming code) and error detection (CRC-16).
+    \item \textbf{3. Network layer}: RFC conform B.A.T.M.A.N. routing.
+    \item \textbf{4. Transport layer}: NUL-terminated frame
+    \item \textbf{5. Application layer}: Shell and receiver thread.
+\end{itemize}
+\end{frame}
+
+\section{Simulations}
+\begin{frame}{Simulations}
+\begin{block}{x86 based Simulator}
+Implemented a PC based simulator by mocking hardware parts.
+\end{block}
+
+\begin{block}{Shell}
+Implemented a shell simulator allowing to inspect and validate raw SPI streams to the radio modules.
+\end{block}
+
+\begin{block}{Routing}
+Implemented a routing simulator which executes different mesh network topology scenarios. 
+\end{block}
+\end{frame}
+
+\section{Results}
+\begin{frame}{Achievements}
+\begin{itemize}
+    \item Hardware works as expected.
+    \item RAM is sufficient for addressing \textgreater2000 nodes.
+    \item Concurrency model and petri net driver model works correctly.
+    \item All simulations run successfully.
+    \item Packet drop count (1.6\%) is very low.
+    \item Communication speed was maximised (57kbps).
+    \item CPU load still leaves headroom for additional computational complexity.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}{ToDos}
+\begin{itemize}
+    \item \textbf{Network stack}: Enhance network stack implementation.
+    \item \textbf{Routing}: Automatic address configuration.
+    \item \textbf{Real Setup}: Build and test a real mesh setup involving many mesh nodes.
+    \item \textbf{Periphery}: Add PS/2 keyboard and HD4780 LCD display.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+\begin{center}
+   Thank you for your patience.
+\end{center} 
+\end{frame}
