@@ -85,7 +85,7 @@ Protothreads is a C-macro based implementation of state machines exposing a thre
 
 \end{frame}
 
-\begin{frame}{Petri net driver}
+\begin{frame}{Petri net based driver model}
 \begin{center}
 \scalebox{0.8} {
     \import{figures/}{rfm12_petri.pdf_tex}
@@ -101,7 +101,7 @@ Modeled and implemented after Tanenbaum's hybrid model:
     \item \textbf{1. Physical layer}: RFM12B low cost half-duplex transceiver.
     \item \textbf{2. Data link layer}: A simple MAC frame format, error correction (using a Hamming code) and error detection (CRC-16).
     \item \textbf{3. Network layer}: RFC conform B.A.T.M.A.N. routing.
-    \item \textbf{4. Transport layer}: NUL-terminated frame
+    \item \textbf{4. Transport layer}: NUL-terminated frame.
     \item \textbf{5. Application layer}: Shell and receiver thread.
 \end{itemize}
 \end{frame}
@@ -113,7 +113,7 @@ Implemented a PC based simulator by mocking hardware parts.
 \end{block}
 
 \begin{block}{Shell}
-Implemented a shell simulator allowing to inspect and validate raw SPI streams to the radio modules.
+Implemented a shell simulator allowing to inspect and validate raw SPI streams to the radio module.
 \end{block}
 
 \begin{block}{Routing}
